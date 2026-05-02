@@ -1,0 +1,133 @@
+:root{
+  /* logo */
+  --logo-color: #1f2328;
+  --logo-color-z: #d11f2f;
+
+  /* Base */
+  --body-bg:
+    linear-gradient(
+      to bottom,
+      #ffffff 0%,
+      #f7f6f3 100%
+    );
+  --main-color: #1f2328;
+
+  /* Links */
+  --a-color: #2563eb;
+  --a-color-hover: #1d4ed8;
+
+  /* Small labels */
+  --h-tag-bg: #f1efe9;
+
+  /* Inputs */
+  --input-border: 1px solid #d6d3cd;
+  --input-bg: #ffffff;
+  --input-border-color-focus: #2563eb;
+  --select-option-bg: #ffffff;
+  --input-placeholder-color: rgba(71,85,105,.65);
+
+  /* Buttons */
+  --button-bg: #2563eb;
+  --button-color: #ffffff;
+
+  /* Header */
+  --header-top-bg: #f7f6f3;
+  --header-border-bottom: 1px solid #e4e2dc;
+  --header-top-nav-color: #1f2328;
+  --header-top-nav-color-active: #2563eb;
+
+  --header-sub-bar-bg: #ffffff;
+  --header-dropmenu-bg: #ffffff;
+  --header-dropmenu-bg-hover: #f1efe9;
+  --header-dropmenu-border: 1px solid #e4e2dc;
+  --header-dropmenu-color: #1f2328;
+  --header-dropmenu-color-hover: #2563eb;
+  --header-dropmenu-shadow: 0 12px 24px rgba(24,24,27,.12);
+
+  /* Search panel */
+  --search-panel-bg: #ffffff;
+  --search-panel-border: 1px solid #e4e2dc;
+  --search-panel-shadow: 0 12px 24px rgba(24,24,27,.12);
+
+  /* Footer */
+  --footer-color: #57534e;
+  --footer-color-small: rgba(87,83,78,.75);
+  --footer-color-a: #2563eb;
+  --footer-color-meta-a: #2563eb;
+  --footer-color-a-hover: #1d4ed8;
+
+  /* Tabs */
+  --tabs-bg: #ffffff;
+  --tab-border: 1px solid #e4e2dc;
+  --tab-color: #1f2328;
+  --tab-shadow: none;
+  --tab-color-hover: #2563eb;
+  --tab-bg-hover: #f1efe9;
+  --tab-color-active: #2563eb;
+  --tab-bg-active: #ffffff;
+
+  /* Tables */
+  --table-bg: #ffffff;
+  --table-border: 1px solid #e4e2dc;
+  --table-th-bg: #f7f6f3;
+  --table-th-color: #1f2328;
+  --table-th-border-bottom: 1px solid #e4e2dc;
+
+  --table-td-color: #1f2328;
+  --table-td-border-bottom: 1px solid #e4e2dc;
+  --table-td-bg-odd: #ffffff;
+  --table-td-bg-even: #f9f8f6;
+  --table-td-bg-hover: #f1efe9;
+
+  --table-a-color: #2563eb;
+  --table-a-color-hover: #1d4ed8;
+  --table-shadow: none;
+
+  /* Cards */
+  --card-bg: #ffffff;
+  --card-section-bg: #f9f8f6;
+  --card-section-border: 1px solid #e4e2dc;
+  --card-section-shadow: none;
+
+  --card-border: 1px solid #e4e2dc;
+  --card-border-color-hover: rgba(37,99,235,.35);
+  --card-title-color: #1f2328;
+
+  --card-award-bg: #f1efe9;
+  --card-award-border: 1px solid #e4e2dc;
+  --card-award-winner-color: rgba(31,35,40,.9);
+  --card-award-winner-count-bg: #ffffff;
+  --card-award-winner-count-color: #2563eb;
+  --card-award-winner-count-border: 1px solid #e4e2dc;
+  --card-award-has-winner-border: rgba(37,99,235,.35);
+  --card-scrollbar-color: #2563eb transparent;
+
+  --card-award-shadow: none;
+  --card-award-has-winner-shadow: none;
+  --card-award-rank-has-winner-shadow: none;
+
+  /* Pagination */
+  --pagination-hover-bg: #f1efe9;
+  --pagination-hover-border: 1px solid rgba(37,99,235,.25);
+
+  --ajax-bg: #2563eb;
+
+  /* Hitbox */
+  --hitbox-model-bg:     var(--table-td-bg-even);
+  --hitbox-label-green:  #15803d;
+  --hitbox-label-orange: #c2410c;
+  --hitbox-label-red:    #dc2626;
+  --hitbox-marker-border: rgba(0,0,0,.30);
+  --hitbox-label-shadow: 0 1px 1px rgba(255,255,255,.5);
+}
+
+body {
+background-image: url('de_dust2.jpg');
+background-repeat: no-repeat;
+background-attachment: fixed;
+background-size: cover;
+}
+
+.hlstats-contents{
+  background: rgba(241,239,233,0.5);
+}

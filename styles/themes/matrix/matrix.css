@@ -1,0 +1,139 @@
+:root{
+  /* logo */
+  --logo-color: #d7ffe6;
+  --logo-color-z: #00ff66;
+
+  /* Base */
+  --body-bg:
+    radial-gradient(900px 420px at 50% -10%, rgba(0,255,102,.14), rgba(0,0,0,0) 60%),
+    linear-gradient(to bottom, #000000 0%, #050807 55%, #020302 100%);
+  --main-color: #d7ffe6;
+
+  --a-color: #00ff66;
+  --a-color-hover: #ffffff;
+
+  --h-tag-bg: linear-gradient(90deg, rgba(0,255,102,.16), rgba(0,255,102,.08));
+
+  /* Inputs */
+  --input-border: 1px solid rgba(0,255,102,.18);
+  --input-bg: rgba(255,255,255,.03);
+  --input-border-color-focus: rgba(0,255,102,.9);
+  --select-option-bg: #000000;
+  --input-placeholder-color: rgba(215,255,230,.55);
+
+  /* Buttons */
+  --button-bg: #00ff66;
+  --button-color: #000000;
+
+  /* Header */
+  --header-top-bg: #000000;
+  --header-border-bottom: 1px solid rgba(0,255,102,.14);
+  --header-top-nav-color: rgba(215,255,230,.80);
+  --header-top-nav-color-active: #00ff66;
+
+  --header-sub-bar-bg: linear-gradient(to bottom, #050807 0%, #000000 100%);
+  --header-dropmenu-bg: #000000;
+  --header-dropmenu-bg-hover: rgba(0,255,102,.08);
+  --header-dropmenu-border: 1px solid rgba(0,255,102,.16);
+  --header-dropmenu-color: rgba(215,255,230,.88);
+  --header-dropmenu-color-hover: #ffffff;
+  --header-dropmenu-shadow: 0 22px 60px rgba(0,0,0,.85);
+
+  /* Search panel */
+  --search-panel-bg: #000000;
+  --search-panel-border: 1px solid rgba(0,255,102,.16);
+  --search-panel-shadow: 0 22px 60px rgba(0,0,0,.85);
+
+  /* Footer */
+  --footer-color: rgba(215,255,230,.62);
+  --footer-color-small: rgba(215,255,230,.50);
+  --footer-color-a: #00ff66;
+  --footer-color-meta-a: rgba(215,255,230,.82);
+  --footer-color-a-hover: #ffffff;
+
+  /* Tabs */
+  --tabs-bg: #000000;
+  --tab-border: 1px solid rgba(0,255,102,.16);
+  --tab-color: rgba(215,255,230,.82);
+  --tab-shadow:
+    0 1px 0 rgba(0,255,102,.06) inset,
+    0 -1px 0 rgba(0,0,0,.65) inset;
+  --tab-color-hover: #ffffff;
+  --tab-bg-hover: rgba(0,255,102,.10);
+  --tab-color-active: #ffffff;
+  --tab-bg-active: rgba(0,255,102,.16);
+
+  /* Tables */
+  --table-bg: rgba(255,255,255,.03);
+  --table-border: 1px solid rgba(0,255,102,.14);
+  --table-th-bg: rgba(0,255,102,.05);
+  --table-th-color: #d7ffe6;
+  --table-th-border-bottom: 1px solid rgba(0,255,102,.14);
+  --table-td-color: rgba(215,255,230,.88);
+  --table-td-border-bottom: 1px solid rgba(0,255,102,.08);
+  --table-td-bg-odd: rgba(255,255,255,.00);
+  --table-td-bg-even: rgba(0,255,102,.02);
+  --table-td-bg-hover: rgba(0,255,102,.10);
+  --table-a-color: #00ff66;
+  --table-a-color-hover: #ffffff;
+  --table-shadow: 0 18px 52px rgba(0,0,0,.85);
+
+  /* Cards */
+  --card-bg: rgba(255,255,255,.03);
+  --card-section-bg: rgba(255,255,255,.02);
+  --card-section-border: 1px solid rgba(0,255,102,.10);
+  --card-section-shadow: 0 18px 52px rgba(0,0,0,.85);
+  --card-border: 1px solid rgba(0,255,102,.14);
+  --card-border-color-hover: rgba(0,255,102,.38);
+  --card-title-color: #ffffff;
+
+  --card-award-bg: radial-gradient(circle at 30% 25%,
+    rgba(0,255,102,.10), rgba(0,0,0,.20));
+  --card-award-border: 1px solid rgba(0,255,102,.12);
+  --card-award-winner-color: rgba(215,255,230,.92);
+  --card-award-winner-count-bg: rgba(255,255,255,.04);
+  --card-award-winner-count-color: #00ff66;
+  --card-award-winner-count-border: 1px solid rgba(0,255,102,.12);
+  --card-award-has-winner-border: rgba(0,255,102,.24);
+  --card-scrollbar-color: rgba(0,255,102,.55) transparent;
+
+  --card-award-shadow:
+    0 1px 0 rgba(0,255,102,.06) inset,
+    0 18px 52px rgba(0,0,0,.85);
+  --card-award-has-winner-shadow:
+    0 1px 0 rgba(0,255,102,.06) inset,
+    0 20px 60px rgba(0,0,0,.90);
+  --card-award-rank-has-winner-shadow:
+    0 1px 0 rgba(0,255,102,.06) inset,
+    0 6px 16px rgba(0,0,0,.90);
+
+  /* Pagination */
+  --pagination-hover-bg: rgba(0,255,102,.14);
+  --pagination-hover-border: 1px solid rgba(0,255,102,.16);
+
+  --ajax-bg: #00ff66;
+
+  /* Hitbox */
+  --hitbox-model-bg:
+    radial-gradient(ellipse at 50% 35%, rgba(0,255,102,.08) 0%, rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(0,20,10,.65), rgba(0,0,0,.80));
+  --hitbox-color-green:  #00ff66;
+  --hitbox-label-green:  #7dffad;
+}
+
+.z{ color: #00ff66; }
+
+.hlstats-top,
+.hlstats-footer{
+  background:none;
+  position: relative;
+  overflow: hidden;
+}
+
+.matrix-canvas{
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  pointer-events: none;
+}

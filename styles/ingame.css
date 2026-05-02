@@ -1,0 +1,347 @@
+/*
+ * ingame.css - HLstatsZ ingame MOTD stylesheet
+ */
+
+body, html {
+    margin: 0;
+    padding: 0;
+    background-color: #1b2838;
+    color: #c6d4df;
+    font-family: Arial, Verdana, sans-serif;
+    font-size: 13px;
+}
+
+a {
+    color: #1a9fff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+/* ---- Header ---- */
+
+.hlstats-header {
+    background-color: #171a21;
+    border-bottom: 2px solid #2a475e;
+    padding: 8px 12px;
+}
+
+.hlstats-brand, .hlstats-top, .hlstats-inner {
+    display: block;
+}
+
+.hlstats-title {
+    color: #c6d4df;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.hlstats-title .z {
+    color: #cc0000;
+}
+
+/* ---- Main content ---- */
+
+.hlstats-contents {
+    padding: 8px 10px;
+}
+
+/* ---- Footer ---- */
+
+.hlstats-footer {
+    border-top: 1px solid #2a475e;
+    padding: 8px 12px;
+    text-align: center;
+    font-size: 12px;
+    color: #8f98a0;
+    margin-top: 12px;
+}
+
+.hlstats-footer a, .hlstats-footer-meta a {
+    color: #8f98a0;
+}
+
+.hlstats-footer-inner { display: block; }
+.hlstats-footer-top   { display: block; }
+.hlstats-footer-meta  { display: block; font-size: 12px; color: #8f98a0; }
+.hlstats-footer-small { font-size: 11px; color: #666; }
+.hlstats-footer-links { display: block; padding-top: 4px; }
+.hlstats-footer-links a { margin: 0 6px; color: #8f98a0; }
+
+.z { color: #cc0000; }
+
+/* ---- Tables ---- */
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+th {
+    background-color: #2a475e;
+    color: #c6d4df;
+    padding: 5px 7px;
+    border: 1px solid #3a5f7a;
+    text-align: center;
+    white-space: nowrap;
+}
+
+td {
+    padding: 4px 7px;
+    border: 1px solid #253040;
+    color: #c6d4df;
+    text-align: center;
+    background-color: #1e2b3a;
+}
+
+/* Alternate row shading */
+tr.alt td {
+    background-color: #1a2230;
+}
+
+/* ---- Utility ---- */
+
+.left  { text-align: left !important; }
+.right { text-align: right !important; }
+
+.nowrap, .nowarp { white-space: nowrap; }
+
+.responsive-table { overflow-x: auto; }
+
+/* ---- Section titles ---- */
+
+h1, h2, h3 {
+    color: #c6d4df;
+    font-size: 14px;
+    padding: 5px 8px;
+    background-color: #253a4a;
+    margin: 10px 0 4px 0;
+    border-left: 3px solid #1a9fff;
+    font-weight: bold;
+}
+
+/* ---- Flags and images ---- */
+
+.hlstats-flag {
+    display: inline;
+    margin-right: 3px;
+}
+
+.hlstats-flag img {
+    vertical-align: middle;
+    border: 0;
+}
+
+.hlstats-image {
+    display: inline;
+}
+
+.hlstats-image img {
+    vertical-align: middle;
+    border: 0;
+    max-height: 22px;
+}
+
+.hlstats-main-description, .hlstats-main-column {
+    text-align: left !important;
+}
+
+/* ---- Skill / activity indicators ---- */
+
+.green { color: #46a54a; }
+.orange{ color: #f98600; }
+.red   { color: #df352d; }
+.up    { color: #46a54a; }
+.down  { color: #df352d; }
+.skill { }
+
+/* ---- Meter: hide the bar, show the value text inline ---- */
+
+.meter-container {
+    display: inline;
+}
+
+meter {
+    display: none;
+}
+
+.meter-value {
+    display: inline;
+    font-weight: bold;
+}
+
+.value.meter-ratio { }
+.meter-ratio { }
+
+/* ---- Profile cards (statsme.php) ---- */
+
+.hlstats-cards-grid {
+    width: 100%;
+}
+
+.hlstats-section, .hlstats-card {
+    border: 1px solid #2a475e;
+    margin-bottom: 10px;
+    background-color: #1a2230;
+}
+
+.hlstats-card-title {
+    background-color: #253a4a;
+    color: #c6d4df;
+    padding: 5px 8px;
+    font-weight: bold;
+    font-size: 13px;
+    border-bottom: 1px solid #2a475e;
+}
+
+.hlstats-card-body {
+    padding: 8px;
+}
+
+/* Key-value pairs in profile */
+.hlstats-card-grid .label {
+    font-weight: bold;
+    color: #8f98a0;
+    display: inline;
+    margin-right: 4px;
+}
+
+.hlstats-card-grid .label:after {
+    content: " ";
+}
+
+.hlstats-card-grid .value {
+    display: inline;
+    margin-right: 14px;
+}
+
+/* Profile head area */
+.hlstats-profile-head {
+    padding: 6px 8px;
+    border-bottom: 1px solid #253040;
+    margin-bottom: 6px;
+}
+
+.hlstats-avatar {
+    display: inline;
+    margin-right: 8px;
+    vertical-align: top;
+}
+
+.hlstats-avatar-img {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #2a475e;
+    vertical-align: top;
+}
+
+.hlstats-identity {
+    display: inline;
+    vertical-align: top;
+}
+
+.hlstats-pname {
+    font-size: 15px;
+    font-weight: bold;
+    color: #e6f0f7;
+    margin-bottom: 3px;
+}
+
+.hlstats-meta span {
+    display: block;
+    font-size: 11px;
+    color: #8f98a0;
+    line-height: 1.5;
+}
+
+.hlstats-steam-profile-shell {
+    padding: 2px;
+}
+
+.hlstats-status {
+    font-size: 11px;
+}
+
+/* ---- Pagination ---- */
+
+.hlstats-pagination {
+    text-align: center;
+    padding: 6px 0;
+    font-size: 12px;
+    color: #8f98a0;
+}
+
+.hlstats-page-entries {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: #8f98a0;
+}
+
+.hlstats-pages {
+    display: block;
+}
+
+.hlstats-page-nav,
+.hlstats-page-button {
+    display: inline;
+    padding: 2px 7px;
+    margin: 1px;
+    background-color: #2a475e;
+    color: #c6d4df;
+    border: 1px solid #3a5f7a;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.hlstats-page-button.current,
+.hlstats-page-nav:hover,
+.hlstats-page-button:hover {
+    background-color: #1a9fff;
+    color: #ffffff;
+    border-color: #1a9fff;
+}
+
+.hlstats-page-nav.disabled,
+.hlstats-page-button.disabled {
+    background-color: #1a2230;
+    color: #4a5a6a;
+    border-color: #253040;
+    cursor: default;
+}
+
+/* ---- Data table (load.php) ---- */
+
+.data-table { margin-bottom: 8px; }
+.data-table-head th { text-align: left; padding: 6px; }
+
+/* ---- Graphs ---- */
+
+img.responsive {
+    max-width: 100%;
+    border: 0;
+}
+
+/* ---- Loading state ---- */
+
+.is-loading { opacity: 0.5; }
+
+/* ---- Sorting arrows in header links ---- */
+
+th a {
+    color: #c6d4df;
+    text-decoration: none;
+    display: block;
+}
+
+th a:hover { color: #ffffff; }
+
+th.sorted-asc  { border-bottom: 2px solid #1a9fff; }
+th.sorted-desc { border-bottom: 2px solid #1a9fff; }

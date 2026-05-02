@@ -1,0 +1,124 @@
+:root{
+  /* logo */
+  --logo-color: #f2eee8;
+  --logo-color-z: #c45a2a;
+
+  /* Base */
+  --body-bg:
+    radial-gradient(1200px 520px at 50% -10%, rgba(196,90,42,.18), rgba(0,0,0,0) 60%),
+    linear-gradient(to bottom, #2f2c2a 0%, #24211f 55%, #1b1918 100%);
+  --main-color: #e8e1d8;
+
+  --a-color: #d0672f;
+  --a-color-hover: #ffd7a6;
+
+  --h-tag-bg: linear-gradient(90deg, rgba(196,90,42,.28), rgba(196,90,42,.12));
+
+  /* Inputs */
+  --input-border: 1px solid rgba(255,255,255,.10);
+  --input-bg: rgba(0,0,0,.25);
+  --input-border-color-focus: rgba(208,103,47,.80);
+  --select-option-bg: #1f1d1c;
+  --input-placeholder-color: rgba(232,225,216,.55);
+
+  /* Buttons */
+  --button-bg: #c45a2a;
+  --button-color: #120f0d;
+
+  /* Header */
+  --header-top-bg: #3a3735;  /* TF2Maps top bar grey */
+  --header-border-bottom: 1px solid rgba(0,0,0,.45);
+  --header-top-nav-color: rgba(232,225,216,.86);
+  --header-top-nav-color-active: #ffd7a6;
+
+  --header-sub-bar-bg: linear-gradient(to bottom, #2f2c2a, #24211f);
+  --header-dropmenu-bg: #2b2826;
+  --header-dropmenu-bg-hover: rgba(196,90,42,.18);
+  --header-dropmenu-border: 1px solid rgba(0,0,0,.50);
+  --header-dropmenu-color: rgba(232,225,216,.90);
+  --header-dropmenu-color-hover: #ffffff;
+  --header-dropmenu-shadow: 0 20px 60px rgba(0,0,0,.80);
+
+  /* Search panel */
+  --search-panel-bg: rgba(43,40,38,.96);
+  --search-panel-border: 1px solid rgba(0,0,0,.55);
+  --search-panel-shadow: 0 22px 60px rgba(0,0,0,.80);
+
+  /* Footer */
+  --footer-color: rgba(232,225,216,.62);
+  --footer-color-small: rgba(232,225,216,.50);
+  --footer-color-a: #ffd7a6;
+  --footer-color-meta-a: rgba(232,225,216,.82);
+  --footer-color-a-hover: #ffffff;
+
+  /* Tabs */
+  --tabs-bg: #2b2826;
+  --tab-border: 1px solid rgba(0,0,0,.55);
+  --tab-color: rgba(232,225,216,.82);
+  --tab-shadow:
+    0 1px 0 rgba(255,255,255,.04) inset,
+    0 -1px 0 rgba(0,0,0,.55) inset;
+  --tab-color-hover: #ffffff;
+  --tab-bg-hover: rgba(196,90,42,.16);
+  --tab-color-active: #ffffff;
+  --tab-bg-active: rgba(196,90,42,.26);
+
+  /* Tables */
+  --table-bg: rgba(0,0,0,.18);
+  --table-border: 1px solid rgba(0,0,0,.55);
+  --table-th-bg: rgba(0,0,0,.22);
+  --table-th-color: #f2eee8;
+  --table-th-border-bottom: 1px solid rgba(0,0,0,.55);
+  --table-td-color: rgba(232,225,216,.90);
+  --table-td-border-bottom: 1px solid rgba(255,255,255,.06);
+  --table-td-bg-odd: rgba(255,255,255,.00);
+  --table-td-bg-even: rgba(255,255,255,.02);
+  --table-td-bg-hover: rgba(196,90,42,.14);
+  --table-a-color: #ffd7a6;
+  --table-a-color-hover: #ffffff;
+  --table-shadow: 0 18px 52px rgba(0,0,0,.78);
+
+  /* Cards / Panels (the big TF2Maps feel) */
+  --card-bg: rgba(46,43,41,.92);
+  --card-section-bg: rgba(0,0,0,.16);
+  --card-section-border: 1px solid rgba(0,0,0,.55);
+  --card-section-shadow: 0 18px 52px rgba(0,0,0,.78);
+  --card-border: 1px solid rgba(0,0,0,.55);
+  --card-border-color-hover: rgba(196,90,42,.35);
+  --card-title-color: #ffffff;
+
+  /* Orange “module header” bars */
+  --card-award-bg: linear-gradient(to bottom, rgba(196,90,42,.92), rgba(167,76,35,.92));
+  --card-award-border: 1px solid rgba(0,0,0,.55);
+  --card-award-winner-color: rgba(255,255,255,.92);
+  --card-award-winner-count-bg: rgba(0,0,0,.25);
+  --card-award-winner-count-color: #ffd7a6;
+  --card-award-winner-count-border: 1px solid rgba(0,0,0,.40);
+  --card-award-has-winner-border: rgba(196,90,42,.45);
+  --card-scrollbar-color: rgba(196,90,42,.55) transparent;
+
+  --card-award-shadow:
+    0 1px 0 rgba(255,255,255,.05) inset,
+    0 22px 60px rgba(0,0,0,.80);
+
+  /* Pagination */
+  --pagination-hover-bg: rgba(196,90,42,.18);
+  --pagination-hover-border: 1px solid rgba(0,0,0,.55);
+
+  /* Ajax loader */
+  --ajax-bg: #c45a2a;
+
+  /* Hitbox */
+  --hitbox-model-bg:
+    radial-gradient(ellipse at 50% 35%, rgba(196,90,42,.14) 0%, rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(47,44,42,.65), rgba(27,25,24,.80));
+}
+
+.hlstats-top .hlstats-inner{
+  background-image: url('tf2-banner.jpg');
+  background-repeat: no-repeat; 
+  background-position: top;
+  height:140px;
+}
+
+.z{ color: #c45a2a; }

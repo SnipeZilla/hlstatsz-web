@@ -1,0 +1,12 @@
+### 📈 Web Frontend for HLstatsZ
+- Official version Z
+- 3 Beautiful Main Themes (Steam blue, dark and Light)
+- Responsive Design highly customizable with .css, .js and .php files
+- True Rank
+- OpenStreetMap
+- Discord voice channel
+- Secure Steam Login
+- Better Admin settings
+- Min PHP 8+
+- Min SQL 8+, 9+ (All Queries are fast and optimized)
+- Recommended with [HLstats v2](https://github.com/SnipeZilla/HLSTATS-2)

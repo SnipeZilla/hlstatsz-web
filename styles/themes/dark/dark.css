@@ -1,0 +1,116 @@
+:root {
+  /* logo */
+  --logo-color: #c9d1d9;
+  --logo-color-z: #ff3b3b;
+
+  --body-bg:
+    radial-gradient(ellipse at top, rgba(42,71,94,.18) 0%, rgba(27,40,56,0) 62%),
+    linear-gradient(to bottom, #161b22 0%, #141a22 45%, #0f141b 100%);
+  --main-color: #c9d1d9;
+  --a-color: #8ab4ff;
+  --a-color-hover: #ffffff;
+
+  --h-tag-bg: linear-gradient(-60deg,
+    rgba(226,244,255,.18) 5%,
+    rgba(84,107,115,.18) 95%);
+
+  /* Inputs */
+  --input-border: 1px solid rgba(240,246,252,.12);
+  --input-bg: rgba(0,0,0,.22);
+  --input-border-color-focus: rgba(88,166,255,.9);
+  --select-option-bg: rgba(22,27,34,.98);
+  --input-placeholder-color: rgba(201,209,217,.55);
+
+  /* Buttons */
+  --button-bg: rgba(88,166,255,.85);
+  --button-color: #0d1117;
+
+  /* Header */
+  --header-top-bg: #0f141b;
+  --header-border-bottom: 1px solid rgba(240,246,252,.08);
+  --header-top-nav-color: rgba(201,209,217,.82);
+  --header-top-nav-color-active: #58a6ff;
+
+  --header-sub-bar-bg: linear-gradient(to bottom, #1b222c 0%, #161b22 100%);
+  --header-dropmenu-bg: #0f141b;
+  --header-dropmenu-bg-hover: rgba(240,246,252,.06);
+  --header-dropmenu-border: 1px solid rgba(240,246,252,.10);
+  --header-dropmenu-color: rgba(201,209,217,.88);
+  --header-dropmenu-color-hover: #ffffff;
+  --header-dropmenu-shadow: 0 16px 40px rgba(0,0,0,.55);
+
+  /* Search panel */
+  --search-panel-bg: linear-gradient(#1b222c, #161b22);
+  --search-panel-border: 1px solid rgba(0,0,0,.65);
+  --search-panel-shadow: 0 18px 44px rgba(0,0,0,.55);
+
+  /* Footer */
+  --footer-color: rgba(201,209,217,.60);
+  --footer-color-small: rgba(201,209,217,.50);
+  --footer-color-a: rgba(138,180,255,.95);
+  --footer-color-meta-a: rgba(201,209,217,.82);
+  --footer-color-a-hover: #ffffff;
+
+  /* Tabs */
+  --tabs-bg: linear-gradient(#1b222c, #161b22);
+  --tab-border: 1px solid rgba(0,0,0,.55);
+  --tab-color: rgba(201,209,217,.86);
+  --tab-shadow:
+      0 1px 0 rgba(240,246,252,.06) inset,
+      0 -1px 0 rgba(0,0,0,.35) inset;
+  --tab-color-hover: #ffffff;
+  --tab-bg-hover: linear-gradient(rgba(88,166,255,.20), rgba(88,166,255,.10));
+  --tab-color-active: #ffffff;
+  --tab-bg-active: linear-gradient(rgba(88,166,255,.26), rgba(88,166,255,.14));
+
+  /* Tables */
+  --table-bg: rgba(15,20,27,.70);
+  --table-border: 1px solid rgba(240,246,252,.10);
+  --table-th-bg: linear-gradient(to bottom, rgba(27,34,44,.95), rgba(22,27,34,.95));
+  --table-th-color: #e6edf3;
+  --table-th-border-bottom: 1px solid rgba(240,246,252,.10);
+  --table-td-color: rgba(201,209,217,.88);
+  --table-td-border-bottom: 1px solid rgba(240,246,252,.06);
+  --table-td-bg-odd: rgba(0,0,0,.08);
+  --table-td-bg-even: rgba(240,246,252,.02);
+  --table-td-bg-hover: rgba(88,166,255,.10);
+  --table-a-color: #8ab4ff;
+  --table-a-color-hover: #ffffff;
+  --table-shadow: 0 12px 32px rgba(0,0,0,.40);
+
+  /* Cards */
+  --card-bg: linear-gradient(180deg, rgba(27,34,44,.72), rgba(22,27,34,.72));
+  --card-section-bg: rgba(0,0,0,.10);
+  --card-section-border: 1px solid rgba(240,246,252,.06);
+  --card-section-shadow: 0 14px 34px rgba(0,0,0,.45);
+  --card-border: 1px solid rgba(240,246,252,.10);
+  --card-border-color-hover: rgba(88,166,255,.40);
+  --card-title-color: #e6edf3;
+
+  --card-award-bg: radial-gradient(circle at 30% 25%,
+    rgba(240,246,252,.14), rgba(0,0,0,.16));
+  --card-award-border: 1px solid rgba(240,246,252,.08);
+  --card-award-winner-color: rgba(201,209,217,.90);
+  --card-award-winner-count-bg: rgba(0,0,0,.26);
+  --card-award-winner-count-color: #ffffff;
+  --card-award-winner-count-border: 1px solid rgba(240,246,252,.06);
+  --card-award-has-winner-border: rgba(88,166,255,.35);
+  --card-scrollbar-color: rgba(201,209,217,.45) transparent;
+
+  --card-award-shadow:
+    0 1px 0 rgba(240,246,252,.06) inset,
+    0 18px 44px rgba(0,0,0,.55);
+  --card-award-has-winner-shadow:
+    0 1px 0 rgba(240,246,252,.06) inset,
+    0 16px 34px rgba(0,0,0,.60);
+  --card-award-rank-has-winner-shadow:
+    0 1px 0 rgba(240,246,252,.06) inset,
+    0 4px 10px rgba(0,0,0,.55);
+
+  /* Pagination */
+  --pagination-hover-bg: rgba(88,166,255,.22);
+  --pagination-hover-border: 1px solid rgba(240,246,252,.12);
+
+  --ajax-bg: #4f92df;
+
+}

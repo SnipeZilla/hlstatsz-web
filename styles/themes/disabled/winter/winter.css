@@ -1,0 +1,123 @@
+:root{
+  /* logo */
+  --logo-color: #12324a;
+  --logo-color-z: #d11f2f;
+
+  /* Base */
+  --body-bg:
+    radial-gradient(900px 420px at 15% -10%, rgba(180, 235, 255, .35), rgba(255,255,255,0) 60%),
+    radial-gradient(900px 420px at 85% -10%, rgba(210, 255, 236, .24), rgba(255,255,255,0) 60%),
+    linear-gradient(to bottom, #ffffff 0%, #f6fbff 55%, #f7faf7 100%);
+  --main-color: #12324a;
+
+  /* Links (icy blue) */
+  --a-color: #0b63d1;
+  --a-color-hover: #084aa0;
+
+  /* Chips / tags (snowy tint) */
+  --h-tag-bg: #eaf6ff;
+
+  /* Inputs */
+  --input-border: 1px solid #cfe0ee;
+  --input-bg: #ffffff;
+  --input-border-color-focus: #0b63d1;
+  --select-option-bg: #ffffff;
+  --input-placeholder-color: rgba(18,50,74,.55);
+
+  /* Buttons (evergreen) */
+  --button-bg: #116b3a;           /* pine */
+  --button-color: #ffffff;
+
+  /* Header */
+  --header-top-bg: #f3f9ff;
+  --header-border-bottom: 1px solid #d7e6f2;
+  --header-top-nav-color: #12324a;
+  --header-top-nav-color-active: #d11f2f; /* festive red active */
+
+  --header-sub-bar-bg: #ffffff;
+  --header-dropmenu-bg: #ffffff;
+  --header-dropmenu-bg-hover: #eaf6ff;
+  --header-dropmenu-border: 1px solid #d7e6f2;
+  --header-dropmenu-color: #12324a;
+  --header-dropmenu-color-hover: #0b63d1;
+  --header-dropmenu-shadow: 0 10px 24px rgba(17,24,39,.12);
+
+  /* Search panel */
+  --search-panel-bg: #ffffff;
+  --search-panel-border: 1px solid #d7e6f2;
+  --search-panel-shadow: 0 10px 24px rgba(17,24,39,.12);
+
+  /* Footer */
+  --footer-color: rgba(18,50,74,.70);
+  --footer-color-small: rgba(18,50,74,.55);
+  --footer-color-a: #0b63d1;
+  --footer-color-meta-a: #0b63d1;
+  --footer-color-a-hover: #084aa0;
+
+  /* Tabs */
+  --tabs-bg: #ffffff;
+  --tab-border: 1px solid #d7e6f2;
+  --tab-color: #12324a;
+  --tab-shadow: none;
+  --tab-color-hover: #0b63d1;
+  --tab-bg-hover: #eaf6ff;
+  --tab-color-active: #d11f2f;
+  --tab-bg-active: #ffffff;
+
+  /* Tables */
+  --table-bg: #ffffff;
+  --table-border: 1px solid #d7e6f2;
+  --table-th-bg: #f3f9ff;
+  --table-th-color: #12324a;
+  --table-th-border-bottom: 1px solid #d7e6f2;
+
+  --table-td-color: #12324a;
+  --table-td-border-bottom: 1px solid #d7e6f2;
+  --table-td-bg-odd: #ffffff;
+  --table-td-bg-even: #f7fbff;   /* slight snow tint */
+  --table-td-bg-hover: #eaf6ff;
+
+  --table-a-color: #0b63d1;
+  --table-a-color-hover: #084aa0;
+  --table-shadow: none;
+
+  /* Cards */
+  --card-bg: #ffffff;
+  --card-section-bg: #f7fbff;
+  --card-section-border: 1px solid #d7e6f2;
+  --card-section-shadow: none;
+
+  --card-border: 1px solid #d7e6f2;
+  --card-border-color-hover: rgba(17,107,58,.28); /* pine hover ring */
+  --card-title-color: #12324a;
+
+  /* Awards */
+  --card-award-bg: #eaf6ff;
+  --card-award-border: 1px solid #d7e6f2;
+  --card-award-winner-color: rgba(18,50,74,.92);
+  --card-award-winner-count-bg: #ffffff;
+  --card-award-winner-count-color: #116b3a; /* pine */
+  --card-award-winner-count-border: 1px solid #d7e6f2;
+  --card-award-has-winner-border: rgba(209,31,47,.28); /* subtle red */
+  --card-scrollbar-color: rgba(18,50,74,.35) transparent;
+
+  --card-award-shadow: none;
+  --card-award-has-winner-shadow: none;
+  --card-award-rank-has-winner-shadow: none;
+
+  /* Pagination */
+  --pagination-hover-bg: #eaf6ff;
+  --pagination-hover-border: 1px solid rgba(11,99,209,.22);
+
+  /* Ajax / misc accent */
+  --ajax-bg: #0b63d1;
+
+  /* Hitbox */
+  --hitbox-model-bg:     var(--table-td-bg-even);
+  --hitbox-label-green:  #15803d;
+  --hitbox-label-orange: #c2410c;
+  --hitbox-label-red:    #dc2626;
+  --hitbox-marker-border: rgba(0,0,0,.30);
+  --hitbox-label-shadow: 0 1px 1px rgba(255,255,255,.5);
+}
+

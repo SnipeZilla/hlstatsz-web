@@ -1,0 +1,136 @@
+:root{
+  /* logo */
+  --logo-color: #ffffff;
+  --logo-color-z: #ff9f1c;
+
+  /* Base */
+  --body-bg:
+    radial-gradient(900px 420px at 15% -10%, rgba(255,77,109,.22), rgba(0,0,0,0) 60%),
+    radial-gradient(900px 420px at 85% -10%, rgba(255,159,28,.18), rgba(0,0,0,0) 60%),
+    linear-gradient(to bottom, #14081a 0%, #0b0610 55%, #05060a 100%);
+  --main-color: #ffeef2;
+
+  --a-color: #ff9f1c;       /* orange */
+  --a-color-hover: #ffffff;
+
+  --h-tag-bg: linear-gradient(90deg, rgba(255,77,109,.20), rgba(255,159,28,.16));
+
+  /* Inputs */
+  --input-border: 1px solid rgba(255,159,28,.18);
+  --input-bg: rgba(0,0,0,.30);
+  --input-border-color-focus: rgba(255,159,28,.85);
+  --select-option-bg: rgba(20,8,26,.98);
+  --input-placeholder-color: rgba(255,238,242,.55);
+
+  /* Buttons */
+  --button-bg: linear-gradient(135deg, #ff4d6d 0%, #ff9f1c 100%);
+  --button-color: #05060a;
+
+  /* Header */
+  --header-top-bg: #05060a;
+  --header-border-bottom: 1px solid rgba(255,159,28,.12);
+  --header-top-nav-color: rgba(255,238,242,.78);
+  --header-top-nav-color-active: #ff9f1c;
+
+  --header-sub-bar-bg: linear-gradient(to bottom, rgba(20,8,26,.96), rgba(5,6,10,.96));
+  --header-dropmenu-bg: #05060a;
+  --header-dropmenu-bg-hover: rgba(255,159,28,.08);
+  --header-dropmenu-border: 1px solid rgba(255,159,28,.16);
+  --header-dropmenu-color: rgba(255,238,242,.88);
+  --header-dropmenu-color-hover: #ffffff;
+  --header-dropmenu-shadow: 0 20px 60px rgba(0,0,0,.75);
+
+  /* Search panel */
+  --search-panel-bg: rgba(20,8,26,.92);
+  --search-panel-border: 1px solid rgba(255,159,28,.16);
+  --search-panel-shadow: 0 22px 60px rgba(0,0,0,.75);
+
+  /* Footer */
+  --footer-color: rgba(255,238,242,.60);
+  --footer-color-small: rgba(255,238,242,.50);
+  --footer-color-a: #ff9f1c;
+  --footer-color-meta-a: rgba(255,238,242,.82);
+  --footer-color-a-hover: #ffffff;
+
+  /* Tabs */
+  --tabs-bg: linear-gradient(#14081a, #05060a);
+  --tab-border: 1px solid rgba(255,159,28,.16);
+  --tab-color: rgba(255,238,242,.82);
+  --tab-shadow:
+    0 1px 0 rgba(255,159,28,.06) inset,
+    0 -1px 0 rgba(0,0,0,.55) inset;
+  --tab-color-hover: #ffffff;
+  --tab-bg-hover: rgba(255,159,28,.10);
+  --tab-color-active: #ffffff;
+  --tab-bg-active: rgba(255,77,109,.16);
+
+  /* Tables */
+  --table-bg: rgba(0,0,0,.18);
+  --table-border: 1px solid rgba(255,159,28,.14);
+  --table-th-bg: rgba(20,8,26,.92);
+  --table-th-color: #ffeef2;
+  --table-th-border-bottom: 1px solid rgba(255,159,28,.16);
+  --table-td-color: rgba(255,238,242,.88);
+  --table-td-border-bottom: 1px solid rgba(255,159,28,.09);
+  --table-td-bg-odd: rgba(255,255,255,.00);
+  --table-td-bg-even: rgba(255,159,28,.02);
+  --table-td-bg-hover: rgba(255,159,28,.10);
+  --table-a-color: #ff9f1c;
+  --table-a-color-hover: #ffffff;
+  --table-shadow: 0 18px 52px rgba(0,0,0,.75);
+
+  /* Cards */
+  --card-bg: rgba(20,8,26,.62);
+  --card-section-bg: rgba(0,0,0,.18);
+  --card-section-border: 1px solid rgba(255,159,28,.10);
+  --card-section-shadow: 0 18px 52px rgba(0,0,0,.75);
+  --card-border: 1px solid rgba(255,159,28,.14);
+  --card-border-color-hover: rgba(255,77,109,.42);
+  --card-title-color: #ffffff;
+
+  --card-award-bg: radial-gradient(circle at 30% 25%,
+    rgba(255,159,28,.12), rgba(255,77,109,.12));
+  --card-award-border: 1px solid rgba(255,159,28,.12);
+  --card-award-winner-color: rgba(255,238,242,.92);
+  --card-award-winner-count-bg: rgba(0,0,0,.30);
+  --card-award-winner-count-color: #ff9f1c;
+  --card-award-winner-count-border: 1px solid rgba(255,159,28,.12);
+  --card-award-has-winner-border: rgba(255,77,109,.35);
+  --card-scrollbar-color: rgba(255,159,28,.55) transparent;
+
+  --card-award-shadow:
+    0 1px 0 rgba(255,159,28,.06) inset,
+    0 22px 60px rgba(0,0,0,.75);
+  --card-award-has-winner-shadow:
+    0 1px 0 rgba(255,159,28,.06) inset,
+    0 18px 52px rgba(0,0,0,.85);
+  --card-award-rank-has-winner-shadow:
+    0 1px 0 rgba(255,159,28,.06) inset,
+    0 8px 22px rgba(0,0,0,.85);
+
+  /* Pagination */
+  --pagination-hover-bg: rgba(255,159,28,.14);
+  --pagination-hover-border: 1px solid rgba(255,159,28,.16);
+  
+  --ajax-bg: #ff9f1c;
+
+  /* Hitbox */
+  --hitbox-model-bg:
+    radial-gradient(ellipse at 50% 35%, rgba(255,77,109,.12) 0%, rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(20,8,26,.65), rgba(5,6,10,.80));
+}
+.z{ color: #ff9f1c; }
+
+.hlstats-top{
+  background-image: url('cs2-banner.png');
+  background-repeat: no-repeat; 
+  background-position: center;
+}
+
+
+
+@media (max-width: 900px){
+ .hlstats-top{
+  background-position: left;
+ }
+}

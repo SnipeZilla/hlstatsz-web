@@ -1,0 +1,317 @@
+
+/* =============================================================
+   Admin Section  — append to hlstatsz.css
+   ============================================================= */
+.hlstats-contents.admin {
+  max-width:1600px;
+}
+
+.hlstats-contents.admin .panel{
+  max-width:1090px;
+}
+
+.hlstats-admin-layout {
+  display: flex;
+  gap: 0px;
+  margin-top: 8px;
+  align-items: flex-start;
+}
+
+.hlstats-admin-back {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  background: none;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 5px;
+  color: var(--main-color);
+  font-size: 13px;
+  padding: 5px 12px;
+  cursor: pointer;
+  height: auto;
+}
+.hlstats-admin-back:hover {
+  background: rgba(255,255,255,.06);
+}
+
+.hlstats-admin-nav {
+  display: block;
+  flex: 0 0 240px;
+  min-width: 200px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--card-scrollbar-color);
+  position: sticky;
+  top: 10px;
+}
+
+.hlstats-admin-nav::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px;
+}
+.hlstats-admin-nav::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.hlstats-admin-panel {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  min-height: 120px;
+}
+
+/* Panel breadcrumb title */
+.hlstats-admin-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  opacity: .85;
+}
+/* ── task ────────────────────────────*/
+.hlstats-task,
+.hlstats-sub-task {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.hlstats-task{
+  margin-left:18px;
+}
+
+.hlstats-task li > ul,
+.hlstats-task li > div,
+.hlstats-sub-task li > ul,
+.hlstats-sub-task li > div {
+    display: none;
+}
+
+.hlstats-task li.active > ul,
+.hlstats-task li.active > div,
+.hlstats-sub-task li.active > ul,
+.hlstats-sub-task li.active > div {
+    display: block;
+}
+
+.hlstats-sub-task li {
+    position: relative;
+    padding-left: 14px;
+}
+.hlstats-task li > a,
+.hlstats-sub-task li > a {
+    display: block;
+    padding: 6px 20px 6px 0;
+    position: relative;
+    color: var(--main-color);
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+.hlstats-sub-task li > a:hover {
+    color: var(--a-color);
+}
+.hlstats-task li > a::after,
+.hlstats-sub-task li > a::after {
+    content: "▼";
+    position: absolute;
+    left: -18px;
+    top: 50%;
+    transform: translateY(-50%) rotate(270deg);
+    transition: transform .15s ease, opacity .15s ease;
+    opacity: .6;
+    font-size: 11px;
+}
+
+.hlstats-task li.active > a::after,
+.hlstats-sub-task li.active > a::after {
+    transform: translateY(-50%) rotate(0deg);
+    opacity: 1;
+}
+
+
+.hlstats-sub-task li.active > a::after {
+    transform: translateY(-50%) rotate(0deg);
+    opacity: 1;
+}
+.hlstats-task li.active > a::after,
+.hlstats-sub-task li.active > a::after {
+    content: "▼";
+}
+
+.hlstats-sub-task li > div {
+    display: none;
+    padding-left: 4px;
+    margin-top: 4px;
+}
+
+.hlstats-sub-task li.active > div {
+    display: block;
+}
+
+.hlstats-sub-task li.active > a {
+    color: var(--tab-color-active);
+    font-weight: 500;
+}
+
+/* ── Mobile: stack vertically, toggle nav/panel ────────────── */
+@media (max-width: 768px) {
+  .hlstats-admin-layout {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .hlstats-admin-nav {
+    flex: none;
+    width: 100%;
+    max-height: none;
+    position: static;
+  }
+  .hlstats-admin-layout.panel-active .hlstats-admin-nav {
+    display: none;
+  }
+  .hlstats-admin-layout.panel-active .hlstats-admin-back {
+    display: inline-flex;
+  }
+  .hlstats-admin-panel {
+    display: none;
+  }
+  .hlstats-admin-layout.panel-active .hlstats-admin-panel {
+    display: block;
+  }
+  .hlstats-contents.admin .panel{
+    max-width:90vw;
+  }
+}
+
+/* Error message */
+.hlstats-admin-error {
+  color: #cd4040;
+  font-size: 13px;
+}
+
+
+.hlstats-admin-nav .hlstats-task > li > a {
+  font-size: 14px;
+  font-weight: 600;
+}
+.hlstats-admin-nav .hlstats-sub-task > li > a {
+  font-size: 13px;
+}
+/* Active link highlight */
+.hlstats-admin-active {
+  color: var(--tab-color-active) !important;
+}
+
+/* Admin tables */
+
+.hlstats-admin-table-wrap {
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: thin;
+  scrollbar-color: var(--card-scrollbar-color);
+  margin-bottom: 15px;
+}
+.hlstats-admin-table-wrap::-webkit-scrollbar       { height: 7px; }
+.hlstats-admin-table-wrap::-webkit-scrollbar-track { background: transparent; }
+.hlstats-admin-table-wrap::-webkit-scrollbar-thumb { background: #555; border-radius: 6px; }
+
+/* Inputs: let size= attribute drive width */
+.hlstats-admin-table-wrap td input[type="text"],
+.hlstats-admin-table-wrap td input[type="password"],
+.hlstats-admin-table-wrap td input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  max-width: 240px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+.hlstats-admin-table-wrap td select {
+  width: 100%;
+  max-width: 240px;
+  font-size: 13px;
+}
+.hlstats-admin-table-wrap td input[type="checkbox"] {
+  width: auto;
+}
+.hlstats-admin-table-wrap input[type="checkbox"] {
+  height: auto;
+}
+/* Links — never wrap */
+.hlstats-admin-table-wrap td a {
+  white-space: nowrap;
+}
+
+/*  Apply button row */
+.hlstats-admin-apply {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 20px;
+}
+.hlstats-admin-apply input[type="submit"] {
+  min-width: 120px;
+  border-radius: 3px;
+}
+
+/*  Info / hint note above tables */
+.hlstats-admin-note {
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  background: var(--card-bg);
+  border-left: 3px solid var(--card-border-color-hover);
+  border-radius: 0 6px 6px 0;
+}
+
+/* Success / warning messages (message() function) */
+.hlstats-admin-msg {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.hlstats-admin-msg.success { background: rgba(0,180,80,.12);  border-color: rgba(0,180,80,.25); color: #75c96a; }
+.hlstats-admin-msg.warning { background: rgba(220,100,0,.12); border-color: rgba(220,100,0,.25); color: #d69445;}
+
+/*  Property page groups */
+.hlstats-admin-propgroup {
+  margin-bottom: 18px;
+}
+.hlstats-admin-propgroup > b {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+.hlstats-admin-propgroup table td {
+  padding: 4px 6px;
+}
+#helpdiv{
+position:fixed;
+top:0px;
+  font-size: 13px;
+  color: #FFF;
+  line-height: 1.55;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  background: #000;
+  border-left: 3px solid #FF0000;
+  width:1090px;
+ z-index:999;
+}
+
+@media (max-width: 600px) {
+    .hlstats-sub-task li > a {
+        padding: 10px 24px 10px 0;
+        font-size: 15px;
+    }
+}

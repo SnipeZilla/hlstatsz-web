@@ -1,0 +1,116 @@
+:root {
+  /* logo */
+  --logo-color: #e6edf3;
+  --logo-color-z: #ff3b3b;
+
+  /* Base */
+  --body-bg: #000000;
+  --main-color: #e6edf3;
+  --a-color: #58a6ff;
+  --a-color-hover: #ffffff;
+
+  /* keep chips subtle but visible on black */
+  --h-tag-bg: linear-gradient(-60deg,
+    rgba(240,246,252,.10) 5%,
+    rgba(88,166,255,.10) 95%);
+
+  /* Inputs */
+  --input-border: 1px solid rgba(240,246,252,.14);
+  --input-bg: rgba(255,255,255,.04);
+  --input-border-color-focus: rgba(88,166,255,.95);
+  --select-option-bg: #0b0f14;
+  --input-placeholder-color: rgba(230,237,243,.55);
+
+  /* Buttons */
+  --button-bg: rgba(88,166,255,.92);
+  --button-color: #000000;
+
+  /* Header */
+  --header-top-bg: #000000;
+  --header-border-bottom: 1px solid rgba(240,246,252,.10);
+  --header-top-nav-color: rgba(230,237,243,.85);
+  --header-top-nav-color-active: #58a6ff;
+
+  --header-sub-bar-bg: linear-gradient(to bottom, #0b0f14 0%, #000000 100%);
+  --header-dropmenu-bg: #000000;
+  --header-dropmenu-bg-hover: rgba(240,246,252,.07);
+  --header-dropmenu-border: 1px solid rgba(240,246,252,.12);
+  --header-dropmenu-color: rgba(230,237,243,.90);
+  --header-dropmenu-color-hover: #ffffff;
+  --header-dropmenu-shadow: 0 22px 60px rgba(0,0,0,.80);
+
+  /* Search panel */
+  --search-panel-bg: #000000;
+  --search-panel-border: 1px solid rgba(240,246,252,.12);
+  --search-panel-shadow: 0 22px 60px rgba(0,0,0,.80);
+
+  /* Footer */
+  --footer-color: rgba(230,237,243,.65);
+  --footer-color-small: rgba(230,237,243,.55);
+  --footer-color-a: rgba(88,166,255,.95);
+  --footer-color-meta-a: rgba(230,237,243,.85);
+  --footer-color-a-hover: #ffffff;
+
+  /* Tabs */
+  --tabs-bg: #000000;
+  --tab-border: 1px solid rgba(240,246,252,.12);
+  --tab-color: rgba(230,237,243,.86);
+  --tab-shadow:
+      0 1px 0 rgba(240,246,252,.05) inset,
+      0 -1px 0 rgba(0,0,0,.55) inset;
+  --tab-color-hover: #ffffff;
+  --tab-bg-hover: rgba(88,166,255,.14);
+  --tab-color-active: #ffffff;
+  --tab-bg-active: rgba(88,166,255,.20);
+
+  /* Tables */
+  --table-bg: rgba(255,255,255,.03);
+  --table-border: 1px solid rgba(240,246,252,.12);
+  --table-th-bg: rgba(255,255,255,.05);
+  --table-th-color: #e6edf3;
+  --table-th-border-bottom: 1px solid rgba(240,246,252,.12);
+  --table-td-color: rgba(230,237,243,.88);
+  --table-td-border-bottom: 1px solid rgba(240,246,252,.07);
+  --table-td-bg-odd: rgba(255,255,255,.00);
+  --table-td-bg-even: rgba(255,255,255,.02);
+  --table-td-bg-hover: rgba(88,166,255,.12);
+  --table-a-color: #58a6ff;
+  --table-a-color-hover: #ffffff;
+  --table-shadow: 0 18px 52px rgba(0,0,0,.75);
+
+  /* Cards */
+  --card-bg: rgba(255,255,255,.03);
+  --card-section-bg: rgba(255,255,255,.02);
+  --card-section-border: 1px solid rgba(240,246,252,.08);
+  --card-section-shadow: 0 18px 52px rgba(0,0,0,.75);
+  --card-border: 1px solid rgba(240,246,252,.12);
+  --card-border-color-hover: rgba(88,166,255,.42);
+  --card-title-color: #ffffff;
+
+  --card-award-bg: radial-gradient(circle at 30% 25%,
+    rgba(240,246,252,.10), rgba(0,0,0,.18));
+  --card-award-border: 1px solid rgba(240,246,252,.10);
+  --card-award-winner-color: rgba(230,237,243,.92);
+  --card-award-winner-count-bg: rgba(255,255,255,.04);
+  --card-award-winner-count-color: #ffffff;
+  --card-award-winner-count-border: 1px solid rgba(240,246,252,.10);
+  --card-award-has-winner-border: rgba(88,166,255,.38);
+  --card-scrollbar-color: rgba(230,237,243,.40) transparent;
+
+  --card-award-shadow:
+    0 1px 0 rgba(240,246,252,.05) inset,
+    0 18px 52px rgba(0,0,0,.75);
+  --card-award-has-winner-shadow:
+    0 1px 0 rgba(240,246,252,.05) inset,
+    0 20px 60px rgba(0,0,0,.85);
+  --card-award-rank-has-winner-shadow:
+    0 1px 0 rgba(240,246,252,.05) inset,
+    0 6px 16px rgba(0,0,0,.85);
+
+  /* Pagination */
+  --pagination-hover-bg: rgba(88,166,255,.18);
+  --pagination-hover-border: 1px solid rgba(240,246,252,.12);
+
+  --ajax-bg: #5199eb;
+
+}
