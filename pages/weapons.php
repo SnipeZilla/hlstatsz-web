@@ -14,21 +14,11 @@ For current support and updates:
    https://forums.alliedmods.net/forumdisplay.php?f=156
 */
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
+	if (!$game) {
+        error("No such game.");
+	}
 
     // Weapon Statistics
-	$db->query
-	("
-		SELECT
-			hlstats_Games.name
-		FROM
-			hlstats_Games
-		WHERE
-			hlstats_Games.code = '$game'
-	");
-	if ($db->num_rows() < 1) error("No such game '$game'.");
-	list($gamename) = $db->fetch_row();
-	$db->free_result();
-    
 	$result = $db->query
 	("
 		SELECT

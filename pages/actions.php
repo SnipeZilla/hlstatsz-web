@@ -17,22 +17,10 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 // Action Statistics
 // Addon Created by Rufus (rufus@nonstuff.de)
-	$db->query
-	("
-		SELECT
-			hlstats_Games.name
-		FROM
-			hlstats_Games
-		WHERE
-			hlstats_Games.code = '$game'
-	");
 
-	if ($db->num_rows() < 1) {
-        error("No such game '$game'.");
+	if (!$game) {
+        error("No such game.");
 	}
-
-	list($gamename) = $db->fetch_row();
-	$db->free_result();
 
     $sortorder = $_GET['obj_sortorder'] ?? '';
     $sort      = $_GET['obj_sort'] ?? '';

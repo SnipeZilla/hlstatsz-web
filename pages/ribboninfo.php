@@ -36,14 +36,6 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	$awardName = $actiondata['awardName'];
 	$image     = $actiondata['image'];
 
-	$db->query("SELECT name FROM hlstats_Games WHERE code='$game'");
-	if ($db->num_rows() < 1) {
-		error("No such game '$game'.");
-	}
-	
-	list($gamename) = $db->fetch_row();
-	$db->free_result();
-
     $sortorder = $_GET['sortorder'] ?? '';
     $sort      = $_GET['sort'] ?? '';
     $sort2     = "playerName";

@@ -190,6 +190,13 @@ if ($mode !== 'contents' && !$game) {
 
 }
 
+if ($game) {
+	$db->query("SELECT name FROM hlstats_Games WHERE code='$game' AND hidden='0'");
+	if ($db->num_rows() < 1) {
+		include (PAGE_PATH . '/header.php');
+		error("No such game '$game'.");
+	}
+}
 
 if ($game && (empty($_SESSION['game']) || $_SESSION['game'] !== $game)) {
 	$realgame = null;

@@ -16,6 +16,9 @@ For current support and updates:
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 // Global Server Chat History
+	if (!$game) {
+        error("No such game.");
+	}
 	$showserver = 0;
 	if (isset($_GET['server_id'])) {
 		$showserver = valid_request(strval($_GET['server_id']), true);
@@ -26,23 +29,6 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	} else {
 		$whereclause = "hlstats_Servers.game='$game' AND hlstats_Events_Chat.serverId=$showserver";
 	}
-
-	$db->query("
-		SELECT
-			hlstats_Games.name
-		FROM
-			hlstats_Games
-		WHERE
-			hlstats_Games.code = '$game'
-	");
-
-	if ($db->num_rows() < 1) {
-        error("No such game '$game'.");
-	}
-
-	list($gamename) = $db->fetch_row();
-
-	$db->free_result();
 
 if (!is_ajax()){
 
@@ -68,7 +54,7 @@ if (!is_ajax()){
 		$servername = "(" . $result['name'] . ")";
 	}
 
-     printSectionTitle("$gamename $servername Server Chat Log");
+     printSectionTitle("Server Chat Log $servername");
 
 ?>
 

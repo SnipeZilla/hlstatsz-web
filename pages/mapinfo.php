@@ -16,15 +16,10 @@ For current support and updates:
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 	// Map Details
-	
-	$map = valid_request($_GET['map'] ?? '', false) or error('No map specified.');
-	
-	$db->query("SELECT name FROM hlstats_Games WHERE code='$game'");
-	if ($db->num_rows() != 1) {
-		error('Invalid or no game specified.');
-	} else {
-		list($gamename) = $db->fetch_row();
+	if (!$game) {
+        error("No such game.");
 	}
+	$map = valid_request($_GET['map'] ?? '', false) or error('No map specified.');
 
     $sortorder = $_GET['sortorder'] ?? '';
     $sort      = $_GET['sort'] ?? '';

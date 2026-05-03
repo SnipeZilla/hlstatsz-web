@@ -84,7 +84,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			   AND game='" . $db->escape($gamecode) . "'",
 			false
 		);
-		if (!$ok) $errors[] = "Ribbon #$rid: database error.";
+		if (!$ok) {
+			if (mysqli_errno($db->link) === 1062) {
+				$dup_result = $db->query(
+					"SELECT ribbonId FROM hlstats_Ribbons
+					 WHERE awardCode='" . $db->escape($awardCode) . "'
+					   AND awardCount='$awardCount'
+					   AND game='" . $db->escape($gamecode) . "'
+					   AND special='$special'
+					   AND ribbonId != '$rid'
+					 LIMIT 1",
+					false
+				);
+				$dup_row = $dup_result ? $db->fetch_array($dup_result) : false;
+				if ($dup_row) {
+					$errors[] = "Ribbon #$rid: conflicts with ribbon #" . (int)$dup_row['ribbonId']
+						. " — same award code, count, and special type.";
+				} else {
+					$errors[] = "Ribbon #$rid: duplicate configuration (unique constraint).";
+				}
+			} else {
+				$errors[] = "Ribbon #$rid: database error.";
+			}
+		}
 	}
 
 	// Insert new ribbon
@@ -134,7 +156,7 @@ $result = $db->query(
 	"SELECT ribbonId, ribbonName, image, awardCode, awardCount, special
 	 FROM   hlstats_Ribbons
 	 WHERE  game='" . $db->escape($gamecode) . "'
-	 ORDER  BY awardCount, awardCode
+	 ORDER  BY ribbonId
 	 LIMIT 30 OFFSET $start"
 
 );
@@ -164,8 +186,9 @@ function rib_award_select(string $name, string $selected, array $awards, bool $a
 	return $out;
 }
 
+$currentPage = max(1, (int)($_GET['page'] ?? 1));
 $formAction = htmlspecialchars(
-	$g_options['scripturl'] . '?mode=admin&task=ribbons&game=' . urlencode($gamecode)
+	$g_options['scripturl'] . '?mode=admin&task=ribbons&game=' . urlencode($gamecode) . '&page=' . $currentPage
 );
 ?>
 <form method="post" action="<?= $formAction ?>">
@@ -196,7 +219,7 @@ $formAction = htmlspecialchars(
 <?php foreach ($ribbons as $r):
 	$rid   = (int)$r['ribbonId'];
 	$base  = 'ribbon[' . $rid . ']';
-	$rName = htmlspecialchars($r['ribbonName']);
+	$rName = $r['ribbonName'];
 	$rImg  = htmlspecialchars($r['image']);
 	$rCode = $r['awardCode'];
 	$rCnt  = (int)$r['awardCount'];

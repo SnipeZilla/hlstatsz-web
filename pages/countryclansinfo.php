@@ -16,7 +16,9 @@ For current support and updates:
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 	// Country Details
-	
+	if (!$game) {
+        error("No such game.");
+	}
 	$flag = valid_request($_GET['flag'] ?? '', false) or error('No country ID specified.');
 
 	$SQL = "
@@ -51,16 +53,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	$cl_name = str_replace(' ', '&nbsp;', htmlspecialchars($clandata['name'] ?? ''));
 	$cl_tag  = str_replace(' ', '&nbsp;', htmlspecialchars($clandata['tag'] ?? ''));
 	$cl_full = "$cl_tag $cl_name";
-	
-	$db->query("SELECT name FROM hlstats_Games WHERE code='$game'");
-	if ($db->num_rows() != 1)
-	{
-		$gamename = ucfirst($game);
-	}
-	else
-	{
-		list($gamename) = $db->fetch_row();
-	}	
+
 	if (!is_ajax()) {
 
     printSectionTitle('Country Information');

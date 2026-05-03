@@ -16,7 +16,9 @@ For current support and updates:
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	
 	// Roles Details
-	
+	if (!$game) {
+        error("No such game.");
+	}
 	$role = valid_request($_GET['role'] ?? '', false) or error('No role ID specified.');
 	
 	$db->query("
@@ -38,13 +40,6 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 		$db->free_result();
 		$role_name = $roledata['name'];
 		$role_code = $roledata['code'];
-	}
-
-	$db->query("SELECT name FROM hlstats_Games WHERE code='$game'");
-	if ($db->num_rows() != 1) {
-		error('Invalid or no game specified.');
-	} else {
-		list($gamename) = $db->fetch_row();
 	}
 
     $numitems       = 0;

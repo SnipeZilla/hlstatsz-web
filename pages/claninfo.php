@@ -64,12 +64,6 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	$game = $clandata['game'];
 	$db->query("SELECT name FROM hlstats_Games WHERE code='$game'");
 
-    if ($db->num_rows() != 1) {
-		$gamename = ucfirst($game);
-	} else {
-		list($gamename) = $db->fetch_row();
-	}
-
     if (is_ajax()) {
 		$tabs = explode('_', preg_replace('[^a-z]', '', $_GET['tab']));
 		unset($_GET['type']);

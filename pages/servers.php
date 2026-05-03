@@ -15,12 +15,7 @@ For current support and updates:
 */
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
-	require('livestats.php');     
-    $db->query("SELECT name FROM hlstats_Games WHERE code='$game'");
-    if ($db->num_rows() < 1) error("No such game '$game'.");
-    
-    list($gamename) = $db->fetch_row();
-    $db->free_result();
+	require('livestats.php');
     $server_id = 1;
 
     if ((isset($_GET['server_id'])) && (is_numeric($_GET['server_id']))) {

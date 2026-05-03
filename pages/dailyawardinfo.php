@@ -60,15 +60,6 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
     $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 30 : 0;
 
-
-	$db->query("SELECT name FROM hlstats_Games WHERE code='$game'");
-	if ($db->num_rows() < 1) {
-		error("No such game '$game'.");
-	}
-	
-	list($gamename) = $db->fetch_row();
-	$db->free_result();
-
 	$result = $db->query("
 		SELECT
 			hlstats_Players_Awards.playerId,

@@ -134,6 +134,11 @@ echo "<h3>Adding Ribbons for L4D2</h3>";
         SELECT 'l4d2', awardCode, awardCount, special, image, ribbonName FROM hlstats_Ribbons WHERE game='l4d';
     ");
 
+    $db->query("UPDATE IGNORE hlstats_Ribbons SET awardCode = 'bilebomb_tank'  WHERE game = 'l4d2' AND awardCode = 'boomer_claw';");
+    $db->query("UPDATE IGNORE hlstats_Ribbons SET awardCode = 'charger_pummel' WHERE game = 'l4d2' AND awardCode = 'tank_claw';");
+    $db->query("UPDATE IGNORE hlstats_Ribbons SET awardCode = 'killed_smoker'  WHERE game = 'l4d2' AND awardCode = 'killed_gas';");
+    $db->query("UPDATE IGNORE hlstats_Ribbons SET awardCode = 'killed_boomer'  WHERE game = 'l4d2' AND awardCode = 'killed_exploding';");
+
 echo "  &rarr; <b>L4D2 Ribbons added...</b><br />";
 ob_flush();
 flush();

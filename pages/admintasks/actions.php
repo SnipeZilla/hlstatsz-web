@@ -162,8 +162,9 @@ function act_team_select(string $name, string $selected, array $teams): string
 	return $out;
 }
 
+$currentPage = max(1, (int)($_GET['page'] ?? 1));
 $formAction = htmlspecialchars(
-	$g_options['scripturl'] . '?mode=admin&task=actions&game=' . urlencode($gamecode)
+	$g_options['scripturl'] . '?mode=admin&task=actions&game=' . urlencode($gamecode) . '&page=' . $currentPage
 );
 ?>
 <form method="post" action="<?= $formAction ?>">

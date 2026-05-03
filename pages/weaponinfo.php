@@ -16,7 +16,10 @@ For current support and updates:
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 	// Weapon Details
-	
+	if (!$game) {
+        error("No such game.");
+	}
+
 	$weapon = valid_request($_GET['weapon'] ?? '', false) or error('No weapon ID specified.');
 	
 	$db->query("
@@ -28,7 +31,8 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 			code='$weapon'
 			AND game='$game'
 	");
-	
+	if (!$db->num_rows()) { error("No such weapon."); }
+		
 	if ($db->num_rows() != 1)
 	{
 		$wep_name = ucfirst($weapon);
@@ -38,16 +42,6 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 		$weapondata = $db->fetch_array();
 		$db->free_result();
 		$wep_name = $weapondata['name'];
-	}
-	
-	$db->query("SELECT name FROM hlstats_Games WHERE code='$game'");
-	if ($db->num_rows() != 1)
-	{
-		error('Invalid or no game specified.');
-	}
-	else
-	{
-		list($gamename) = $db->fetch_row();
 	}
 
     $numitems       = 0;

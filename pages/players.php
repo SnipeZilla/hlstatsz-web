@@ -14,7 +14,9 @@ For current support and updates:
    https://forums.alliedmods.net/forumdisplay.php?f=156
 */
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
-
+	if (!$game) {
+        error("No such game.");
+	}
 $total     = 0;
 $rank_type = (int)valid_request($_GET['rank_type'] ?? '', false);
 $sortorder = valid_request($_GET['sortorder'] ?? '', false);

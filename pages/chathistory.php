@@ -45,21 +45,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	$pl_name = htmlspecialchars($pl_name, ENT_COMPAT);
 	$pl_shortname = htmlspecialchars($pl_shortname, ENT_COMPAT);
 	$game = $playerdata['game'];
-	$db->query
-	("
-		SELECT
-			hlstats_Games.name
-		FROM
-			hlstats_Games
-		WHERE
-			hlstats_Games.code = '$game'
-	");
 
-	if ($db->num_rows() != 1) {
-		$gamename = ucfirst($game);
-	} else {
-		list($gamename) = $db->fetch_row();
-	}
     ob_flush();
     flush();
 

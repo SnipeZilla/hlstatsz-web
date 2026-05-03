@@ -87,23 +87,6 @@ function qPlayersRank()
 }
 
 // Player Rankings
-$db->query("
-    SELECT
-        hlstats_Games.name
-    FROM
-        hlstats_Games
-    WHERE
-        hlstats_Games.code = '$game'
-");
-
-if ($db->num_rows() < 1) {
-    error("No such game '$game'.");
-}
-
-list($gamename) = $db->fetch_row();
-
-$db->free_result();
-
 
 if (!is_ajax()) {
 

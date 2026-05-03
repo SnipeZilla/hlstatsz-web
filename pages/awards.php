@@ -16,12 +16,9 @@ For current support and updates:
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 	// Awards Info Page
-
-	$db->query("SELECT name FROM hlstats_Games WHERE code='$game'");
-	if ($db->num_rows() < 1) error("No such game '$game'.");
-
-	list($gamename) = $db->fetch_row();
-	$db->free_result();
+	if (!$game) {
+        error("No such game.");
+	}
 
 	$type = valid_request($_GET['type'] ?? '');
 	$tab = valid_request($_GET['tab'] ?? '');

@@ -14,26 +14,10 @@ For current support and updates:
    https://forums.alliedmods.net/forumdisplay.php?f=156
 */
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
-
-// Country Clan Rankings
-	$db->query
-	("
-		SELECT
-			hlstats_Games.name
-		FROM
-			hlstats_Games
-		WHERE
-			hlstats_Games.code = '$game'
-	");
-
-	if ($db->num_rows() < 1) {
-        error("No such game '$game'.");
+	if (!$game) {
+        error("No such game.");
 	}
-
-    list($gamename) = $db->fetch_row();
-
-    $db->free_result();
-
+// Country Clan Rankings
     $total      = 0;
     $rank_type1 = 'kills';
     $rank_type2 = 'deaths';

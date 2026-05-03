@@ -215,21 +215,6 @@ function makeClanTag(string $name): array{
     $pl_urlname = urlencode($playerdata['lastName']);
     $game = $playerdata['game'];
 
-    $db->query("
-        SELECT
-            hlstats_Games.name
-        FROM
-            hlstats_Games
-        WHERE
-            hlstats_Games.code = '$game'
-    ");
-
-    if ($db->num_rows() != 1) {
-        $gamename = ucfirst($game);
-    } else {
-        list($gamename) = $db->fetch_row();
-    }
-
     $hideranking = $playerdata['hideranking'];
 
     if ($hideranking == 2) {

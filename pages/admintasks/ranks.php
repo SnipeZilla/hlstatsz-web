@@ -116,8 +116,9 @@ while ($row = $db->fetch_array($result)) {
 	$ranks[] = $row;
 }
 
+$currentPage = max(1, (int)($_GET['page'] ?? 1));
 $formAction = htmlspecialchars(
-	$g_options['scripturl'] . '?mode=admin&task=ranks&game=' . urlencode($gamecode)
+	$g_options['scripturl'] . '?mode=admin&task=ranks&game=' . urlencode($gamecode) . '&page=' . $currentPage
 );
 ?>
 <form method="post" action="<?= $formAction ?>">

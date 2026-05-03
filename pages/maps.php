@@ -16,22 +16,9 @@ For current support and updates:
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 // Map Statistics
-	$db->query("
-		SELECT
-			hlstats_Games.name
-		FROM
-			hlstats_Games
-		WHERE
-			hlstats_Games.code = '$game'
-	");
-
-	if ($db->num_rows() < 1) {
-        error("No such game '$game'.");
+	if (!$game) {
+        error("No such game.");
 	}
-
-	list($gamename) = $db->fetch_row();
-	$db->free_result();
-
 	$db->query("
 	 	SELECT
 			SUM(hlstats_Maps_Counts.kills),

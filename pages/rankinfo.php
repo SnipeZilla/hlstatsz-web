@@ -35,13 +35,6 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 		$act_name = $actiondata['rankName'];
 	}
 
-	$db->query("SELECT name FROM hlstats_Games WHERE code='$game'");
-	if ($db->num_rows() != 1) {
-		error('Invalid or no game specified.');
-	} else {
-		list($gamename) = $db->fetch_row();
-	}
-
     $sortorder = $_GET['sortorder'] ?? '';
     $sort      = $_GET['sort'] ?? '';
     $sort2     = "kills";

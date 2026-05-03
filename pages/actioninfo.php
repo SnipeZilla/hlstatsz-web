@@ -16,7 +16,9 @@ For current support and updates:
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 // Action Details
-
+	if (!$game) {
+        error("No such game.");
+	}
 // Addon created by Rufus (rufus@nonstuff.de)
 $asterisk = $g_options['DeleteDays'] ? ' *' : '';
 $action = valid_request($_GET['action'] ?? '', false) or error('No action ID specified.');
@@ -46,12 +48,6 @@ else
     $db->free_result();
     $act_name = $actiondata['description'];
 }
-
-$db->query("SELECT name FROM hlstats_Games WHERE code='{$game_escaped}'");
-if ($db->num_rows() != 1)
-    error('Invalid or no game specified.');
-else
-    list($gamename) = $db->fetch_row();
 
 if (!is_ajax() || $_GET['ajax'] == 'actioninfo') {
     $sortorder = $_GET['obj_sortorder'] ?? '';

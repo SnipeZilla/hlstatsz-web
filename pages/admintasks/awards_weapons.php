@@ -149,8 +149,9 @@ function award_code_select(string $name, string $selected, array $codes): string
 	return $out;
 }
 
+$currentPage = max(1, (int)($_GET['page'] ?? 1));
 $formAction = htmlspecialchars(
-	$g_options['scripturl'] . '?mode=admin&task=awards_weapons&game=' . urlencode($gamecode)
+	$g_options['scripturl'] . '?mode=admin&task=awards_weapons&game=' . urlencode($gamecode) . '&page=' . $currentPage
 );
 ?>
 <form method="post" action="<?= $formAction ?>">

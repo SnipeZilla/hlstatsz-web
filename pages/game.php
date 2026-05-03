@@ -16,13 +16,6 @@ For current support and updates:
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	global $theme;
 	require (PAGE_PATH . '/livestats.php');
-	$db->query("SELECT name FROM hlstats_Games WHERE code='$game'");
-	if ($db->num_rows() < 1) {
-		error("No such game '$game'.");
-	}
-
-	list($gamename) = $db->fetch_row();
-	$db->free_result();
 
 	$query = "
             SELECT COUNT(*) AS all_players,
