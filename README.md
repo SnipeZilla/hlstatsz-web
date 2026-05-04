@@ -35,6 +35,9 @@
 ### Admin
 <img width="1172" height="637" alt="image" src="https://github.com/user-attachments/assets/63e3821c-daf9-4d34-bed7-01efad5acb86" />
 
+### Admin
+<img width="1356" height="1307" alt="image" src="https://github.com/user-attachments/assets/526de317-37ce-4a4d-bded-30b17558597d" />
+
 ### Discord Channel
 <img width="1609" height="332" alt="image" src="https://github.com/user-attachments/assets/2447aed3-cd20-43ad-a0d5-9e0bb44d5ddd" />
 
