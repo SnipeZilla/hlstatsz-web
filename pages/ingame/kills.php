@@ -46,7 +46,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
     if (!$game && $player) {
         $db->query("SELECT game
-                    FROM hlstats_players
+                    FROM hlstats_Players
                     WHERE playerId = '$player'
                     LIMIT 1
                 ");
@@ -56,7 +56,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
     if ($player) {
         $db->query("SELECT game,
                     lastName
-                    FROM hlstats_players
+                    FROM hlstats_Players
                     WHERE playerId = '$player'
                     LIMIT 1
                 ");
@@ -154,7 +154,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
         SELECT
             playerId,
             RANK() OVER (ORDER BY $rank_type1 DESC, $rank_type2 $sort_type2) AS global_rank
-        FROM hlstats_players
+        FROM hlstats_Players
         WHERE hideranking = 0
           AND lastAddress <> ''
           AND game = '$game'

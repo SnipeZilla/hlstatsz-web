@@ -232,7 +232,7 @@ if ($player_id > 0) {
                         IFNULL(ROUND((hits / shots * 100), 1), 0.0) AS acc, 
                         hideranking,
                         COUNT(*) OVER() AS total_rows
-                    FROM hlstats_players 
+                    FROM hlstats_Players 
                     WHERE lastAddress <> ''
                           AND hideranking = 0
                           AND game='{$game_escaped}'
@@ -266,7 +266,7 @@ if ($player_id > 0) {
                         IFNULL(kills/deaths, '-') AS kpd, 
                         IFNULL(ROUND((hits / shots * 100), 1), 0.0) AS acc, 
                         hideranking
-                    FROM hlstats_players 
+                    FROM hlstats_Players 
                     WHERE lastAddress <> ''
                           AND game='{$game_escaped}'
                           AND playerId='$player_id'

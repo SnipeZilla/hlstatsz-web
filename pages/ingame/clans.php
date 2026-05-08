@@ -68,9 +68,9 @@ function qClansRank()
                ROUND(SUM(p.headshots) / NULLIF(SUM(p.kills), 0),2) AS hpk,
                COUNT(*) OVER() AS total_rows
            FROM
-               hlstats_players AS p
+               hlstats_Players AS p
            LEFT JOIN
-               hlstats_clans AS c ON p.clan = c.clanId
+               hlstats_Clans AS c ON p.clan = c.clanId
            WHERE
                p.hideranking = 0 
                AND p.lastAddress <> ''

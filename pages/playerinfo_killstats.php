@@ -55,7 +55,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'playerkills') {
         SELECT
             playerId,
             RANK() OVER (ORDER BY $rank_type1 DESC, $rank_type2 $sort_type2) AS global_rank
-        FROM hlstats_players
+        FROM hlstats_Players
         WHERE hideranking = 0
           AND lastAddress <> ''
           AND game = '$game'

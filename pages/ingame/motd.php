@@ -109,7 +109,7 @@ function qPlayersRank()
                 ROUND(IF(p.kills=0, 0, p.headshots/p.kills), 2) AS hpk,
                 ROUND(IF(p.shots=0, 0, p.hits/p.shots), 3) AS acc,
                 COUNT(*) OVER() AS total_rows
-            FROM hlstats_players p
+            FROM hlstats_Players p
             LEFT JOIN hlstats_PlayerUniqueIds uid ON uid.playerId = p.playerId
             WHERE p.hideranking = 0
               AND p.lastAddress <> ''
@@ -265,9 +265,9 @@ function qClansRank()
                ROUND(SUM(p.headshots) / NULLIF(SUM(p.kills), 0),2) AS hpk,
                COUNT(*) OVER() AS total_rows
            FROM
-               hlstats_players AS p
+               hlstats_Players AS p
            LEFT JOIN
-               hlstats_clans AS c ON p.clan = c.clanId
+               hlstats_Clans AS c ON p.clan = c.clanId
            WHERE
                p.hideranking = 0 
                AND p.lastAddress <> ''

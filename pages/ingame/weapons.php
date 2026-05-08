@@ -47,7 +47,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
     if (!$game && $player) {
         $db->query("SELECT game
-                    FROM hlstats_players
+                    FROM hlstats_Players
                     WHERE playerId = '$player'
                     LIMIT 1
                 ");

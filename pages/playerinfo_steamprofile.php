@@ -50,7 +50,7 @@ if ($name !== $playerdata['lastName']) {
     $playerdata['lastName'] = $name;
 
     $db->query("
-        UPDATE hlstats_players
+        UPDATE hlstats_Players
         SET lastName = '" . $db->escape($name) . "'
         WHERE playerId = '" . (int) $playerdata['playerId'] . "'
     ");

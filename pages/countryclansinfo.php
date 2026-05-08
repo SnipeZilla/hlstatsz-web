@@ -184,7 +184,7 @@ if (file_exists(IMAGE_PATH.'/flags/'.strtolower($flag).'_large.png')) {
                         p.death_streak,
                         p.activity,
                         uid.uniqueId
-                    FROM hlstats_players p
+                    FROM hlstats_Players p
                     LEFT JOIN hlstats_PlayerUniqueIds uid ON uid.playerId = p.playerId
                     WHERE p.hideranking = 0
                     AND p.lastAddress <> ''

@@ -23,7 +23,7 @@ if (!$player) {
 }
 
 if (!$game) {
-    $db->query("SELECT game FROM hlstats_players WHERE playerId = '$player' LIMIT 1");
+    $db->query("SELECT game FROM hlstats_Players WHERE playerId = '$player' LIMIT 1");
     list($game) = $db->fetch_row();
 }
 
@@ -40,7 +40,7 @@ $db->query("
             + CAST('76561197960265728' AS unsigned)
             + CAST(MID(pu.uniqueId, 3,10)*2 AS unsigned) AS communityId
     FROM
-        hlstats_players AS p
+        hlstats_Players AS p
     LEFT JOIN
         hlstats_PlayerUniqueIds AS pu
     ON
@@ -131,7 +131,7 @@ function saveAvatarLocally(string $url, string $steamId): string
     return IMAGE_PATH . '/unknown.jpg';
 }
 if ($name !== $steamdata['lastName']) {
-    $db->query("UPDATE hlstats_players SET lastName = '" . $db->escape($name) . "' WHERE playerId = '" . (int) $steamdata['playerId'] . "'");
+    $db->query("UPDATE hlstats_Players SET lastName = '" . $db->escape($name) . "' WHERE playerId = '" . (int) $steamdata['playerId'] . "'");
 }
 
 $prefix = ($g_options['Mode'] == 'Normal') ? 'STEAM_0:' : '';

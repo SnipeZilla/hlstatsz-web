@@ -88,7 +88,7 @@ function makeClanTag(string $name): array{
     }
 
     $db->query("SELECT game
-                FROM hlstats_players
+                FROM hlstats_Players
                 WHERE playerId = '$player'
                 LIMIT 1
                ");
@@ -127,13 +127,13 @@ function makeClanTag(string $name): array{
                     CONCAT(c.name) AS clan_name,
                     p.hideranking,
                     (SELECT COUNT(*) + 1
-                     FROM hlstats_players p2
+                     FROM hlstats_Players p2
                      WHERE p2.game = p.game
                        AND p2.lastAddress <> ''
                        AND p2.hideranking = 0
                        AND $rank_above
                     ) AS rank_position
-                FROM hlstats_players AS p
+                FROM hlstats_Players AS p
                 LEFT JOIN hlstats_Clans AS c ON c.clanId = p.clan
                 WHERE p.playerId = '$player'
                   AND p.lastAddress <> ''

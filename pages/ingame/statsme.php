@@ -47,7 +47,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
     if (!$game && $player) {
         $db->query("SELECT game
-                    FROM hlstats_players
+                    FROM hlstats_Players
                     WHERE playerId = '$player'
                     LIMIT 1
                 ");
@@ -99,7 +99,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
                         ROUND(IF(p.shots=0, 0, p.hits/p.shots), 3) AS acc,
                         CONCAT(c.name) AS clan_name,
                         p.hideranking
-                    FROM hlstats_players AS p
+                    FROM hlstats_Players AS p
                     LEFT JOIN
                         hlstats_Clans AS c
                     ON
@@ -148,7 +148,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
                         ROUND(IF(p.shots=0, 0, p.hits/p.shots), 3) AS acc,
                         CONCAT(c.name) AS clan_name,
                         p.hideranking
-                    FROM hlstats_players AS p
+                    FROM hlstats_Players AS p
                     LEFT JOIN
                         hlstats_Clans AS c
                     ON

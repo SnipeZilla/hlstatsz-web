@@ -110,7 +110,7 @@ function qPlayersRank()
                     p.death_streak,
                     p.activity,
                     uid.uniqueId
-                FROM hlstats_players p
+                FROM hlstats_Players p
                 LEFT JOIN hlstats_PlayerUniqueIds uid ON uid.playerId = p.playerId
                 WHERE p.hideranking = 0
                 AND p.lastAddress <> ''
@@ -150,7 +150,7 @@ function qPlayersRank()
                 SUM(h.headshots) AS headshots,
                 MAX(h.kill_streak) AS kill_streak,
                 MAX(h.death_streak) AS death_streak
-            FROM hlstats_players_history h
+            FROM hlstats_Players_History h
             WHERE $dateFilter
             AND h.game = '$game'
             GROUP BY h.playerId
@@ -175,7 +175,7 @@ function qPlayersRank()
                 a.death_streak,
                 p.activity
             FROM Aggregated a
-            JOIN hlstats_players p ON p.playerId = a.playerId
+            JOIN hlstats_Players p ON p.playerId = a.playerId
             LEFT JOIN hlstats_PlayerUniqueIds uid ON uid.playerId = a.playerId
             WHERE p.hideranking = 0
             AND p.lastAddress <> ''

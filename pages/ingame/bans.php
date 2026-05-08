@@ -72,7 +72,7 @@ function qPlayersRank()
                         ROUND(IF(kills=0, 0, headshots/kills), 2) AS hpk,
                         ROUND(IF(shots=0, 0, hits/shots), 3) AS acc,
                         COUNT(*) OVER() AS total_rows
-                    FROM hlstats_players
+                    FROM hlstats_Players
                     WHERE hideranking = 2
                       AND game = '".$game."'
                 )
