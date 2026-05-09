@@ -122,7 +122,7 @@ $Chart = new pChart($w, $h);
 	if (count($date) < 2)
 	{
 		$Chart->setFontProperties(IMAGE_PATH . '/sig/font/DejaVuSans.ttf', 12);
-		$Chart->drawTextBox(100, $grid[0], $grid[1], $grid[1], "Not Enough Session Data", 0, 0, 0, 0, ALIGN_LEFT, FALSE, 255, 255, 255, 0);
+		$Chart->drawTextBox(100, $grid[0], $grid[1], $grid[1], "Not Enough Session Data", 0, $color['red'], $color['green'], $color['blue'], ALIGN_LEFT, FALSE, -1, -1, -1, 100);
 	}
 	else
 	{	
