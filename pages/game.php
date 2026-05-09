@@ -133,7 +133,7 @@ printSectionTitle('Participating Servers');
 		}
 		if ($g_options['show_server_load_image'] == 1) {
 ?>
-		<tr class="hide-3">
+		<tr class="hlstats-graph hide-3">
 			<td style="text-align:center;padding:0px;">
 				<img src="show_graph.php?type=1&amp;game=<?=$game?>&amp;theme=<?=$theme?>" class="responsive" alt="Server Load Graph" title="serverLoadGraph" />
 			</td>
@@ -188,7 +188,7 @@ printSectionTitle('Participating Servers');
 				echo IMAGE_PATH . '/game.png';
 			}
 			echo "\" alt=\"$game\" /></span>";
-			echo "<span class=\"hlstats-name\"><a href=\"" . $g_options['scripturl'] . "?mode=servers&amp;server_id=$server_id&amp;game=$game\">" . htmlspecialchars($rowdata['name']) . "</a></span>";
+			echo "<span class=\"hlstats-name\">" . htmlspecialchars($rowdata['name']) . "</span>";
 	?></td>
 						<td class="hide nowrap"><?php
 			echo "<a title=\"Click To Join\" href=\"steam://connect/$addr\">$addr <a href=\"steam://connect/$addr\"></a>";
@@ -218,7 +218,7 @@ printSectionTitle('Participating Servers');
 					</tr>
 			<tr class="hlstats-graph hide-2<?= $slider ?>">
 			  <td style="padding:0px;text-align:center;" colspan="8">
-				<a href="<?php $g_options['scripturl'] ?>?mode=servers&amp;server_id=<?php echo $server_id ?>&amp;game=<?php echo $game ?>" style="text-decoration:none;"><img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>&amp;theme=<?=$theme?>" style="border:0px;" class="responsive" alt="Server Load Graph" title="Server Load Graph" /></a>
+				<a href="<?php $g_options['scripturl'] ?>?mode=servers&amp;server_id=<?php echo $server_id ?>&amp;game=<?php echo $game ?>" style="text-decoration:none;"><img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>&amp;theme=<?=$theme?>" style="border:0px;" class="responsive" alt="Server Load Graph" title="View All Server Load Graphs" /></a>
 			  </td>
 			</tr>
 			</tbody></table>

@@ -147,10 +147,10 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 				echo sprintf('%.2f', 0);
 	?></td>
 					</tr>
-			<tr>
+			<tr class="hlstats-graph">
 			  <td class="responsive" style="padding:0px;text-align:center;" colspan="8">
 <div class="responsive-table">
-				<a href="<?php $g_options['scripturl'] ?>?mode=servers&amp;server_id=<?php echo $server_id ?>&amp;game=<?php echo $game ?>" style="text-decoration:none;"><img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>&amp;theme=<?=$theme?>" style="border:0px;" class="responsive" alt="Server Load Graph" title="Server Load Graph" /></a>
+				<img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>&amp;theme=<?=$theme?>" style="border:0px;" class="responsive" alt="Server Load Graph" title="Server Load Graph" />
 </div>
 			  </td>
 			</tr>
@@ -165,7 +165,7 @@ echo '</div>';
  printSectionTitle('Server Load History');
  ?>
     
-		<div class="responsive-table">
+		<div class="hlstats-graph responsive-table">
 		<table>
 			<tr>
 				<td class="left">24h View</td>

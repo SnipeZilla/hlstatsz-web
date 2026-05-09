@@ -148,31 +148,6 @@ if ($g_options['display_style_selector'] == 1) {
   }
   echo '<script>document.getElementById("theme-menu").innerHTML = "'.$stylesheets.'"</script>';
 }
-
-if ($g_options['display_gamelist'] == 1 && !empty($game) && $mode != 'admin' && $mode != 'help') {
-    $resultGames = $db->query("
-    SELECT
-        code,
-        name
-    FROM
-        hlstats_Games
-    WHERE
-        hidden='0'
-    ORDER BY
-        name ASC
-    ");
-    $mode = array('players','clans','awards','chat','actions','weapons','maps','bans','countryclans');
-    $html = '';
-        while ($gamedata = $db->fetch_row($resultGames)) {
-            if ($gamedata[0] == $game) continue;
-            $query = isset($_GET['mode']) && in_array($_GET['mode'], $mode) && !empty($_GET['game']) ?
-                     updateQueryKey(["game" => $gamedata[0]]) : 'game='.$gamedata[0];
-            $html .= '<li><a href=\"?'.$query.'\">'.$gamedata[1].'</a></li>';
-        }
-        if (!empty($html)) {
-            echo '<script>document.getElementById("gamelist-menu").innerHTML = "'.$html.'";document.getElementById("game-dropdown").classList.add("has-games");</script>';
-        }
-}
 ?>
 </body>
 </html>

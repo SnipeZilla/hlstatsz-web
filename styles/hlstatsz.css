@@ -357,7 +357,7 @@ input[type=number] {
   position: relative;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 15px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -432,12 +432,18 @@ margin-right:10px;
   align-items: center;
   gap: 15px;
 }
-.hlstats-subnav a{
+.hlstats-sublink{
+  position: relative;
   color: var(--a-color);
   text-decoration: none;
   font-size: 14px;
   font-weight: 400;
   font-family: "Motiva Sans", Arial, sans-serif;
+}
+
+.hlstats-sublink.active{
+  text-decoration: underline;
+  text-underline-offset: 8px;
 }
 
 .hlstats-subnav .hlstats-server{
@@ -544,7 +550,7 @@ margin-right:10px;
   display: block;
   width: 100%;
   padding: 10px 12px;
-  color: var(--header-dropmenu-color);
+  color: var(--a-color);
   text-decoration: none;
   font-size: 14px;
   white-space: nowrap;
@@ -552,7 +558,7 @@ margin-right:10px;
 
 .hlstats-dropmenu a:hover{
   background: var(--header-dropmenu-bg-hover);
-  color: var(--header-dropmenu-color-hover);
+  color: var(--a-color-hover);
 }
 
 .hlstats-dropdown.open .caret{
@@ -1065,7 +1071,7 @@ th:hover::after{
 .hlstats-contents table a:hover{
   color: var(--table-a-color-hover);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 6px;
 }
 
 /* small icons/images alignment */
@@ -1199,7 +1205,7 @@ display: flex;
   grid-template-columns: max-content 1fr;
   gap: 15px;
   align-items:start;
-  padding: 16px;
+  padding: 15px;
   border-bottom: var(--card-border);
 }
 
@@ -1231,9 +1237,9 @@ display: flex;
 .hlstats-card-grid{
   display: grid;
   grid-template-columns: max-content 1fr;
-  column-gap: 15px;
-  row-gap: 6px;
-  padding: 16px;
+  column-gap: 30px;
+  row-gap: 3px;
+  padding: 15px;
   align-items: center;
 }
 .hlstats-card-title{
@@ -1253,6 +1259,10 @@ display: flex;
 
 .hlstats-card-foot {
   grid-column: 1 / -1;
+}
+
+.hlstats-card-foot-margin {
+  margin-top: 30px;
 }
 
 .hlstats-rankmeter meter{
@@ -1509,6 +1519,174 @@ display: flex;
 
 .theme-switcher:hover .theme-menu{ display: block; }
 
+/* =======================
+   Hitbox / Weapon Targets
+   ======================= */
+.hitbox-display{
+  display:flex;
+  align-items:stretch;
+  width:100%;
+}
+
+.hitbox-stats{
+  flex: 0 0 30%;
+  min-width: 130px;
+  display:flex;
+  padding:8px;
+  flex-direction:column;
+  background: var(--table-td-bg-even);
+  border-right:var(--table-td-border-bottom);
+}
+
+.hitbox-weapon-name{
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:.5px;
+  color: var(--main-color);
+  text-transform: uppercase;
+  border-bottom:var(--table-border);
+  padding:6px;
+}
+
+.hitbox-total{
+  font-size:12px;
+  opacity:.85;
+}
+.hitbox-total strong{
+  color: var(--main-color);
+  margin-left:4px;
+  font-weight:700;
+}
+
+.hitbox-bars{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.hitbox-bars li{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  font-size:11px;
+}
+.hitbox-bars .bar-label{
+  opacity:.85;
+  color: var(--main-color);
+}
+.hitbox-bars .bar-track{
+  width:100%;
+  height:6px;
+  background: var(--table-td-bg-hover);
+  border-radius:3px;
+  overflow:hidden;
+}
+.hitbox-bars .bar-fill{
+  height:100%;
+  border-radius:3px;
+  transition: width .4s ease;
+  min-width: 1px;
+}
+.hitbox-bars .bar-fill.green  { background: var(--green); }
+.hitbox-bars .bar-fill.orange { background: var(--orange); }
+.hitbox-bars .bar-fill.red    { background: var(--red); }
+
+.hitbox-model{
+  position:relative;
+  flex:1 1 auto;
+  aspect-ratio: 4 / 3;
+  user-select:none;
+  background: var(--hitbox-model-bg);
+}
+
+.hitbox-stage{
+  position:absolute;
+  inset:0;
+}
+.hitbox-stage img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:fill;
+  pointer-events:none;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.5));
+}
+
+.hitbox-lines{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:1;
+}
+.hitbox-line{
+  fill:none;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+  opacity:.85;
+}
+.hitbox-line.green  { stroke: var(--hitbox-color-green); }
+.hitbox-line.orange { stroke: var(--hitbox-color-orange); }
+.hitbox-line.red    { stroke: var(--hitbox-color-red); }
+
+.hitbox-marker{
+  position:absolute;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  transform: translate(-50%, -50%);
+  border:2px solid var(--hitbox-marker-border);
+  box-shadow: 0 0 10px currentColor, 0 1px 2px rgba(0,0,0,.7);
+  z-index:2;
+  cursor: help;
+  animation: hitbox-pulse 2.4s ease-in-out infinite;
+}
+.hitbox-marker.green  { background: var(--hitbox-color-green);  color: var(--hitbox-color-green); }
+.hitbox-marker.orange { background: var(--hitbox-color-orange); color: var(--hitbox-color-orange); }
+.hitbox-marker.red    { background: var(--hitbox-color-red);    color: var(--hitbox-color-red); }
+
+@keyframes hitbox-pulse{
+  0%, 100% { transform: translate(-50%,-50%) scale(1);    box-shadow: 0 0 6px  currentColor, 0 1px 2px rgba(0,0,0,.7); }
+  50%      { transform: translate(-50%,-50%) scale(1.45); box-shadow: 0 0 18px currentColor, 0 1px 2px rgba(0,0,0,.7); }
+}
+
+.hitbox-label{
+  position:absolute;
+  transform: translate(-50%, -50%);
+  font-size:11px;
+  line-height:1.15;
+  font-weight:600;
+  text-align:center;
+  text-shadow: var(--hitbox-label-shadow);
+  pointer-events:none;
+  z-index:3;
+  white-space:nowrap;
+}
+.hitbox-label.green  { color: var(--hitbox-label-green); }
+.hitbox-label.orange { color: var(--hitbox-label-orange); }
+.hitbox-label.red    { color: var(--hitbox-label-red); }
+.hitbox-label strong{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+}
+.hitbox-label .pct{
+  display:block;
+  font-size:10px;
+  opacity:.9;
+}
+
+@media (max-width: 600px){
+  .hitbox-display{ flex-direction:column; }
+  .hitbox-stats{ flex:0 0 auto; }
+  .hitbox-label{ font-size:10px; }
+  .hitbox-label strong{ font-size:11px; }
+}
+
 /* ── ajax ── */
 .is-loading {
     position: relative;
@@ -1693,171 +1871,3 @@ display: flex;
   }
 }
 
-/* =======================
-   Hitbox / Weapon Targets
-   ======================= */
-.hitbox-display{
-  display:flex;
-  align-items:stretch;
-  width:100%;
-}
-
-.hitbox-stats{
-  flex: 0 0 30%;
-  min-width: 130px;
-  display:flex;
-  padding:8px;
-  flex-direction:column;
-  background: var(--table-td-bg-even);
-  border-right:var(--table-td-border-bottom);
-}
-
-.hitbox-weapon-name{
-  font-size:15px;
-  font-weight:700;
-  letter-spacing:.5px;
-  color: var(--main-color);
-  text-transform: uppercase;
-  border-bottom:var(--table-border);
-  padding:6px;
-}
-
-.hitbox-total{
-  font-size:12px;
-  opacity:.85;
-}
-.hitbox-total strong{
-  color: var(--main-color);
-  margin-left:4px;
-  font-weight:700;
-}
-
-.hitbox-bars{
-  list-style:none;
-  margin:0;
-  padding:0;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-.hitbox-bars li{
-  display:flex;
-  flex-direction:column;
-  gap:3px;
-  font-size:11px;
-}
-.hitbox-bars .bar-label{
-  opacity:.85;
-  color: var(--main-color);
-}
-.hitbox-bars .bar-track{
-  width:100%;
-  height:6px;
-  background: var(--table-td-bg-hover);
-  border-radius:3px;
-  overflow:hidden;
-}
-.hitbox-bars .bar-fill{
-  height:100%;
-  border-radius:3px;
-  transition: width .4s ease;
-  min-width: 1px;
-}
-.hitbox-bars .bar-fill.green  { background: var(--green); }
-.hitbox-bars .bar-fill.orange { background: var(--orange); }
-.hitbox-bars .bar-fill.red    { background: var(--red); }
-
-.hitbox-model{
-  position:relative;
-  flex:1 1 auto;
-  aspect-ratio: 4 / 3;
-  user-select:none;
-  background: var(--hitbox-model-bg);
-}
-/* Stage is sized via JS to match the image's actual rendered bounds, so all
-   marker/label percentages map to image-space (not container-space). */
-.hitbox-stage{
-  position:absolute;
-  inset:0;
-}
-.hitbox-stage img{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:fill;
-  pointer-events:none;
-  filter: drop-shadow(0 6px 10px rgba(0,0,0,.5));
-}
-
-.hitbox-lines{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  pointer-events:none;
-  z-index:1;
-}
-.hitbox-line{
-  fill:none;
-  stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
-  opacity:.85;
-}
-.hitbox-line.green  { stroke: var(--hitbox-color-green); }
-.hitbox-line.orange { stroke: var(--hitbox-color-orange); }
-.hitbox-line.red    { stroke: var(--hitbox-color-red); }
-
-.hitbox-marker{
-  position:absolute;
-  width:14px;
-  height:14px;
-  border-radius:50%;
-  transform: translate(-50%, -50%);
-  border:2px solid var(--hitbox-marker-border);
-  box-shadow: 0 0 10px currentColor, 0 1px 2px rgba(0,0,0,.7);
-  z-index:2;
-  cursor: help;
-  animation: hitbox-pulse 2.4s ease-in-out infinite;
-}
-.hitbox-marker.green  { background: var(--hitbox-color-green);  color: var(--hitbox-color-green); }
-.hitbox-marker.orange { background: var(--hitbox-color-orange); color: var(--hitbox-color-orange); }
-.hitbox-marker.red    { background: var(--hitbox-color-red);    color: var(--hitbox-color-red); }
-
-@keyframes hitbox-pulse{
-  0%, 100% { transform: translate(-50%,-50%) scale(1);    box-shadow: 0 0 6px  currentColor, 0 1px 2px rgba(0,0,0,.7); }
-  50%      { transform: translate(-50%,-50%) scale(1.45); box-shadow: 0 0 18px currentColor, 0 1px 2px rgba(0,0,0,.7); }
-}
-
-.hitbox-label{
-  position:absolute;
-  transform: translate(-50%, -50%);
-  font-size:11px;
-  line-height:1.15;
-  font-weight:600;
-  text-align:center;
-  text-shadow: var(--hitbox-label-shadow);
-  pointer-events:none;
-  z-index:3;
-  white-space:nowrap;
-}
-.hitbox-label.green  { color: var(--hitbox-label-green); }
-.hitbox-label.orange { color: var(--hitbox-label-orange); }
-.hitbox-label.red    { color: var(--hitbox-label-red); }
-.hitbox-label strong{
-  display:block;
-  font-size:13px;
-  font-weight:700;
-}
-.hitbox-label .pct{
-  display:block;
-  font-size:10px;
-  opacity:.9;
-}
-
-@media (max-width: 600px){
-  .hitbox-display{ flex-direction:column; }
-  .hitbox-stats{ flex:0 0 auto; }
-  .hitbox-label{ font-size:10px; }
-  .hitbox-label strong{ font-size:11px; }
-}

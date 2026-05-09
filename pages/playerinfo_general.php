@@ -370,7 +370,7 @@ flush();
                   ?>
           </div>
 
-      <div class="hlstats-card-foot">
+      <div class="hlstats-card-foot hlstats-card-foot-margin">
           <?php
               echo '🗓️ <b>'
                   . htmlspecialchars($playerdata['lastName'], ENT_COMPAT) . '</b>\'s History: ';
