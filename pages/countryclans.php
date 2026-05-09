@@ -30,8 +30,8 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
     $col = array("rank_position","name","skill","nummembers","activity","connection_time","kills","deaths","kpd");
     if (!in_array($sort, $col)) {
-        $sort      = "kills";
-        $sortorder = "DESC";
+        $sort      = "rank_position";
+        $sortorder = "ASC";
     }
 
     if ($sort == $rank_type2) {
@@ -40,7 +40,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
-    $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 10 : 0;
+    $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 30 : 0;
 
     $result = $db->query("
          SELECT
@@ -111,7 +111,7 @@ echo '<div class="responsive-table">
         .($g_options['rankingtype'] != 'kills' ? ('<th class="hide'. isSorted('skill', $sort, $sortorder) .'">'. headerUrl('skill',['sort','sortorder'],'countries') .'Points</a></th>'):'').
         '<th class="hide'. isSorted('kills', $sort, $sortorder) .'">'. headerUrl('kills',['sort','sortorder'],'countries') .'Kills</a></th>
         <th class="hide-1'. isSorted('deaths', $sort, $sortorder) .'">'. headerUrl('deaths',['sort','sortorder'],'countries') .'Deaths</a></th>
-        <th class="hide-2'. isSorted('hpd', $sort, $sortorder) .'">'. headerUrl('hpk',['sort','sortorder'],'countries') .'K:D</a></th>
+        <th class="hide-2'. isSorted('kpd', $sort, $sortorder) .'">'. headerUrl('kpd',['sort','sortorder'],'countries') .'K:D</a></th>
         <th class="hide-3'. isSorted('activity', $sort, $sortorder) .'">'. headerUrl('activity',['sort','sortorder'],'countries') .'Activity</a></th>
         <th class="hide'. isSorted('connection_time', $sort, $sortorder) .'">'. headerUrl('connection_time',['sort','sortorder'],'countries') .'Connection Time</a></th>
     </tr>';

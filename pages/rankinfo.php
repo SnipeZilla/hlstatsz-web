@@ -14,7 +14,7 @@ For current support and updates:
    https://forums.alliedmods.net/forumdisplay.php?f=156
 */
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
-	// Action Details
+	// Rank Details
 
 	$rank = valid_request($_GET['rank'] ?? '', true) or error('No rank ID specified.');
 	
@@ -35,14 +35,16 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 		$act_name = $actiondata['rankName'];
 	}
 
+    $total = 0;
+
     $sortorder = $_GET['sortorder'] ?? '';
     $sort      = $_GET['sort'] ?? '';
     $sort2     = "kills";
 
-    $col = array("skill","kills","playerName");
+    $col = array("rank_position","skill","kills","playerName");
     if (!in_array($sort, $col)) {
-        $sort      = "skill";
-        $sortorder = "DESC";
+        $sort      = "rank_position";
+        $sortorder = "ASC";
     }
 
     if ($sort == "kills") {
@@ -52,27 +54,39 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
     $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 30 : 0;
-  
-	$result = $db->query("
-		SELECT
-			p.skill,
-			p.kills,
-			p.flag,
-			p.lastName AS playerName,
-			p.playerId
-		FROM hlstats_Players p
-		JOIN hlstats_Ranks r
-			ON r.rankId = $rank
-			AND r.game = p.game
-		WHERE
-			p.game = '$game' AND
-			p.kills >= r.minKills AND
-			p.kills <= r.maxKills AND
-			p.hideranking <> '1'
-		ORDER BY
-			$sort $sortorder,
-			$sort2 $sortorder
-		LIMIT 30 OFFSET $start
+
+    $result = $db->query("
+        WITH Base AS (
+            SELECT
+                p.skill,
+                p.kills,
+                p.flag,
+                p.lastName AS playerName,
+                p.playerId
+            FROM hlstats_Players p
+            JOIN hlstats_Ranks r
+                ON r.rankId = $rank
+                AND r.game = p.game
+            WHERE
+                p.game = '$game' AND
+                p.kills >= r.minKills AND
+                p.kills <= r.maxKills AND
+                p.hideranking <> '1'
+        ),
+        Ranked AS (
+            SELECT
+                *,
+                RANK() OVER (ORDER BY skill DESC, kills DESC) AS rank_position,
+                COUNT(*) OVER () AS total_rows
+            FROM Base
+        )
+        SELECT *
+        FROM Ranked
+        ORDER BY
+            $sort $sortorder,
+            $sort2 $sortorder,
+            playerName ASC
+        LIMIT 30 OFFSET $start
 	");
 
 	$db->query("
@@ -121,9 +135,6 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
             <div class="hlstats-award-icon">'.$imagestring.'</div>
             <div class="hlstats-award-count">Achieved by '.$numitems.' Players</div>
           </div>';
-
-    
-
 ?>
 
   </section>
@@ -144,30 +155,29 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 <div class="responsive-table">
   <table class="players-table">
     <tr>
-        <th class="nowarp left" style="width:1%"><span>#</span></th>
-        <th class="hlstats-main-description left<?= isSorted('playerName',$sort,$sortorder) ?>"><?= headerUrl('playerName', ['sort','sortorder'], 'rank') ?>Player</a></th>
-        <th class="<?= isSorted('kills',$sort,$sortorder) ?>"><?= headerUrl('kills', ['sort','sortorder'], 'rank') ?>Kills</a></th>
-        <th class="<?= isSorted('skill',$sort,$sortorder) ?>"><?= headerUrl('skill', ['sort','sortorder'], 'rank') ?>Skill</a></th>
+        <th class="hlstats-ranking nowrap<?= isSorted('rank_position',$sort,$sortorder) ?>"><?= headerUrl('rank_position', ['sort','sortorder'], 'rankinfo') ?>Rank</a></th>
+        <th class="hlstats-main-description left<?= isSorted('playerName',$sort,$sortorder) ?>"><?= headerUrl('playerName', ['sort','sortorder'], 'rankinfo') ?>Player</a></th>
+        <th class="<?= isSorted('kills',$sort,$sortorder) ?>"><?= headerUrl('kills', ['sort','sortorder'], 'rankinfo') ?>Kills</a></th>
+        <th class="<?= isSorted('skill',$sort,$sortorder) ?>"><?= headerUrl('skill', ['sort','sortorder'], 'rankinfo') ?>Skill</a></th>
     </tr>
     <?php
-        $i= 1 + $start;
         while ($res = $db->fetch_array($result))
         {
+            $total = $res['total_rows'];
             echo '<tr>
-                  <td class="nowrap right">'.$i.'</td>
+                  <td class="nowrap right">'.$res['rank_position'].'</td>
                   <td class="hlstats-main-description left">
                        <span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>
-                       <a href="'.$g_options['scripturl'].'?mode=playerinfo&amp;player='.$res['playerId'].'" title=""><span class="hlstats-name">'.htmlspecialchars($res['playerName']).' </span></a>
+                       <a href="'.$g_options['scripturl'].'?mode=playerinfo&amp;player='.$res['playerId'].'"><span class="hlstats-name">'.htmlspecialchars($res['playerName']).'</span></a>
                    </td>
-                  </td>
                   <td class="nowrap">'.$res['kills'].'</td>
                   <td class="nowrap">'.$res['skill'].'</td>
-                  </tr>'; $i++;
+                  </tr>';
         }
    ?>
    </table></div>
    <?php
-       echo Pagination($numitems, $_GET['page'] ?? 1, 30, 'page', true, 'rankinfo');
+       echo Pagination($total, $_GET['page'] ?? 1, 30, 'page', true, 'rankinfo');
 
   if (is_ajax()) exit;
   ?>

@@ -36,17 +36,16 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	$awardName = $actiondata['awardName'];
 	$image     = $actiondata['image'];
 
+    $total = 0;
+
     $sortorder = $_GET['sortorder'] ?? '';
     $sort      = $_GET['sort'] ?? '';
     $sort2     = "playerName";
 
-    $sortby = $sort;
-    $order  = $sortorder;
-
-    $col = array("playerName","numawards","awardName");
+    $col = array("rank_position","playerName","numawards","awardName");
     if (!in_array($sort, $col)) {
-        $sort      = "numawards";
-        $sortorder = "DESC";
+        $sort      = "rank_position";
+        $sortorder = "ASC";
     }
 
     if ($sort == "playerName") {
@@ -56,35 +55,37 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
     $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 30 : 0;
-    
-	$result = $db->query("
-		SELECT
-			p.flag,
-			p.lastName AS playerName,
-			p.playerId,
-			COUNT(pa.awardId) AS numawards
-		FROM hlstats_Players_Ribbons prb
-		JOIN hlstats_Players p
-			ON p.playerId = prb.playerId AND p.game = '$game'
-		LEFT JOIN hlstats_Players_Awards pa
-			ON pa.playerId = prb.playerId AND pa.game = '$game' AND pa.awardId = $awardId
-		WHERE prb.ribbonId = $ribbon
-		  AND p.hideranking <> '1'
-		GROUP BY p.flag, p.lastName, p.playerId
-		ORDER BY $sort $sortorder, $sort2 $sortorder
-		LIMIT 30 OFFSET $start
-	");
 
-	$db->query("
-		SELECT COUNT(DISTINCT prb.playerId)
-		FROM hlstats_Players_Ribbons prb
-		JOIN hlstats_Players p
-			ON p.playerId = prb.playerId AND p.game = '$game'
-		WHERE prb.ribbonId = $ribbon
-		  AND p.hideranking <> '1'
+    $result = $db->query("
+        WITH Base AS (
+            SELECT
+                p.flag,
+                p.lastName AS playerName,
+                p.playerId,
+                COUNT(pa.awardId) AS numawards
+            FROM hlstats_Players_Ribbons prb
+            JOIN hlstats_Players p
+                ON p.playerId = prb.playerId AND p.game = '$game'
+            LEFT JOIN hlstats_Players_Awards pa
+                ON pa.playerId = prb.playerId AND pa.game = '$game' AND pa.awardId = $awardId
+            WHERE prb.ribbonId = $ribbon
+              AND p.hideranking <> '1'
+            GROUP BY p.flag, p.lastName, p.playerId
+        ),
+        Ranked AS (
+            SELECT
+                *,
+                RANK() OVER (ORDER BY numawards DESC, playerName ASC) AS rank_position,
+                COUNT(*) OVER () AS total_rows
+            FROM Base
+        )
+        SELECT *
+        FROM Ranked
+        ORDER BY $sort $sortorder,
+                 $sort2 $sortorder,
+                 playerName ASC
+        LIMIT 30 OFFSET $start
 	");
-	list($numitems) = $db->fetch_row();
-
 
 if (!is_ajax()) {
 printSectionTitle('Ribbon Details');
@@ -117,31 +118,30 @@ printSectionTitle('Ribbon Details');
 <div class="responsive-table">
   <table class="players-table">
     <tr>
-        <th class="nowarp left" style="width:1%"><span>#</span></th>
+        <th class="hlstats-ranking nowrap<?= isSorted('rank_position',$sort,$sortorder) ?>"><?= headerUrl('rank_position', ['sort','sortorder'], 'ribboninfo') ?>Rank</a></th>
         <th class="hlstats-main-description left<?= isSorted('playerName',$sort,$sortorder) ?>"><?= headerUrl('playerName', ['sort','sortorder'], 'ribboninfo') ?>Player</a></th>
         <th class="nowrap<?= isSorted('numawards',$sort,$sortorder) ?>"><?= headerUrl('numawards', ['sort','sortorder'], 'ribboninfo') ?>Daily Awards</a></th>
         <th class="nowrap<?= isSorted('awardName',$sort,$sortorder) ?>"><?= headerUrl('awardName', ['sort','sortorder'], 'ribboninfo') ?>Name</a></th>
     </tr>
     <?php
-        $i= 1 + $start;
-
         while ($res = $db->fetch_array($result))
         {
+            $total = $res['total_rows'];
             echo '<tr>
-                  <td class="nowrap right">'.$i.'</td>
+                  <td class="nowrap right">'.$res['rank_position'].'</td>
                   <td class="hlstats-main-description left">
                       <span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>
-                      <a href="?mode=playerinfo&amp;player='.$res['playerId'].'" title=""></span><span class="hlstats-name">'.htmlspecialchars($res['playerName']).' &nbsp;</span></a>
+                      <a href="?mode=playerinfo&amp;player='.$res['playerId'].'"><span class="hlstats-name">'.htmlspecialchars($res['playerName']).'&nbsp;</span></a>
                   </td>
                   <td class="nowrap">'.$res['numawards'].' times</td>
                   <td class="nowrap"><span class="hlstats-name">'.htmlspecialchars($awardName).'</span></td>
-                  </tr>'; $i++;
+                  </tr>';
         }
    ?>
    </table>
    </div>
    <?php
-       echo Pagination($numitems, $_GET['page'] ?? 1, 30, 'page', true, 'ribboninfo');
+       echo Pagination($total, $_GET['page'] ?? 1, 30, 'page', true, 'ribboninfo');
 
   if (is_ajax()) exit;
   ?>
@@ -150,4 +150,3 @@ printSectionTitle('Ribbon Details');
 <div>
 <a href="?mode=awards&game=<?=$game?>&tab=ribbons#Ribbons">&larr;&nbsp;Ribbons</a>
 </div>
-

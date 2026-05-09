@@ -32,14 +32,16 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	list($realkills, $realheadshots) = $db->fetch_row();
 
 
+    $total = 0;
+
     $sortorder = $_GET['sortorder'] ?? '';
     $sort      = $_GET['sort'] ?? '';
     $sort2     = "headshots";
 
-    $col = array("map","kills","kpercent","headshots","hpercent");
+    $col = array("rank_position","map","kills","kpercent","headshots","hpercent");
     if (!in_array($sort, $col)) {
-        $sort      = "kills";
-        $sortorder = "DESC";
+        $sort      = "rank_position";
+        $sortorder = "ASC";
     }
 
     if ($sort == "headshots") {
@@ -50,36 +52,34 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
     $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 30 : 0;
 
-    // kpercent/hpercent are monotonic in kills/headshots, so map them to the real
-    // columns so the ORDER BY can use the (game, kills, ...) / (game, headshots, ...) indexes.
     $sortColMap = [
-        'map'       => 'map',
-        'kills'     => 'kills',
-        'kpercent'  => 'kills',
-        'headshots' => 'headshots',
-        'hpercent'  => 'headshots',
+        'rank_position' => 'rank_position',
+        'map'           => 'map',
+        'kills'         => 'kills',
+        'kpercent'      => 'kills',
+        'headshots'     => 'headshots',
+        'hpercent'      => 'headshots',
     ];
     $sortCol  = $sortColMap[$sort];
     $sort2Col = $sortColMap[$sort2];
 
-    $db->query("
-        SELECT COUNT(*)
-        FROM hlstats_Maps_Counts
-        WHERE game = '$game'
-    ");
-    list($total) = $db->fetch_row();
-    $db->free_result();
-
     $result = $db->query("
-        SELECT
-            map,
-            kills,
-            headshots
-        FROM hlstats_Maps_Counts
-        WHERE game = '$game'
+        WITH Ranked AS (
+            SELECT
+                map,
+                kills,
+                headshots,
+                RANK() OVER (ORDER BY kills DESC, headshots DESC) AS rank_position,
+                COUNT(*) OVER () AS total_rows
+            FROM hlstats_Maps_Counts
+            WHERE game = '$game'
+        )
+        SELECT *
+        FROM Ranked
         ORDER BY
             $sortCol $sortorder,
-            $sort2Col $sortorder
+            $sort2Col $sortorder,
+            map ASC
         LIMIT 30 OFFSET $start
     ");
     
@@ -97,30 +97,28 @@ if (!is_ajax()) {
 
 <?php
 }
-if ($total) {
+if ($db->num_rows($result)) {
 ?>
 <div  class="responsive-table">
   <table class="maps-table">
     <tr>
-        <th class="nowarp left" style="width:1%"><span>#</span></th>
+        <th class="hlstats-ranking nowrap<?= isSorted('rank_position',$sort,$sortorder) ?>"><?= headerUrl('rank_position', ['sort','sortorder'], 'mapinfo') ?>Rank</a></th>
         <th class="hlstats-main-column left<?= isSorted('map',$sort,$sortorder) ?>"><?= headerUrl('map', ['sort','sortorder'], 'mapinfo') ?>Map</a></th>
         <th class="<?= isSorted('kills',$sort,$sortorder) ?>"><?= headerUrl('kills', ['sort','sortorder'], 'mapinfo') ?>Kills</a></th>
         <th class="meter-ratio hide-1<?= isSorted('kpercent',$sort,$sortorder) ?>"><?= headerUrl('kpercent', ['sort','sortorder'], 'mapinfo') ?>Ratio</a></th>
-        <th class="hide<?= isSorted('kills',$sort,$sortorder) ?>"><?= headerUrl('kills', ['sort','sortorder'], 'mapinfo') ?>Headshots</a></th>
+        <th class="hide<?= isSorted('headshots',$sort,$sortorder) ?>"><?= headerUrl('headshots', ['sort','sortorder'], 'mapinfo') ?>Headshots</a></th>
         <th class="meter-ratio hide-2<?= isSorted('hpercent',$sort,$sortorder) ?>"><?= headerUrl('hpercent', ['sort','sortorder'], 'mapinfo') ?>Ratio</a></th>
     </tr>
     <?php
-
-        $i = 1+$start;
-
         while ($res = $db->fetch_array($result))
         {
+            $total    = $res['total_rows'];
             $mapName  = $res['map'] === '' ? '(Unaccounted)' : $res['map'];
             $kpercent = $realkills > 0      ? round($res['kills']     / $realkills     * 100, 2) : 0;
             $hpercent = $realheadshots > 0  ? round($res['headshots'] / $realheadshots * 100, 2) : 0;
             echo '<tr>
-                  <td class="nowrap right">'.$i.'</td>
-                  <td class="left"><span class="hlstats-name"><a href="?mode=mapinfo&amp;map='.$mapName.'&amp;game='.$game.'"></span><span class="hlstats-name">'.$mapName.'</span></a></td>
+                  <td class="nowrap right">'.$res['rank_position'].'</td>
+                  <td class="left"><a href="?mode=mapinfo&amp;map='.urlencode($mapName).'&amp;game='.$game.'"><span class="hlstats-name">'.htmlspecialchars($mapName).'</span></a></td>
                   <td class="nowrap">'.nf($res['kills']).'</td>
                   <td class="nowrap hide-1">
                       <div class="meter-container">
@@ -135,7 +133,7 @@ if ($total) {
                         <div class="meter-value" id="meterText">'.$hpercent.'%</div>
                       </div>
                   </td>
-                  </tr>'; $i++;
+                  </tr>';
         }
    ?>
    </table>

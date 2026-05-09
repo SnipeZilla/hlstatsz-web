@@ -50,20 +50,19 @@ else
 }
 
 if (!is_ajax() || $_GET['ajax'] == 'actioninfo') {
+    $total = 0;
+
     $sortorder = $_GET['obj_sortorder'] ?? '';
     $sort      = $_GET['obj_sort'] ?? '';
     $sort2     = "obj_bonus";
 
-    $sortby = $sort;
-    $order  = $sortorder;
-
-    $col = array("playerName","obj_count","obj_bonus");
+    $col = array("rank_position","playerName","obj_count","obj_bonus");
     if (!in_array($sort, $col)) {
-        $sort      = "obj_count";
-        $sortorder = "DESC";
+        $sort      = "rank_position";
+        $sortorder = "ASC";
     }
 
-    if ($sort == "obj_bonus") {
+    if ($sort == "rank_position") {
         $sort2 = "obj_count";
     }
 
@@ -85,10 +84,10 @@ if (!is_ajax() || $_GET['ajax'] == 'actioninfo') {
         WHERE a.code = '{$action_escaped}'
         AND p.game = '{$game_escaped}'
         AND p.hideranking = '0'
-        GROUP BY p.playerId
-    
+        GROUP BY p.playerId, p.lastName, p.flag
+
         UNION ALL
-    
+
         SELECT
             p.playerId,
             p.lastName AS playerName,
@@ -101,10 +100,10 @@ if (!is_ajax() || $_GET['ajax'] == 'actioninfo') {
         WHERE a.code = '{$action_escaped}'
         AND p.game = '{$game_escaped}'
         AND p.hideranking = '0'
-        GROUP BY p.playerId
-    
+        GROUP BY p.playerId, p.lastName, p.flag
+
         UNION ALL
-    
+
         SELECT
             p.playerId,
             p.lastName AS playerName,
@@ -117,7 +116,7 @@ if (!is_ajax() || $_GET['ajax'] == 'actioninfo') {
         WHERE a.code = '{$action_escaped}'
         AND p.game = '{$game_escaped}'
         AND p.hideranking = '0'
-        GROUP BY p.playerId
+        GROUP BY p.playerId, p.lastName, p.flag
     ),
     final AS (
         SELECT
@@ -127,15 +126,21 @@ if (!is_ajax() || $_GET['ajax'] == 'actioninfo') {
             SUM(obj_count) AS obj_count,
             SUM(obj_bonus) AS obj_bonus
         FROM base
-        GROUP BY playerId
+        GROUP BY playerId, playerName, flag
+    ),
+    Ranked AS (
+        SELECT
+            *,
+            RANK() OVER (ORDER BY obj_count DESC, obj_bonus DESC) AS rank_position,
+            COUNT(*) OVER () AS total_rows
+        FROM final
     )
-    SELECT
-        *,
-        COUNT(*) OVER() AS total_rows
-    FROM final
+    SELECT *
+    FROM Ranked
     ORDER BY
         $sort $sortorder,
-        $sort2 $sortorder
+        $sort2 $sortorder,
+        playerName ASC
     LIMIT 30 OFFSET $start
     ");
 
@@ -183,38 +188,29 @@ if (!is_ajax() || $_GET['ajax'] == 'actioninfo') {
 
 if ($db->num_rows($result)) {
 
-    $first = $db->fetch_array($result);
-    $total = $first['total_rows'];
-
-
     echo '<div  class="responsive-table">
         <table class="maps-table">
         <tr>
-            <th class="nowrap left" style="width:1%"><span>#</span></th>
+            <th class="hlstats-ranking nowrap'.isSorted('rank_position',$sort,$sortorder).'">'.headerUrl('rank_position',['obj_sort','obj_sortorder'],'actioninfo').'Rank</a></th>
             <th class="left'.isSorted('playerName',$sort,$sortorder).'">'.headerUrl('playerName',['obj_sort','obj_sortorder'],'actioninfo').'Player</a></th>
             <th class="'.isSorted('obj_count',$sort,$sortorder).'">'.headerUrl('obj_count',['obj_sort','obj_sortorder'],'actioninfo').'Achieved</a></th>
             <th class="hide-1'.isSorted('obj_bonus',$sort,$sortorder).'">'.headerUrl('obj_bonus',['obj_sort','obj_sortorder'],'actioninfo').'Skill Bonus Total</a></th>
         </tr>';
 
-    $i = 1 + $start;
-    $res = $first;
-
-    do {
+    while ($res = $db->fetch_array($result)) {
+        $total = $res['total_rows'];
         echo '<tr>
-            <td class="nowrap right">'.$i.'</td>
-            <td class="left"><a href="?mode=playerinfo&player='.$res['playerId'].'">';
+            <td class="nowrap right">'.$res['rank_position'].'</td>
+            <td class="left">';
             if ($g_options['countrydata']) {
                echo '<span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>';
             }
-            echo '<a href="?mode=playerinfo&amp;player='.$res['playerId'].'" title=""></span><span class="hlstats-name">'.htmlspecialchars($res['playerName'] ?? '').'</span></a>
+            echo '<a href="?mode=playerinfo&amp;player='.$res['playerId'].'" title=""><span class="hlstats-name">'.htmlspecialchars($res['playerName'] ?? '').'</span></a>
             </td>
             <td class="nowrap right">'.$res['obj_count'].'</td>
             <td class="nowrap right hide-1">'.$res['obj_bonus'].'</td>
         </tr>';
-
-        $i++;
-
-    } while ($res = $db->fetch_array($result));
+    }
     echo '</table></div>';
 
     echo Pagination($total, $_GET['obj_page'] ?? 1, 30, 'obj_page', true, 'actioninfo');
@@ -226,14 +222,14 @@ if ($db->num_rows($result)) {
 }
 
 if (!is_ajax() || $_GET['ajax'] == 'vpage') {
+    $total = 0;
+
     $sortorder = $_GET['vpage_sortorder'] ?? '';
     $sort      = $_GET['vpage_sort'] ?? '';
     $sort2     = "obj_bonus";
 
-    $sortby = $sort;
-    $order  = $sortorder;
-
-    $col = array("playerName","obj_count","obj_bonus");
+    // Allowed sort columns (rank_position is now sortable)
+    $col = array("rank_position","playerName","obj_count","obj_bonus");
     if (!in_array($sort, $col)) {
         $sort      = "obj_count";
         $sortorder = "DESC";
@@ -247,7 +243,8 @@ if (!is_ajax() || $_GET['ajax'] == 'vpage') {
 
     $start = isset($_GET['vpage_page']) ? ((int)$_GET['vpage_page'] - 1) * 30 : 0;
 
-
+    // Victims: aggregate per victim, then RANK().
+    // Canonical rank: obj_count DESC (most-victimized first), obj_bonus DESC.
     $result = $db->query("
         WITH victim AS (
             SELECT
@@ -262,16 +259,22 @@ if (!is_ajax() || $_GET['ajax'] == 'vpage') {
             WHERE a.code = '{$action_escaped}'
             AND p.game = '{$game_escaped}'
             AND p.hideranking = '0'
-            GROUP BY p.playerId
+            GROUP BY p.playerId, p.lastName, p.flag
+        ),
+        Ranked AS (
+            SELECT
+                *,
+                RANK() OVER (ORDER BY obj_count DESC, obj_bonus DESC) AS rank_position,
+                COUNT(*) OVER () AS total_rows
+            FROM victim
         )
-        SELECT
-            *,
-            COUNT(*) OVER() AS total_rows
-        FROM victim
+        SELECT *
+        FROM Ranked
         ORDER BY
             $sort $sortorder,
-            $sort2 $sortorder
-        LIMIT 30 OFFSET $start;
+            $sort2 $sortorder,
+            playerName ASC
+        LIMIT 30 OFFSET $start
     ");
 
 
@@ -282,20 +285,18 @@ if ($db->num_rows($result)) {
         echo '<div class="hlstats-cards-grid">
         <section class="hlstats-section hlstats-card">
         <div class="hlstats-card-foot">
-            <span class="hlstats-name">Victims of <?= $act_name ?></span> (Last '.$g_options['DeleteDays'].' Days)
+            <span class="hlstats-name">Victims of '.$act_name.'</span> (Last '.$g_options['DeleteDays'].' Days)
         </div>
         </section>
         </div>
         <div id="vpage">';
     }
 
-    $first = $db->fetch_array($result);
-    $total = $first['total_rows'];
-
     echo '<div  class="responsive-table">
         <table class="maps-table">
         <tr>
-            <th class="nowrap left" style="width:1%"><span>#</span></th>
+            <th class="'.isSorted('rank_position',$sort,$sortorder).'">'.
+                headerUrl('rank_position',['vpage_sort','vpage_sortorder'],'vpage').'Rank</a></th>
             <th class="left'.isSorted('playerName',$sort,$sortorder).'">'.
                 headerUrl('playerName',['vpage_sort','vpage_sortorder'],'vpage').'Player</a></th>
             <th class="'.isSorted('obj_count',$sort,$sortorder).'">'.
@@ -304,26 +305,21 @@ if ($db->num_rows($result)) {
                 headerUrl('obj_bonus',['vpage_sort','vpage_sortorder'],'vpage').'Skill Bonus Total</a></th>
         </tr>';
 
-    $i = 1 + $start;
-    $res = $first;
-
-    do {
+    while ($res = $db->fetch_array($result)) {
+        $total = $res['total_rows'];
         echo '<tr>
-            <td class="nowrap right">'.$i.'</td>
+            <td class="nowrap right">'.$res['rank_position'].'</td>
             <td class="left">
                <span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>
-               <a href="?mode=playerinfo&player='.$res['victimId'].'">'.htmlspecialchars($res['playerName']).'</a></td>
+               <a href="?mode=playerinfo&amp;player='.$res['victimId'].'"><span class="hlstats-name">'.htmlspecialchars($res['playerName']).'</span></a></td>
             <td class="nowrap right">'.$res['obj_count'].'</td>
             <td class="nowrap right hide-1">'.$res['obj_bonus'].'</td>
         </tr>';
-
-        $i++;
-
-    } while ($res = $db->fetch_array($result));
+    }
 
     echo '</table></div>';
 
-    echo Pagination($total, $_GET['vpage'] ?? 1, $start, 'vpage', true, 'vpage');
+    echo Pagination($total, $_GET['vpage_page'] ?? 1, 30, 'vpage_page', true, 'vpage');
     if (is_ajax()) exit;
 
     echo '</div>';

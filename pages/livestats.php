@@ -93,7 +93,7 @@ function printserverstats($server_id)
 
 ?>
 <table class="livestats-table-players">
-	<tr>
+	<thead><tr>
 		<th class="right">#</th>
 		<th class="hlstats-main-column left responsive">Player</th>
 		<th class="kd"><span class="k right">Kills</span><span class="sep">:</span><span class="d left">Deaths</span></th>
@@ -104,7 +104,8 @@ function printserverstats($server_id)
 		<th class="hide-2">Time</th>
 		<th class="hide-2">+/-</th>
 		<th class="hide-3">Skill</th>
-	</tr>
+	</tr></thead>
+	<tbody>
 
 <?php 
 		unset($team_colors);
@@ -479,6 +480,7 @@ function printserverstats($server_id)
 <?php
 		}
     ?>
+	</tbody>
 </table>
 
 <?php

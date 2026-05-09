@@ -44,7 +44,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 		$wep_name = $weapondata['name'];
 	}
 
-    $numitems       = 0;
+    $total          = 0;
     $totalkills     = 0;
     $totalheadshots = 0;
 
@@ -52,62 +52,77 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
     $sort      = $_GET['sort'] ?? '';
     $sort2     = "headshots";
 
-    $sortby = $sort;
-    $order  = $sortorder;
-
-    $col = array("killerName","frags","headshots","hpk");
+    $col = array("rank_position","killerName","frags","headshots","hpk");
     if (!in_array($sort, $col)) {
-        $sort      = "frags";
-        $sortorder = "DESC";
+        $sort      = "rank_position";
+        $sortorder = "ASC";
     }
 
+    // Secondary sort
     if ($sort == "frags") {
         $sort2 = "headshots";
+    } elseif ($sort == "headshots") {
+        $sort2 = "frags";
+    } elseif ($sort == "hpk") {
+        $sort2 = "frags";
+    } elseif ($sort == "killerName") {
+        $sort2 = "frags";
+    } else {
+        // rank_position
+        $sort2 = "frags";
     }
 
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
     $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 30 : 0;
 
-	$result = $db->query("
-		SELECT
-			hlstats_Events_Frags.killerId,
-			hlstats_Players.lastName AS killerName,
-			hlstats_Players.flag as flag,
-			COUNT(hlstats_Events_Frags.weapon) AS frags,
-			SUM(hlstats_Events_Frags.headshot=1) as headshots,
-			IFNULL(SUM(hlstats_Events_Frags.headshot=1) / Count(hlstats_Events_Frags.weapon), '-') AS hpk
-		FROM
-			hlstats_Events_Frags,
-			hlstats_Players
-		WHERE
-			hlstats_Players.playerId = hlstats_Events_Frags.killerId
-			AND hlstats_Events_Frags.weapon='$weapon'
-			AND hlstats_Players.game='$game'
-			AND hlstats_Players.hideranking = 0
-		GROUP BY
-			hlstats_Events_Frags.killerId
-		ORDER BY
-			$sort $sortorder,
-			$sort2 $sortorder
-		LIMIT 30 OFFSET $start
-	");
-	
-	$resultCount = $db->query("
-		SELECT
-			COUNT(DISTINCT hlstats_Events_Frags.killerId),
-			SUM(hlstats_Events_Frags.weapon='$weapon'),
-			SUM(hlstats_Events_Frags.weapon='$weapon' AND hlstats_Events_Frags.headshot=1)
-		FROM
-			hlstats_Events_Frags,
-			hlstats_Servers
-		WHERE
-			hlstats_Servers.serverId = hlstats_Events_Frags.serverId
-			AND hlstats_Events_Frags.weapon='$weapon'
-			AND hlstats_Servers.game='$game'
-	");
-	
-	list($numitems, $totalkills, $totalheadshots) = $db->fetch_row($resultCount);
+    $resultCount = $db->query("
+        SELECT
+            COUNT(DISTINCT hlstats_Events_Frags.killerId),
+            SUM(hlstats_Events_Frags.weapon='$weapon'),
+            SUM(hlstats_Events_Frags.weapon='$weapon' AND hlstats_Events_Frags.headshot=1)
+        FROM
+            hlstats_Events_Frags,
+            hlstats_Servers
+        WHERE
+            hlstats_Servers.serverId = hlstats_Events_Frags.serverId
+            AND hlstats_Events_Frags.weapon='$weapon'
+            AND hlstats_Servers.game='$game'
+    ");
+
+    list($numitems, $totalkills, $totalheadshots) = $db->fetch_row($resultCount);
+
+    $result = $db->query("
+        WITH Base AS (
+            SELECT
+                f.killerId,
+                p.lastName AS killerName,
+                p.flag,
+                COUNT(*) AS frags,
+                SUM(f.headshot = 1) AS headshots,
+                IFNULL(SUM(f.headshot = 1) / COUNT(*), 0) AS hpk
+            FROM hlstats_Events_Frags AS f
+            INNER JOIN hlstats_Players AS p
+                ON p.playerId = f.killerId
+            WHERE f.weapon = '$weapon'
+                AND p.game = '$game'
+                AND p.hideranking = 0
+            GROUP BY f.killerId, p.lastName, p.flag
+        ),
+        Ranked AS (
+            SELECT
+                *,
+                RANK() OVER (ORDER BY frags DESC, headshots DESC) AS rank_position,
+                COUNT(*) OVER () AS total_rows
+            FROM Base
+        )
+        SELECT *
+        FROM Ranked
+        ORDER BY $sort $sortorder,
+                 $sort2 $sortorder,
+                 killerName ASC
+        LIMIT 30 OFFSET $start
+    ");
 
 if (!is_ajax()) {
 printSectionTitle('Weapon Details');
@@ -136,40 +151,39 @@ printSectionTitle('Weapon Details');
 <div id="weaponinfo">
 <?php
 }
-if ($numitems) {
+if ($db->num_rows($result)) {
 ?>
 <div class="responsive-table">
   <table class="players-table">
     <tr>
-        <th class="nowarp left" style="width:1%"><span>#</span></th>
+        <th class="hlstats-ranking nowrap<?= isSorted('rank_position',$sort,$sortorder) ?>"><?= headerUrl('rank_position', ['sort','sortorder'], 'weaponinfo') ?>Rank</a></th>
         <th class="hlstats-main-description left<?= isSorted('killerName',$sort,$sortorder) ?>"><?= headerUrl('killerName', ['sort','sortorder'], 'weaponinfo') ?>Player</a></th>
         <th class="<?= isSorted('frags',$sort,$sortorder) ?>"><?= headerUrl('frags', ['sort','sortorder'], 'weaponinfo') ?>Kills</a></th>
         <th class="hide<?= isSorted('headshots',$sort,$sortorder) ?>"><?= headerUrl('headshots', ['sort','sortorder'], 'weaponinfo') ?>Headshots</a></th>
         <th class="hide-1<?= isSorted('hpk',$sort,$sortorder) ?>"><?= headerUrl('hpk', ['sort','sortorder'], 'weaponinfo') ?>HS:K</a></th>
     </tr>
     <?php
-        $i= 1 + $start;
         while ($res = $db->fetch_array($result))
         {
+            $total = $res['total_rows'];
             echo '<tr>
-                  <td class="nowrap right">'.$i.'</td>
+                  <td class="nowrap right">'.$res['rank_position'].'</td>
                   <td class="hlstats-main-description left">';
                     if ($g_options['countrydata']) {
                        echo '<span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>';
                     }
-                    echo '<a href="'.$g_options['scripturl'].'?mode=playerinfo&amp;player='.$res['killerId'].'" title=""><span class="hlstats-name">'.$res['killerName'].'&nbsp;</span></a>
+                    echo '<a href="'.$g_options['scripturl'].'?mode=playerinfo&amp;player='.$res['killerId'].'" title=""><span class="hlstats-name">'.htmlspecialchars($res['killerName']).'&nbsp;</span></a>
                    </td>
-                  </td>
                   <td class="nowrap">'.$res['frags'].'</td>
                   <td class="nowrap hide">'.$res['headshots'].'</td>
-                  <td class="nowrap hide-1">'.$res['hpk'].'</td>
-                  </tr>'; $i++;
+                  <td class="nowrap hide-1">'.round($res['hpk'], 2).'</td>
+                  </tr>';
         }
    ?>
    </table>
    </div>
    <?php
-       echo Pagination($numitems, $_GET['page'] ?? 1, 30, 'page', true, 'weaponinfo');
+       echo Pagination($total, $_GET['page'] ?? 1, 30, 'page', true, 'weaponinfo');
 
   if (is_ajax()) exit;
 }

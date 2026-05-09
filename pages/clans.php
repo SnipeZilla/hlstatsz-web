@@ -206,7 +206,7 @@ $query  = qClansRank();
 <div  class="responsive-table">
 <table class="clans-table">
     <thead>
-        <th class="<?= isSorted('rank_position', $sort, $sortorder) ?>"><?= headerUrl('rank_position',['sort','sortorder'],'clans') ?>Rank</a></th>
+        <th class="hlstats-ranking nowrap<?= isSorted('rank_position', $sort, $sortorder) ?>"><?= headerUrl('rank_position',['sort','sortorder'],'clans') ?>Rank</a></th>
         <th class="hlstats-main-column left<?= isSorted('name', $sort, $sortorder) ?>"><?= headerUrl('name',['sort','sortorder'],'clans') ?>Clan</a></th>
         <th class="hide-3<?= isSorted('tag', $sort, $sortorder) ?>"><?= headerUrl('tag',['sort','sortorder'],'clans') ?>Tag</a></th>
         <?php  if ($g_options['rankingtype']!='kills') { ?>

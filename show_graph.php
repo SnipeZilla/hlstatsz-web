@@ -40,6 +40,7 @@ For current support and updates:
 	}
 
 	define('IN_HLSTATS', true);
+	ob_start(); // buffer all output so stray bytes from includes never block headers
 
 	// Load database classes
 	require ('config.php');
@@ -144,11 +145,14 @@ $height = $theme['height'];
                 if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
                     $ims = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
                     if ($ims !== false && $ims >= $file_timestamp) {
+                        ob_end_clean();
                         header('HTTP/1.1 304 Not Modified');
                         exit;
                     }
                 }
 				$mod_date = date('D, d M Y H:i:s \G\M\T', $file_timestamp);
+				ob_end_clean();
+				header('Content-Type: image/png');
 				header('Last-Modified:' . $mod_date);
 				$image = imagecreatefrompng(IMAGE_PATH . '/progress/server_' . $width . '_' . $height . '_' . $bar_type . '_' . $game . '_' . $server_id . '_' . $theme_name . '_' . $server_load_type . '.png');
 				imagepng($image);
@@ -245,7 +249,8 @@ if ($theme['background']['type'] == 'gradient') {
 		// background
 		if ($drawbg)
 		{
-			imagefilledrectangle($image, 0, 0, $width, $height, $bg_color); // background color
+			if ($theme['background']['type'] != 'gradient')
+				imagefilledrectangle($image, 0, 0, $width, $height, $bg_color); // background color
 			imagerectangle($image, $indent_x[0], $indent_y[0], $width - $indent_x[1], $height - $indent_y[1], $axis_color);
 			imagefilledrectangle($image, $indent_x[0] + 1, $indent_y[0] + 1, $width - $indent_x[1] - 1, $height - $indent_y[1] - 1, $grid_color);
 		}
@@ -316,7 +321,36 @@ if ($theme['background']['type'] == 'gradient') {
 			}
 
 		}
-		//print_r($data_array);
+		// flush remaining rows that didn't fill a full avg_step batch
+		if ($i > 0 && !empty($avg_values))
+		{
+			$insert_values = array();
+			$insert_values['timestamp']   = $avg_values[max(0, ceil($i / 2) - 1)]['timestamp'];
+			$insert_values['act_players'] = 0;
+			$insert_values['min_players'] = 0;
+			$insert_values['max_players'] = 0;
+			$insert_values['uptime']      = 0;
+			$insert_values['fps']         = 0;
+			$insert_values['map']         = '';
+			foreach ($avg_values as $entry)
+			{
+				$insert_values['act_players'] += $entry['act_players'];
+				$insert_values['min_players'] += $entry['min_players'];
+				$insert_values['max_players'] += $entry['max_players'];
+				$insert_values['uptime']      += $entry['uptime'];
+				$insert_values['fps']         += $entry['fps'];
+				$insert_values['map']          = $entry['map'];
+			}
+			$data_array[] = array(
+				'timestamp'   => $insert_values['timestamp'],
+				'act_players' => round($insert_values['act_players'] / $i),
+				'min_players' => round($insert_values['min_players'] / $i),
+				'max_players' => round($insert_values['max_players'] / $i),
+				'uptime'      => round($insert_values['uptime']      / $i),
+				'fps'         => round($insert_values['fps']         / $i),
+				'map'         => $insert_values['map'],
+			);
+		}
 
 		$last_map = '';
 		if ($avg_step == 1 && !empty($data_array)) 
@@ -373,7 +407,8 @@ if ($theme['background']['type'] == 'gradient') {
 		// background
 		if ($drawbg)
 		{
-        imagefilledrectangle($image, 0, 0, $width, $height, $bg_color); // background color
+        if ($theme['background']['type'] != 'gradient')
+            imagefilledrectangle($image, 0, 0, $width, $height, $bg_color); // background color
         imagerectangle($image, $indent_x[0], $indent_y[0], $width - $indent_x[1], $height - $indent_y[1], $axis_color);
         imagefilledrectangle($image, $indent_x[0] + 1, $indent_y[0] + 1, $width - $indent_x[1] - 1, $height - $indent_y[1] - 1, $grid_color);
 		}
@@ -445,7 +480,8 @@ if ($theme['background']['type'] == 'gradient') {
 		// background
 		if ($drawbg)
 		{
-        imagefilledrectangle($image, 0, 0, $width, $height, $bg_color); // background color
+        if ($theme['background']['type'] != 'gradient')
+            imagefilledrectangle($image, 0, 0, $width, $height, $bg_color); // background color
         imagerectangle($image, $indent_x[0], $indent_y[0], $width - $indent_x[1], $height - $indent_y[1], $axis_color);
         imagefilledrectangle($image, $indent_x[0] + 1, $indent_y[0] + 1, $width - $indent_x[1] - 1, $height - $indent_y[1] - 1, $grid_color);
 		}
@@ -510,6 +546,7 @@ if ($theme['background']['type'] == 'gradient') {
 
 	imageTrueColorToPalette($image, 0, 65535);
 
+	ob_end_clean();
     header('Content-Type: image/png');
     header('Cache-Control: private, no-cache, must-revalidate, max-age=0');
     header('Pragma: no-cache');

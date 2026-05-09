@@ -164,7 +164,7 @@ printSectionTitle('Participating Servers');
             if ($g_options['slider'] == 0 || $i == 0) {
 ?>
 		  <table class="livestats-table-server<?= $i == 0 ? ' livestats-table-first':' livestats-table-next' ?>">
-				<tr>
+				<thead><tr>
 					<th class="hlstats-main-server left responsive">Server</th>
 					<th class="hide">Address</th>
 					<th>Map</th>
@@ -173,9 +173,9 @@ printSectionTitle('Participating Servers');
 					<th class="hide-1">Kills</th>
 					<th class="hide-2">Headshots</th>
 					<th class="hide-3">HS:K</th>
-				</tr>
-<?php } else { echo '<table class="livestats-table-server hlstats-table-fixed '.($i==count($servers)-1? ' livestats-table-last':' livestats-table-next').'">'; } ?>
-				<tr<?= $slider ? ' class="hlstats-server-row"' : '' ?>>
+				</tr></thead><tbody>
+<?php } else { echo '<table class="livestats-table-server hlstats-table-fixed '.($i==count($servers)-1? ' livestats-table-last':' livestats-table-next').'"><tbody>'; } ?>
+				<tr class="<?= $slider ? 'hlstats-server-row ' : '' ?><?= $i % 2 === 0 ? 'row-odd' : 'row-even' ?>">
 					<td class="left"><?php
 			$image = getImage("/games/$game/game");
 			if ($slider) echo '<span class="hlstats-slider-arrow">▼</span>';
@@ -221,7 +221,7 @@ printSectionTitle('Participating Servers');
 				<a href="<?php $g_options['scripturl'] ?>?mode=servers&amp;server_id=<?php echo $server_id ?>&amp;game=<?php echo $game ?>" style="text-decoration:none;"><img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>&amp;theme=<?=$theme?>" style="border:0px;" class="responsive" alt="Server Load Graph" title="Server Load Graph" /></a>
 			  </td>
 			</tr>
-			</table>
+			</tbody></table>
 					
 	<?php
 			printserverstats($server_id);

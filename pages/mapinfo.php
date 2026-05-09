@@ -21,17 +21,30 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	}
 	$map = valid_request($_GET['map'] ?? '', false) or error('No map specified.');
 
+    $total      = 0;
+    $totalkills = 0;
+
     $sortorder = $_GET['sortorder'] ?? '';
     $sort      = $_GET['sort'] ?? '';
     $sort2     = "headshots";
 
-    $col = array("killerName","frags","headshots","hpk");
+    $col = array("rank_position","killerName","frags","headshots","hpk");
     if (!in_array($sort, $col)) {
-        $sort      = "frags";
-        $sortorder = "DESC";
+        $sort      = "rank_position";
+        $sortorder = "ASC";
     }
 
-    if ($sort == "headshots") {
+    // Secondary sort
+    if ($sort == "frags") {
+        $sort2 = "headshots";
+    } elseif ($sort == "headshots") {
+        $sort2 = "frags";
+    } elseif ($sort == "hpk") {
+        $sort2 = "frags";
+    } elseif ($sort == "killerName") {
+        $sort2 = "frags";
+    } else {
+        // rank_position
         $sort2 = "frags";
     }
 
@@ -39,46 +52,53 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
     $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 30 : 0;
 
-
-    $result = $db->query("
-        SELECT
-            hlstats_Events_Frags.killerId,
-            hlstats_Players.lastName AS killerName,
-            hlstats_Players.flag as flag,
-            COUNT(hlstats_Events_Frags.map) AS frags,
-            SUM(hlstats_Events_Frags.headshot=1) as headshots,
-            IFNULL(SUM(hlstats_Events_Frags.headshot=1) / Count(hlstats_Events_Frags.map), '-') AS hpk
-        FROM
-            hlstats_Events_Frags,
-            hlstats_Players
-        WHERE
-            hlstats_Players.playerId = hlstats_Events_Frags.killerId
-            AND hlstats_Events_Frags.map='$map'
-            AND hlstats_Players.game='$game'
-            AND hlstats_Players.hideranking<>'1'
-        GROUP BY
-            hlstats_Events_Frags.killerId
-        ORDER BY
-            $sort $sortorder,
-            $sort2 $sortorder
-        LIMIT 30 OFFSET $start
-    ");
-
     $resultCount = $db->query("
         SELECT
             COUNT(DISTINCT hlstats_Events_Frags.killerId),
             SUM(hlstats_Events_Frags.map='$map')
         FROM
             hlstats_Events_Frags,
-        hlstats_Servers
+            hlstats_Servers
         WHERE
             hlstats_Servers.serverId = hlstats_Events_Frags.serverId
             AND hlstats_Events_Frags.map='$map'
             AND hlstats_Servers.game='$game'
     ");
-	
-	list($numitems, $totalkills) = $db->fetch_row($resultCount);
-    
+
+    list($numitems, $totalkills) = $db->fetch_row($resultCount);
+
+    $result = $db->query("
+        WITH Base AS (
+            SELECT
+                f.killerId,
+                p.lastName AS killerName,
+                p.flag,
+                COUNT(*) AS frags,
+                SUM(f.headshot = 1) AS headshots,
+                IFNULL(SUM(f.headshot = 1) / COUNT(*), 0) AS hpk
+            FROM hlstats_Events_Frags AS f
+            INNER JOIN hlstats_Players AS p
+                ON p.playerId = f.killerId
+            WHERE f.map = '$map'
+                AND p.game = '$game'
+                AND p.hideranking <> 1
+            GROUP BY f.killerId, p.lastName, p.flag
+        ),
+        Ranked AS (
+            SELECT
+                *,
+                RANK() OVER (ORDER BY frags DESC, headshots DESC) AS rank_position,
+                COUNT(*) OVER () AS total_rows
+            FROM Base
+        )
+        SELECT *
+        FROM Ranked
+        ORDER BY $sort $sortorder,
+                 $sort2 $sortorder,
+                 killerName ASC
+        LIMIT 30 OFFSET $start
+    ");
+
 if (!is_ajax()) {
 ?>
 
@@ -149,25 +169,23 @@ if (!is_ajax()) {
 
 <?php
 }
-if ($numitems) {
+if ($db->num_rows($result)) {
 ?>
 <div  class="responsive-table">
   <table class="maps-table">
     <tr>
-        <th class="nowarp right" style="width:1%"><span>#</span></th>
+        <th class="hlstats-ranking nowrap<?= isSorted('rank_position',$sort,$sortorder) ?>"><?= headerUrl('rank_position', ['sort','sortorder'], 'mapinfo') ?>Rank</a></th>
         <th class="hlstats-main-description left<?= isSorted('killerName',$sort,$sortorder) ?>"><?= headerUrl('killerName', ['sort','sortorder'], 'mapinfo') ?>Player</a></th>
         <th class="<?= isSorted('frags',$sort,$sortorder) ?>"><?= headerUrl('frags', ['sort','sortorder'], 'mapinfo') ?>Kills</a></th>
         <th class="hide<?= isSorted('headshots',$sort,$sortorder) ?>"><?= headerUrl('headshots', ['sort','sortorder'], 'mapinfo') ?>Headshots</a></th>
         <th class="hide-1<?= isSorted('hpk',$sort,$sortorder) ?>"><?= headerUrl('hpk', ['sort','sortorder'], 'mapinfo') ?>HS:K</a></th>
     </tr>
     <?php
-
-        $i = 1+$start;
-
         while ($res = $db->fetch_array($result))
         {
+            $total = $res['total_rows'];
             echo '<tr>
-                  <td class="nowrap right">'.$i.'</td>
+                  <td class="nowrap right">'.$res['rank_position'].'</td>
                   <td class="hlstats-main-description left">';
             if ($g_options['countrydata']) {
                 echo '<span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>';
@@ -175,14 +193,14 @@ if ($numitems) {
             echo '<a href="?mode=playerinfo&amp;player='.$res['killerId'].'"><span class="hlstats-name">'.htmlspecialchars($res['killerName']).'&nbsp;</span></a></td>
                   <td class="nowrap">'.nf($res['frags']).'</td>
                   <td class="nowrap hide">'.nf($res['headshots']).'</td>
-                  <td class="nowrap hide-1">'.$res['hpk'].'</td>
-                  </tr>'; $i++;
+                  <td class="nowrap hide-1">'.round($res['hpk'], 2).'</td>
+                  </tr>';
         }
    ?>
    </table>
    </div>
    <?php
-       echo Pagination($numitems, $_GET['page'] ?? 1, 30, 'page');
+       echo Pagination($total, $_GET['page'] ?? 1, 30, 'page');
 
   if (is_ajax()) exit;
 }
@@ -201,4 +219,3 @@ Fetch.ini('mapinfo');
     Items above are generated from the most recent <?= $g_options['DeleteDays'] ?> days of activity.
 </div>
 <?php } ?>
-

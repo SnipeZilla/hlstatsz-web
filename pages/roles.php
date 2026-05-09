@@ -22,24 +22,19 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
     $sort      = $_GET['sort'] ?? '';
     $sort2     = "kills";
 
-    $sortby = $sort;
-    $order  = $sortorder;
-
     $col = array("rank_position","code","picked","ppercent","kills","kpercent","deaths","dpercent","kpd");
     if (!in_array($sort, $col)) {
-        $sort      = "picked";
-        $sortorder = "DESC";
+        $sort      = "rank_position";
+        $sortorder = "ASC";
     }
 
-    if ($sort == "kills") {
-        $sort2 = "picked";
+    if ($sort == "rank_position") {
+        $sort2 = "kills";
     }
 
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
-
-	$db->query
-	("
+	$db->query("
 		SELECT
 			IF(IFNULL(SUM(hlstats_Roles.kills), 0) = 0, 1, SUM(hlstats_Roles.kills)),
 			IF(IFNULL(SUM(hlstats_Roles.deaths), 0) = 0, 1, SUM(hlstats_Roles.deaths)),
@@ -51,28 +46,31 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 			AND hlstats_Roles.hidden = '0'
 	");
 	list($realkills, $realdeaths, $realpicked) = $db->fetch_row();
+
 	$result = $db->query("
-		SELECT
-			hlstats_Roles.code,
-			hlstats_Roles.name,
-			hlstats_Roles.picked,
-			ROUND(hlstats_Roles.picked / $realpicked * 100, 2) AS ppercent,
-			hlstats_Roles.kills,
-			ROUND(hlstats_Roles.kills / $realkills * 100, 2) AS kpercent,
-			hlstats_Roles.deaths,
-			ROUND(hlstats_Roles.deaths / $realdeaths * 100, 2) AS dpercent,
-			ROUND(hlstats_Roles.kills / IF(hlstats_Roles.deaths = 0, 1, hlstats_Roles.deaths), 2) AS kpd
-		FROM
-			hlstats_Roles
-		WHERE
-			hlstats_Roles.game = '$game' 
-			AND hlstats_Roles.kills > 0 
-			AND hlstats_Roles.hidden = '0'
-		GROUP BY
-			hlstats_Roles.roleId
-		ORDER BY
-			$sort $sortorder,
-			$sort2 $sortorder
+        WITH Ranked AS (
+            SELECT
+                code,
+                name,
+                picked,
+                ROUND(picked / $realpicked * 100, 2) AS ppercent,
+                kills,
+                ROUND(kills / $realkills * 100, 2) AS kpercent,
+                deaths,
+                ROUND(deaths / $realdeaths * 100, 2) AS dpercent,
+                ROUND(kills / IF(deaths = 0, 1, deaths), 2) AS kpd,
+                RANK() OVER (ORDER BY picked DESC, kills DESC) AS rank_position
+            FROM hlstats_Roles
+            WHERE game = '$game'
+              AND kills > 0
+              AND hidden = '0'
+        )
+        SELECT *
+        FROM Ranked
+        ORDER BY
+            $sort $sortorder,
+            $sort2 $sortorder,
+            code ASC
 	");
 
 if (!is_ajax()) {
@@ -94,7 +92,7 @@ if ($db->num_rows($result)) {
 <div class="responsive-table">
   <table class="roles-table">
     <tr>
-        <th class="nowrap right">#</th>
+        <th class="hlstats-ranking nowrap right<?= isSorted('rank_position',$sort,$sortorder) ?>"><?= headerUrl('rank_position', ['sort','sortorder'], 'roles') ?>Rank</a></th>
         <th class="hlstats-main-column<?= isSorted('code',$sort,$sortorder) ?>"><?= headerUrl('code', ['sort','sortorder'], 'roles') ?>Role</a></th>
         <th class="nowrap<?= isSorted('picked',$sort,$sortorder) ?>"><?= headerUrl('picked', ['sort','sortorder'], 'roles') ?>Picked</a></th>
         <th class="meter-ratio nowrap hide-2<?= isSorted('ppercent',$sort,$sortorder) ?>"><?= headerUrl('ppercent', ['sort','sortorder'], 'roles') ?>Ratio</a></th>
@@ -105,8 +103,6 @@ if ($db->num_rows($result)) {
         <th class="nowrap hide-3<?= isSorted('kpd',$sort,$sortorder) ?>"><?= headerUrl('kpd', ['sort','sortorder'], 'roles') ?>K:D</a></th>
     </tr>
     <?php
-        $i= 1;
-
         while ($res = $db->fetch_array($result))
         {
             $icode = strtolower($res['code']);
@@ -123,7 +119,7 @@ if ($db->num_rows($result)) {
             }
 
             echo '<tr>
-                  <td class="nowrap right">'.$i.'</td>
+                  <td class="nowrap right">'.$res['rank_position'].'</td>
                   <td class="left"><a href="?mode=rolesinfo&amp;role='.$icode.'&amp;game='.$game.'">'.$img.'<span class="hlstats-name">'.htmlspecialchars($res['name']).'</span></a></td>
                   <td class="nowrap">'.nf($res['picked']).' times</td>
                   <td class="nowrap hide-2">
@@ -147,7 +143,7 @@ if ($db->num_rows($result)) {
                     </div>
                   </td>
                   <td class="nowrap hide-3">'.$res['kpd'].'</td>
-                  </tr>'; $i++;
+                  </tr>';
         }
    ?>
    </table>

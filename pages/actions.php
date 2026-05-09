@@ -22,17 +22,16 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
         error("No such game.");
 	}
 
+    $total = 0;
+
     $sortorder = $_GET['obj_sortorder'] ?? '';
     $sort      = $_GET['obj_sort'] ?? '';
     $sort2     = "description";
 
-    $sortby = $sort;
-    $order  = $sortorder;
-
-    $col = array("description","obj_count","obj_bonus");
+    $col = array("rank_position","description","obj_count","obj_bonus");
     if (!in_array($sort, $col)) {
-        $sort      = "obj_count";
-        $sortorder = "DESC";
+        $sort      = "rank_position";
+        $sortorder = "ASC";
     }
 
     if ($sort == "description") {
@@ -43,36 +42,36 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
     $start = isset($_GET['obj_page']) ? ((int)$_GET['obj_page'] - 1) * 30 : 0;
 
-	$result = $db->query("
-		SELECT
-			hlstats_Actions.code,
-			hlstats_Actions.description,
-			hlstats_Actions.count AS obj_count,
-			hlstats_Actions.reward_player AS obj_bonus
-		FROM
-			hlstats_Actions
-		WHERE
-			hlstats_Actions.game = '$game'
-			AND hlstats_Actions.count > 0
-		GROUP BY
-			hlstats_Actions.id
-		ORDER BY
-			$sort $sortorder,
-			$sort2 $sortorder
+    $result = $db->query("
+        WITH Ranked AS (
+            SELECT
+                code,
+                description,
+                count AS obj_count,
+                reward_player AS obj_bonus,
+                RANK() OVER (ORDER BY count DESC, reward_player DESC) AS rank_position,
+                COUNT(*) OVER () AS total_rows
+            FROM hlstats_Actions
+            WHERE game = '$game'
+              AND count > 0
+        )
+        SELECT *
+        FROM Ranked
+        ORDER BY
+            $sort $sortorder,
+            $sort2 $sortorder,
+            description ASC
         LIMIT 30 OFFSET $start
-	");
-	$db->query
-	("
-		SELECT
-			SUM(count),
-            COUNT(DISTINCT id)
-		FROM
-			hlstats_Actions
-		WHERE
-			hlstats_Actions.game = '$game'
-            AND hlstats_Actions.count > 0
-	");
-	list($totalactions,$numitems) = $db->fetch_row();
+    ");
+
+    $db->query("
+        SELECT SUM(count)
+        FROM hlstats_Actions
+        WHERE hlstats_Actions.game = '$game'
+          AND hlstats_Actions.count > 0
+    ");
+    list($totalactions) = $db->fetch_row();
+
 if (!is_ajax()) {
 
 printSectionTitle('Action Statistics'); ?>
@@ -84,35 +83,34 @@ printSectionTitle('Action Statistics'); ?>
 <div id="actions">
 <?php
 }
-if ($numitems) {
+if ($db->num_rows($result)) {
 ?>
 <div  class="responsive-table">
   <table class="players-table">
     <tr>
-        <th class="nowarp left" style="width:1%"><span>#</span></th>
+        <th class="hlstats-ranking nowrap<?= isSorted('rank_position',$sort,$sortorder) ?>"><?= headerUrl('rank_position', ['obj_sort','obj_sortorder'], 'actions') ?>Rank</a></th>
         <th class="hlstats-main-column left<?= isSorted('description',$sort,$sortorder) ?>"><?= headerUrl('description', ['obj_sort','obj_sortorder'], 'actions') ?>Action</a></th>
         <th class="<?= isSorted('obj_count',$sort,$sortorder) ?>"><?= headerUrl('obj_count', ['obj_sort','obj_sortorder'], 'actions') ?>Earned</a></th>
         <th class="<?= isSorted('obj_bonus',$sort,$sortorder) ?>"><?= headerUrl('obj_bonus', ['obj_sort','obj_sortorder'], 'actions') ?>Reward</a></th>
     </tr>
     <?php
-        $i= 1 + $start;
         while ($res = $db->fetch_array($result))
         {
+            $total = $res['total_rows'];
             echo '<tr>
-                  <td class="nowrap right">'.$i.'</td>
+                  <td class="nowrap right">'.$res['rank_position'].'</td>
                   <td class="left">
-                       <a href="?mode=actioninfo&amp;action='.$res['code'].'&amp;game='.$game.'" title=""><span class="hlstats-name">'.$res['description'].'</span></a>
+                       <a href="?mode=actioninfo&amp;action='.urlencode($res['code']).'&amp;game='.$game.'" title=""><span class="hlstats-name">'.htmlspecialchars($res['description']).'</span></a>
                    </td>
-                  </td>
                   <td class="nowrap">'.$res['obj_count'].' times</td>
                   <td class="nowrap">'.$res['obj_bonus'].'</td>
-                  </tr>'; $i++;
+                  </tr>';
         }
    ?>
    </table>
    </div>
    <?php
-       echo Pagination($numitems, $_GET['obj_page'] ?? 1, 30, 'obj_page');
+       echo Pagination($total, $_GET['obj_page'] ?? 1, 30, 'obj_page');
 
   if (is_ajax()) exit;
 } else { echo '<p class="hlstats-no-data"><em>Not enough data</em></p>'; }

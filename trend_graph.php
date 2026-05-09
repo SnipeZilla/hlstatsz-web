@@ -15,6 +15,7 @@ For current support and updates:
 */
 
 	define('IN_HLSTATS', true);
+	ob_start(); // buffer so stray bytes from includes never block headers
 
 	// Load database classes
 	require ('config.php');
@@ -102,8 +103,8 @@ $grid = $theme['grid_color'];
 	{
 		$file_timestamp = @filemtime($cache_image);
 		if ($file_timestamp + IMAGE_UPDATE_INTERVAL > time()) {
+			ob_end_clean();
 			header('Content-type: image/png');
-			// header("Cache-Control: public, s-maxage=" . IMAGE_UPDATE_INTERVAL . ", max-age=" . IMAGE_UPDATE_INTERVAL); // Cache it in the browser
 			readfile($cache_image);
 			exit();
 		}
@@ -168,9 +169,8 @@ $Chart = new pChart($w, $h);
 	}
 	
 	$Chart->Render($cache_image);
-	// header("Location: $cache_image");
+	ob_end_clean();
 	header('Content-type: image/png');
-	// header("Cache-Control: public, s-maxage=" . IMAGE_UPDATE_INTERVAL . ", max-age=" . IMAGE_UPDATE_INTERVAL); // Cache it in the browser
 	readfile($cache_image);
 
 ?>

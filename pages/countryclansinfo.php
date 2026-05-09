@@ -184,11 +184,12 @@ if (file_exists(IMAGE_PATH.'/flags/'.strtolower($flag).'_large.png')) {
                         p.death_streak,
                         p.activity,
                         uid.uniqueId
-                    FROM hlstats_Players p
+                    FROM hlstats_players p
                     LEFT JOIN hlstats_PlayerUniqueIds uid ON uid.playerId = p.playerId
                     WHERE p.hideranking = 0
                     AND p.lastAddress <> ''
                     AND p.game = '$game'
+                    AND p.flag = '$flag'
                 ),
                 Ranked AS (
                     SELECT
@@ -202,7 +203,6 @@ if (file_exists(IMAGE_PATH.'/flags/'.strtolower($flag).'_large.png')) {
                     ROUND(IF(kills=0, 0, headshots/kills), 2) AS hpk,
                     ROUND(IF(shots=0, 0, hits/shots), 3) AS acc
                 FROM Ranked
-                WHERE flag = '$flag'
                 ORDER BY $sort $sortorder,
                         $sort2 $sortorder2,
                         connection_time DESC
@@ -218,7 +218,7 @@ if ($db->num_rows($result)) {
 echo '<div  class="responsive-table">
 <table class="players-table">
     <tr>
-        <th class="'. isSorted('rank_position', $sort, $sortorder). '">'. headerUrl('rank_position',['sort','sortorder'],'members') .'Rank</a></th>
+        <th class="hlstats-ranking nowrap'. isSorted('rank_position', $sort, $sortorder). '">'. headerUrl('rank_position',['sort','sortorder'],'members') .'Rank</a></th>
         <th class="hlstats-main-column left'. isSorted('lastName', $sort, $sortorder) .'">'. headerUrl('lastName',['sort','sortorder'],'members') .'Player</a></th>';
         if ($g_options['rankingtype']!='kills') {
         echo '<th class="'. isSorted('skill', $sort, $sortorder) .'">'. headerUrl('skill',['sort','sortorder'],'members') .'Points</a></th>';
@@ -272,7 +272,7 @@ echo '<div  class="responsive-table">
     }
 
     echo  '</table></div>'.
-          Pagination($clandata['nummembers'], $_GET['page'] ?? 1, 30, 'page', true,'members');
+          Pagination($clandata['nummembers'], $_GET['page'] ?? 1, 20, 'page', true,'members');
 
 if (is_ajax()) exit();
 

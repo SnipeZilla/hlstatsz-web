@@ -19,8 +19,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	}
 
     // Weapon Statistics
-	$result = $db->query
-	("
+	$result = $db->query("
 		SELECT
 			hlstats_Weapons.code,
 			hlstats_Weapons.name
@@ -35,14 +34,16 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 		$fname[strToLower($code)] = $rowdata[1];
 	}
 
+    $total = 0;
+
     $sortorder = $_GET['weap_sortorder'] ?? '';
     $sort      = $_GET['weap_sort'] ?? '';
     $sort2     = "headshots";
 
-    $col = array("weapon","modifier","kills","kpercent","headshots","hpercent","hpk");
+    $col = array("rank_position","weapon","modifier","kills","kpercent","headshots","hpercent","hpk");
     if (!in_array($sort, $col)) {
-        $sort      = "kills";
-        $sortorder = "DESC";
+        $sort      = "rank_position";
+        $sortorder = "ASC";
     }
 
     if ($sort == "headshots") {
@@ -53,8 +54,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
     $start = isset($_GET['weap_page']) ? ((int)$_GET['weap_page'] - 1) * 30 : 0;
 
-    $db->query
-    ("
+    $db->query("
         SELECT
             COALESCE(SUM(kills), 0) AS realkills,
             COALESCE(SUM(headshots), 0) AS realheadshots
@@ -63,36 +63,29 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
     ");
     list($realkills, $realheadshots) = $db->fetch_row();
 
-    $db->query
-    ("
-        SELECT COUNT(*) AS total
-        FROM hlstats_Weapons
-        WHERE game = '$game'
-          AND kills > 0;
-    ");
-    list($total) = $db->fetch_row();
-
-    $result = $db->query
-    ("
-    SELECT
-        w.code AS weapon,
-        w.kills,
-        ROUND(w.kills / $realkills * 100, 2) AS kpercent,
-        w.headshots,
-        ROUND(w.headshots / IF(w.kills = 0, 1, w.kills), 2) AS hpk,
-        ROUND(w.headshots / $realheadshots * 100, 2) AS hpercent,
-        w.modifier
-    FROM hlstats_Weapons AS w
-    WHERE
-        w.game = '$game'
-        AND w.kills > 0
-    GROUP BY
-        w.weaponId
-    ORDER BY
-        $sort $sortorder,
-        $sort2 $sortorder
-    LIMIT 30 OFFSET $start;
-
+    $result = $db->query("
+        WITH Ranked AS (
+            SELECT
+                w.code AS weapon,
+                w.kills,
+                ROUND(w.kills / IF($realkills = 0, 1, $realkills) * 100, 2) AS kpercent,
+                w.headshots,
+                ROUND(w.headshots / IF(w.kills = 0, 1, w.kills), 2) AS hpk,
+                ROUND(w.headshots / IF($realheadshots = 0, 1, $realheadshots) * 100, 2) AS hpercent,
+                w.modifier,
+                RANK() OVER (ORDER BY w.kills DESC, w.headshots DESC) AS rank_position,
+                COUNT(*) OVER () AS total_rows
+            FROM hlstats_Weapons AS w
+            WHERE w.game = '$game'
+              AND w.kills > 0
+        )
+        SELECT *
+        FROM Ranked
+        ORDER BY
+            $sort $sortorder,
+            $sort2 $sortorder,
+            weapon ASC
+        LIMIT 30 OFFSET $start
     ");
     
     
@@ -108,12 +101,12 @@ printSectionTitle('Weapon Statistics');
 <div id="weapons">
 <?php
 }
-if ($total) {
+if ($db->num_rows($result)) {
 ?>
 <div class="responsive-table">
   <table class="weapons-table">
     <tr>
-        <th class="nowarp right" style="width:1%"><span>#</span></th>
+        <th class="hlstats-ranking nowrap<?= isSorted('rank_position',$sort,$sortorder) ?>"><?= headerUrl('rank_position', ['weap_sort','weap_sortorder'], 'weapons') ?>Rank</a></th>
         <th class="hlstats-main-column left<?= isSorted('weapon',$sort,$sortorder) ?>"><?= headerUrl('weapon', ['weap_sort','weap_sortorder'], 'weapons') ?>Weapons</a></th>
         <th class="hide-3<?= isSorted('modifier',$sort,$sortorder) ?>"><?= headerUrl('modifier', ['weap_sort','weap_sortorder'], 'weapons') ?>Modifier</a></th>
         <th class="<?= isSorted('kills',$sort,$sortorder) ?>"><?= headerUrl('kills', ['weap_sort','weap_sortorder'], 'weapons') ?>Kills</a></th>
@@ -123,11 +116,9 @@ if ($total) {
         <th class="hide-2<?= isSorted('hpk',$sort,$sortorder) ?>"><?= headerUrl('hpk', ['weap_sort','weap_sortorder'], 'weapons') ?>HS:K</a></th>
     </tr>
     <?php
-
-        $i = 1+$start;
-
         while ($res = $db->fetch_array($result))
         {
+            $total  = $res['total_rows'];
             $weapon = strtolower($res['weapon']);
             $image = getImage("/games/$game/weapons/" . $weapon);
             if ($image) {
@@ -138,7 +129,7 @@ if ($total) {
                 $weapimg = '<span class="hlstats-name">' . ((!empty($fname[$weapon])) ? $fname[$weapon] : ucwords(preg_replace('/_/', ' ', $weapon))) . '</span>';
             }
             echo '<tr>
-                  <td class="nowrap right">'.$i.'</td>
+                  <td class="nowrap right">'.$res['rank_position'].'</td>
                   <td class="left"><a href="?mode=weaponinfo&weapon='.$res['weapon'].'&game='.$game.'">'.$weapimg.'</a></td>
                   <td class="nowrap hide-3">'.$res['modifier'].' times</td>
                   <td class="nowrap">'.$res['kills'].'</td>
@@ -156,7 +147,7 @@ if ($total) {
                     </div>
                   </td>
                   <td class="nowrap hide-2">'.$res['hpk'].'</td>
-                  </tr>'; $i++;
+                  </tr>';
         }
    ?>
    </table>

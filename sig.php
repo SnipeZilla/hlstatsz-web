@@ -41,7 +41,7 @@ foreach ($_SERVER as $key => $entry) {
 }
   
 define('IN_HLSTATS', true);
-header("Content-Type: image/png");
+ob_start(); // buffer all output so stray bytes from includes never block headers
 
 // Load database classes
 require ('config.php');
@@ -177,16 +177,19 @@ function f_num($number) {
 			if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
 				$browser_timestamp = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
 				if ($browser_timestamp + IMAGE_UPDATE_INTERVAL > time()) {
+					ob_end_clean();
 					header('HTTP/1.0 304 Not Modified');
-					exit; 
+					exit;
 				}
 			}
 
 			$mod_date = date('D, d M Y H:i:s \G\M\T', $file_timestamp);
+			ob_end_clean();
+			header('Content-Type: image/png');
 			header('Last-Modified: ' . $mod_date);
 			readfile(IMAGE_PATH . '/progress/sig_' . $player_id . '.png');
 			exit;
-		}  
+		}
 	}
 
 	////
@@ -521,8 +524,9 @@ if ($player_id > 0) {
 
 	@imagepng($image, IMAGE_PATH.'/progress/sig_'.$player_id.'.png');
 	$mod_date = date('D, d M Y H:i:s \G\M\T', time());
-	Header('Last-Modified:'.$mod_date);
-
+	ob_end_clean();
+	header('Content-Type: image/png');
+	header('Last-Modified: ' . $mod_date);
 	imagepng($image);
 	unset($image);
 	unset($watermark);

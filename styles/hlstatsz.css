@@ -907,7 +907,7 @@ input:focus::placeholder{
     opacity: .6;
     transform: rotate(270deg);
     transition: transform .15s ease, opacity .15s ease;
-    margin-right: 4px;
+    margin-right: 12px;
     vertical-align: middle;
 }
 
@@ -916,6 +916,7 @@ input:focus::placeholder{
     opacity: 1;
 }
 
+.hlstats-ranking{ width:64px; }
 .hlstats-numeric{ width:96px; }
 .hlstats-main-column{ width:25%; }
 .hlstats-main-description{ width:50%; }
@@ -972,7 +973,7 @@ div.hlstats-stats,
   color: var(--table-th-color);
   font-weight: 700;
   font-size: 13px;
-  padding: 10px 10px;
+  padding: 10px 14px 10px 10px;
   border-bottom: var(--table-th-border-bottom);
   white-space: nowrap;
 }
@@ -1035,6 +1036,14 @@ th:hover::after{
   background: var(--table-td-bg-odd);
 }
 .hlstats-contents table tbody tr:nth-child(even) td{
+  background: var(--table-td-bg-even);
+}
+
+/* zebra rows server rows (overrides nth-child) */
+.hlstats-contents .livestats table tr.row-odd td {
+  background: var(--table-td-bg-odd);
+}
+.hlstats-contents .livestats table tr.row-even td {
   background: var(--table-td-bg-even);
 }
 
