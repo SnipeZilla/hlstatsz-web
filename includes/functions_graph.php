@@ -1,39 +1,17 @@
 <?php
 /*
-HLstatsX Community Edition - Real-time player and clan rankings and statistics
-Copyleft (L) 2008-20XX Nicholas Hastings (nshastings@gmail.com)
-http://www.hlxcommunity.com
+HLstatsZ - Real-time player and clan rankings and statistics
+Originally HLstatsX Community Edition by Nicholas Hastings (2008–20XX)
+Based on ELstatsNEO by Malte Bayer, HLstatsX by Tobias Oetzel, and HLstats by Simon Garner
 
-HLstatsX Community Edition is a continuation of 
-ELstatsNEO - Real-time player and clan rankings and statistics
-Copyleft (L) 2008-20XX Malte Bayer (steam@neo-soft.org)
-http://ovrsized.neo-soft.org/
+HLstats > HLstatsX > HLstatsX:CE > HLStatsZ
+HLstatsZ continues a long lineage of open-source server stats tools for Half-Life and Source games.
+This version is released under the GNU General Public License v2 or later.
 
-ELstatsNEO is an very improved & enhanced - so called Ultra-Humongus Edition of HLstatsX
-HLstatsX - Real-time player and clan rankings and statistics for Half-Life 2
-http://www.hlstatsx.com/
-Copyright (C) 2005-2007 Tobias Oetzel (Tobi@hlstatsx.com)
-
-HLstatsX is an enhanced version of HLstats made by Simon Garner
-HLstats - Real-time player and clan rankings and statistics for Half-Life
-http://sourceforge.net/projects/hlstats/
-Copyright (C) 2001  Simon Garner
-            
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-For support and installation notes visit http://www.hlxcommunity.com
+For current support and updates:
+   https://snipezilla.com
+   https://github.com/SnipeZilla
+   https://forums.alliedmods.net/forumdisplay.php?f=156
 */
     function image_dashed_line($image, $x1, $y1, $x2, $y2, $style)
 	{
@@ -248,19 +226,6 @@ if ($write_legend > 0) {
             
                 // only draw if enough space
                 if ($last_y_label === null || abs($temp_y - $last_y_label) >= ($fh + 4)) {
-            
-                    //// dashed grid line
-                    //if ($temp_y > $bounds['indent_y'][0]+5) {
-                    //    image_dashed_line(
-                    //        $image,
-                    //        $bounds['indent_x'][0]+1,
-                    //        $temp_y,
-                    //        $bounds['width']-$bounds['indent_x'][1]-1,
-                    //        $temp_y,
-                    //        array($color[5], $color[5], $color[5], -1, -1, -1)
-                    //    );
-                    //}
-            
                     // axis tick
                     imageline(
                         $image,
@@ -453,15 +418,6 @@ $timestamp_spacing = $fw * 6;   // enough room for "HH:MM"
 if ($write_timestamp > 0) {
     if ($last_timestamp_x === null || ($last_timestamp_x - $pos['x']) >= $timestamp_spacing) {
         if ($last_timestamp_x !== null) { 
-           //image_dashed_line(
-           //    $image,
-           //    $pos['x'],
-           //    $pos['y'],
-           //    $pos['x'],
-           //    $bounds['height'] - $bounds['indent_y'][1],
-           //    array($color[3], $color[3], $color[3], -1, -1, -1)
-           //);
-
             $str = date("H:i", $entry['timestamp']);
             imagestring(
                 $image,
@@ -484,7 +440,6 @@ if ($write_timestamp > 0) {
 						if ($bounds['width']-$bounds['indent_x'][1]-$pos['x'] > 120)
 							$first_day++;
 						if ($first_day > 0) { 
-							//image_dashed_line($image, $pos['x'], $pos['y'], $pos['x'], $bounds['height']-$bounds['indent_y'][1], array($color[3], $color[3], $color[3], -1, -1, -1));
 							$first_day++;  
 							if ($last_day_timestamp == 0)
 								$last_day_timestamp = $first_timestamp;
@@ -501,7 +456,6 @@ if ($write_timestamp > 0) {
 						if ($bounds['width']-$bounds['indent_x'][1]-$pos['x'] > 0)
 							$first_day++;
 						if ($first_day > 0) { 
-							//image_dashed_line($image, $pos['x'], $pos['y'], $pos['x'], $bounds['height']-$bounds['indent_y'][1], array($color[3], $color[3], $color[3], -1, -1, -1));
 							if ($last_day_timestamp == 0)
 								$last_day_timestamp = $first_timestamp;
 							$str = date("d", $last_day_timestamp);
@@ -516,7 +470,6 @@ if ($write_timestamp > 0) {
 						if ($bounds['width']-$bounds['indent_x'][1]-$pos['x'] > 30)
 							$first_day++;
 						if ($first_day > 0) { 
-							//image_dashed_line($image, $pos['x'], $pos['y'], $pos['x'], $bounds['height']-$bounds['indent_y'][1], array($color[3], $color[3], $color[3], -1, -1, -1));
 							$first_day++;  
 							if ($last_month_timestamp == 0)
 								$last_month_timestamp = $first_timestamp;
@@ -529,7 +482,6 @@ if ($write_timestamp > 0) {
 					
 				default:
 					if (($write_timestamp > 0) && ($key > 0 && $key % 12 == 0)) {
-						//image_dashed_line($image, $pos['x'], $pos['y'], $pos['x'], $bounds['height']-$bounds['indent_y'][1], array($color[3], $color[3], $color[3], -1, -1, -1));
 						$str = date("H:i", $entry['timestamp']);
 						imagestring($image, $theme['font_size'], $pos['x']-10, $bounds['height']-$bounds['indent_y'][1]+3, $str, $color[2]);
                     }

@@ -386,7 +386,6 @@ if ($theme['background']['type'] == 'gradient') {
         drawItems($image, array('width' => $width, 'height' => $height, 'indent_x' => $indent_x, 'indent_y' => $indent_y), $data_array, 2, 'uptime',      0, 0, 1, 1, [$metric_colors['uptime'], $metric_colors['uptime'], $font_color, $axis_color, $grid_color, $grid_dash_color]);
         drawItems($image, array('width' => $width, 'height' => $height, 'indent_x' => $indent_x, 'indent_y' => $indent_y), $data_array, 0, 'fps',         0, 0, 0, 1, [$metric_colors['fps'], $metric_colors['fps'], $font_color, $axis_color, $grid_color,$grid_dash_color]);
 
-        //drawItems($image, array('width' => $width, 'height' => $height, 'indent_x' => $indent_x, 'indent_y' => $indent_y), $data_array, 0, 'max_players', 0, 1, 0, 0, [$metric_colors['max_players'], $metric_colors['max_players'], $font_color, $axis_color, $grid_color,$grid_dash_color]);
 		}
 
 		if (!empty($data_array) && $width >= 800)
