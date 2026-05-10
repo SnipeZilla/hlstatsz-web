@@ -440,7 +440,7 @@ margin-right:10px;
   font-weight: 400;
   font-family: "Motiva Sans", Arial, sans-serif;
 }
-
+.hlstats-sublink:hover,
 .hlstats-sublink.active{
   text-decoration: underline;
   text-underline-offset: 8px;

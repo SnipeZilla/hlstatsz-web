@@ -127,7 +127,7 @@ Tabs.init({
 <?php
     if ((!empty($_SESSION['loggedin']) && (int)($_SESSION['acclevel'] ?? 0) >= 100) || STEAM_ADMIN === ($_SESSION['ID64'] ?? ''))
 	{
-		echo '<div style="float:right;">';
+		echo '<div class="hlstats-note" style="float:right;">';
 		echo 'Admin Options &rarr; <a href="'.$g_options['scripturl']."?mode=admin&amp;task=tools_editdetails_clan&amp;id=$clan\">Edit Clan Details</a>";
 		echo '</div>';
 	}
