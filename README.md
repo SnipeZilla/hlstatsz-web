@@ -20,7 +20,6 @@ HLstatsZ continues the long lineage of open-source server stats tools for Half-L
 |-----------|---------|
 | PHP | 8.0+ |
 | MySQL / MariaDB | 8.0+ |
-| Web server | Apache / Nginx |
 | HLstats daemon | [HLstats v2](https://github.com/SnipeZilla/HLSTATS-2) |
 
 ### Weapons
