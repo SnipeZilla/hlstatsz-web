@@ -154,8 +154,21 @@ if ($write_legend > 0) {
 }
 
       
-		$start_pos = array("x" => $bounds['width']-$bounds['indent_x'][1], "y" => $bounds['indent_y'][1]);
-       
+		$_right_x  = $bounds['width'] - $bounds['indent_x'][1];
+		$_usable_w = $bounds['width'] - $bounds['indent_x'][0] - $bounds['indent_x'][1];
+		$_n_pts    = count($data_array);
+		if ($bar_type == 0 && $_n_pts > 1) {
+			$step_x_float = (float)$_usable_w / ($_n_pts - 1);
+		} elseif ($bar_type == 2 && isset($deletedays) && $deletedays > 1) {
+			$step_x_float = (float)$_usable_w / ($deletedays - 1);
+		} elseif ($bar_type == 3 || $bar_type == 4) {
+			$step_x_float = 5.0;
+		} else {
+			$step_x_float = 3.0;
+		}
+
+		$start_pos = array("x" => $_right_x, "y" => $bounds['indent_y'][1]);
+
 		$pos   = $start_pos;
 		$cache = array("x" => 0, "y" => 0);
       
@@ -188,7 +201,7 @@ if ($write_legend > 0) {
 						$last_map_posx = $pos['x']; 
 					}
 				}
-				$pos['x'] -= 3;
+				$pos['x'] = (int)round($_right_x - ($key + 1) * $step_x_float);
 				if ($pos['x'] < $bounds['indent_x'][0])
 					break;
 			}
@@ -330,6 +343,9 @@ $timestamp_spacing = $fw * 6;   // enough room for "HH:MM"
 
 		foreach ($data_array as $key => $entry) {
 
+			$pos['x'] = (int)round($_right_x - $key * $step_x_float);
+			if ($pos['x'] < $bounds['indent_x'][0]) break;
+
 			$pos['y'] = (($bounds['height']-$bounds['indent_y'][0]-$bounds['indent_y'][1]) - ((($bounds['height']-$bounds['indent_y'][0]-$bounds['indent_y'][1]) / $max_pos_y[$max_index]) * $entry[$name])) + $bounds['indent_y'][0];
 
 
@@ -414,19 +430,17 @@ $timestamp_spacing = $fw * 6;   // enough room for "HH:MM"
         
 			if ($first_timestamp == 0)
 				$first_timestamp = $entry['timestamp'];
-			$this_month = date("m", $entry['timestamp']);
-			if ($this_month > $last_month+1)
-				$last_month = $this_month+1;
+
+			// Use YYYYMM / YYYYMMDD integers so year-boundary crossings are detected
+			$this_month = (int)date("Ym",  $entry['timestamp']);
 			if ($last_month == 0) {
 				$last_month           = $this_month;
 				$last_month_timestamp = $entry['timestamp'];
 			}
 			if ($last_month == $this_month)
 				$last_month_timestamp = $entry['timestamp'];
-          
-			$this_day = date("d", $entry['timestamp']);
-			if ($this_day > $last_day+1)
-				$last_day = $this_day+1;
+
+			$this_day = (int)date("Ymd", $entry['timestamp']);
 			if ($last_day == 0) {
 				$last_day           = $this_day;
 				$last_day_timestamp = $entry['timestamp'];
@@ -465,8 +479,8 @@ if ($write_timestamp > 0) {
 					break;
 					
 				case 2:
-					if (($write_timestamp > 0) && ($last_day > $this_day)) {
-						$last_day = $this_day; 
+					if (($write_timestamp > 0) && ($last_day !== 0) && ($last_day !== $this_day)) {
+						$last_day = $this_day;
 						if ($bounds['width']-$bounds['indent_x'][1]-$pos['x'] > 120)
 							$first_day++;
 						if ($first_day > 0) { 
@@ -482,8 +496,8 @@ if ($write_timestamp > 0) {
                     break;
 					
 				case 3:
-					if (($write_timestamp > 0) && ($last_day > $this_day)) {
-						$last_day = $this_day; 
+					if (($write_timestamp > 0) && ($last_day !== 0) && ($last_day !== $this_day)) {
+						$last_day = $this_day;
 						if ($bounds['width']-$bounds['indent_x'][1]-$pos['x'] > 0)
 							$first_day++;
 						if ($first_day > 0) { 
@@ -497,8 +511,8 @@ if ($write_timestamp > 0) {
                     break;
 					
 				case 4:
-					if (($write_timestamp > 0) && ($last_month > $this_month)) {
-						$last_month = $this_month; 
+					if (($write_timestamp > 0) && ($last_month !== 0) && ($last_month !== $this_month)) {
+						$last_month = $this_month;
 						if ($bounds['width']-$bounds['indent_x'][1]-$pos['x'] > 30)
 							$first_day++;
 						if ($first_day > 0) { 
@@ -539,21 +553,6 @@ if ($write_timestamp > 0) {
 			$cache['x'] = $pos['x'];
 			$cache['y'] = $pos['y'];
         
-			$step_x = 3;
-        
-			if ($bar_type==2) {
-				// skalieren auf anzahl Tage
-				$step_x = round( ($bounds['width']-$bounds['indent_x'][1]-$bounds['indent_x'][0]) / $deletedays );
-			}
-
-			if ($bar_type==3 || $bar_type==4) {
-				// skalieren 
-				$step_x = 5;
-			}
-
-			$pos['x'] -= $step_x;
-			if ($pos['x'] < $bounds['indent_x'][0])
-				break;
 		}
     }
 ?>

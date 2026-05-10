@@ -259,9 +259,17 @@ if ($theme['background']['type'] == 'gradient') {
 		if ($avg_step < 10)
 			$limit = ' LIMIT 0, 2500';
 
+		$time_filter = '';
+		switch ($server_load_type) {
+			case 1: $time_filter = ' AND timestamp >= ' . (time() - 86400);       break;
+			case 2: $time_filter = ' AND timestamp >= ' . (time() - 7   * 86400); break;
+			case 3: $time_filter = ' AND timestamp >= ' . (time() - 31  * 86400); break;
+			case 4: $time_filter = ' AND timestamp >= ' . (time() - 365 * 86400); break;
+		}
+
 		// entries
 		$data_array = array();
-		$result = $db->query("SELECT timestamp, act_players, min_players, max_players, map, uptime, fps FROM hlstats_server_load WHERE server_id=$server_id ORDER BY timestamp DESC$limit");
+		$result = $db->query("SELECT timestamp, act_players, min_players, max_players, map, uptime, fps FROM hlstats_server_load WHERE server_id=$server_id{$time_filter} ORDER BY timestamp DESC$limit");
 		// TSGK
 		$last_map = 0;
 		// TSGK
