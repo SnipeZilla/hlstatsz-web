@@ -20,7 +20,6 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
         error("No such game.");
 	}
 // Addon created by Rufus (rufus@nonstuff.de)
-$asterisk = $g_options['DeleteDays'] ? ' *' : '';
 $action = valid_request($_GET['action'] ?? '', false) or error('No action ID specified.');
 
 $action_escaped=$db->escape($action);
@@ -175,7 +174,7 @@ if (!is_ajax() || $_GET['ajax'] == 'actioninfo') {
         
 
     if (!is_ajax()) {
-        printSectionTitle('Action Details '.$asterisk);
+        printSectionTitle('Action Details');
         echo '<div class="hlstats-cards-grid">
         <section class="hlstats-section hlstats-card">
         <div class="hlstats-card-foot">
@@ -280,7 +279,7 @@ if (!is_ajax() || $_GET['ajax'] == 'vpage') {
 
 if ($db->num_rows($result)) {
     if (empty($_GET['ajax'])) {
-        printSectionTitle('Action Victim Details'.$asterisk);
+        printSectionTitle('Action Victim Details');
 
         echo '<div class="hlstats-cards-grid">
         <section class="hlstats-section hlstats-card">
