@@ -218,7 +218,7 @@ printSectionTitle('Participating Servers');
 					</tr>
 			<tr class="hlstats-graph<?= $slider ?>">
 			  <td style="padding:0px;text-align:center;" colspan="8">
-				<a href="<?php $g_options['scripturl'] ?>?mode=servers&amp;server_id=<?php echo $server_id ?>&amp;game=<?php echo $game ?>" style="text-decoration:none;"><img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>&amp;theme=<?=$theme?>" style="border:0px;" class="responsive hide-3" alt="Server Load Graph" title="View All Server Load Graphs" /><span class="show-3">View Load Graphs</span></a>
+				<a href="<?php $g_options['scripturl'] ?>?mode=servers&amp;server_id=<?php echo $server_id ?>&amp;game=<?php echo $game ?>" style="text-decoration:none;"><img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>&amp;theme=<?=$theme?>" style="border:0px;" class="responsive hide-2" alt="Server Load Graph" title="View All Server Load Graphs" /><span class="show-2">View Load Graphs</span></a>
 			  </td>
 			</tr>
 			</tbody></table>
@@ -288,6 +288,27 @@ if ($g_options['slider'] == 1 && count($servers) > 1) {
 </script>
 
 <?php }
+?>
+<script>
+(function() {
+    function updateGraphColspan() {
+        document.querySelectorAll('.hlstats-graph').forEach(function(graphRow) {
+            var table = graphRow.closest('table');
+            if (!table) return;
+            var headerCells = table.querySelectorAll('thead tr th, tbody tr:not(.hlstats-graph) td');
+            var firstDataRow = table.querySelector('thead tr') || table.querySelector('tbody tr:not(.hlstats-graph)');
+            if (!firstDataRow) return;
+            var visibleCols = Array.from(firstDataRow.cells).filter(function(cell) {
+                return window.getComputedStyle(cell).display !== 'none';
+            }).length;
+            graphRow.querySelector('td').colSpan = visibleCols || 1;
+        });
+    }
+    updateGraphColspan();
+    window.addEventListener('resize', updateGraphColspan);
+})();
+</script>
+<?php
 
 	if ($g_options['gamehome_show_awards'] == 1) {
 		$resultAwards = $db->query("

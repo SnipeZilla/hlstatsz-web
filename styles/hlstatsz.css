@@ -132,6 +132,8 @@ html, body{
   margin: 0;
   padding: 0;
   min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 body{
   min-height: 100vh;
@@ -1740,7 +1742,7 @@ display: flex;
 .hlstats-filter-actions input{ flex: 1; }
 
 /* ── Responsive ── */
-.show-3{ display:none; padding: 15px; }
+.show,.show-1,.show-2,.show-3{ display:none; padding: 15px; }
 
 .responsive-task select,
 .responsive-task input,
@@ -1759,12 +1761,14 @@ display: flex;
   .leaflet-popup-content { margin: 4px; }
   .hlstats-contents table .hlstats-map-top { margin-bottom: 2px; }
   .hide{ display: none; }
-  
+  .show{ display: block; }
+
   .hlstats-main-column{ width:60% }
 }
 
 @media (max-width: 720px){
   .hide-1 { display: none; } 
+  .show-1 { display: block; }
 
   .hlstats-footer-top{
     flex-direction: column;
@@ -1779,6 +1783,7 @@ display: flex;
 
 @media (max-width: 810px){
   .hide-2 { display: none; } 
+  .show-2 { display: block; }
 
   .responsive-table img.responsive{
       max-width:none;

@@ -505,7 +505,6 @@ if ($theme['background']['type'] == 'gradient') {
 		$result = $db->query("SELECT eventTime, skill, kills, deaths, headshots, connection_time, UNIX_TIMESTAMP(eventTime) AS ts FROM hlstats_Players_History WHERE playerId=" . $player . " ORDER BY eventTime DESC LIMIT 0, " . $deletedays);
 		while (($rowdata = $db->fetch_array($result)) && ($arcount < $deletedays))
 		{
-			//echo $rowdata['eventTime']." - ".date("Y-m-d", $ts)."\n";
 			while (($rowdata['eventTime'] != date("Y-m-d", $ts)) && ($arcount < $deletedays))
 			{
 				// insert null value
