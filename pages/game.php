@@ -216,9 +216,9 @@ printSectionTitle('Participating Servers');
 				echo sprintf('%.2f', 0);
 	?></td>
 					</tr>
-			<tr class="hlstats-graph hide-2<?= $slider ?>">
+			<tr class="hlstats-graph<?= $slider ?>">
 			  <td style="padding:0px;text-align:center;" colspan="8">
-				<a href="<?php $g_options['scripturl'] ?>?mode=servers&amp;server_id=<?php echo $server_id ?>&amp;game=<?php echo $game ?>" style="text-decoration:none;"><img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>&amp;theme=<?=$theme?>" style="border:0px;" class="responsive" alt="Server Load Graph" title="View All Server Load Graphs" /></a>
+				<a href="<?php $g_options['scripturl'] ?>?mode=servers&amp;server_id=<?php echo $server_id ?>&amp;game=<?php echo $game ?>" style="text-decoration:none;"><img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>&amp;theme=<?=$theme?>" style="border:0px;" class="responsive hide-3" alt="Server Load Graph" title="View All Server Load Graphs" /><span class="show-3">View Load Graphs</span></a>
 			  </td>
 			</tr>
 			</tbody></table>

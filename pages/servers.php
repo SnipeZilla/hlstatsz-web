@@ -149,7 +149,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 					</tr>
 			<tr class="hlstats-graph">
 			  <td class="responsive" style="padding:0px;text-align:center;" colspan="8">
-<div class="responsive-table scroll">
+<div class="responsive-table">
 				<img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>&amp;theme=<?=$theme?>" style="border:0px;" class="responsive" alt="Server Load Graph" title="Server Load Graph" />
 </div>
 			  </td>
@@ -165,53 +165,58 @@ echo '</div>';
  printSectionTitle('Server Load History');
  ?>
     
-		<div class="hlstats-graph responsive-table scroll">
-		<table>
+
+		<table class="hlstats-table-fixed">
 			<tr>
 				<td class="left">24h View</td>
 			</tr>
-			<tr>
-				<td style="text-align:center; padding:0;">
+			<tr class="hlstats-graph">
+				<td class="responsive" style="text-align:center; padding:0;overflow:hidden;">
+				<div class="responsive-table">
 					<img src="show_graph.php?type=0&amp;game=<?= $game; ?>&amp;server_id=<?= $server_id ?>&amp;theme=<?=$theme?>&amp;range=1" class="responsive" alt="24h View" />
+				</div>
 				</td>
 			</tr>
 		</table>
-		</div>
-        <div class="responsive-table scroll">
-		<table>
+
+		<table class="hlstats-table-fixed">
 			<tr>
 				<td class="left">Last Week</td>
 			</tr>
 			<tr class="hlstats-graph">
 				<td style="text-align:center;padding:0;">
+				<div class="responsive-table">
 					<img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?php echo $server_id ?>&amp;theme=<?=$theme?>&amp;range=2" class="responsive" alt="Last Week" />
+				</div>
 				</td>
 			</tr>
 		</table>
-		</div>
-		<div class="responsive-table scroll">
-		<table>
+
+		<table class="hlstats-table-fixed">
 			<tr>
 				<td class="left">Last Month</td>
 			</tr>
 			<tr class="hlstats-graph">
 				<td style="text-align:center;padding:0;">
+				<div class="responsive-table">
 					<img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?php echo $server_id ?>&amp;theme=<?=$theme?>&amp;range=3" class="responsive" alt="Last Month" />
+				</div>
 				</td>
 			</tr>
 		</table>
-		</div>
-		<div class="responsive-table scroll">
-		<table>
+
+		<table class="hlstats-table-fixed">
 			<tr>
 				<td class="left">Last Year</td>
 			</tr>
 			<tr class="hlstats-graph">
 				<td style="text-align:center;padding:0;">
+				<div class="responsive-table">
 					<img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?php echo $server_id ?>&amp;theme=<?=$theme?>&amp;range=4" class="responsive" alt="Last Year" />
+				</div>
 				</td>
 			</tr>
 		</table>
-		</div>
+
 
 

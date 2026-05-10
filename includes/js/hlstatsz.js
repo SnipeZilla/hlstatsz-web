@@ -407,7 +407,7 @@ function playerCard(player) {
         <div class="hlstats-map-title">
           </span><a href="hlstats.php?mode=playerinfo&player=${encodeURIComponent(player.playerId)}"><span class="hlstats-name">${name}</span></a>
         </div>
-        <div class="hhlstats-map-sub"><span class="hlstats-flag"><img src="${flag}" onerror="this.style.display='none'"></span><span class="hlstats-name">${geocity}</span></div>
+        <div class="hlstats-map-sub"><span class="hlstats-flag"><img src="${flag}" onerror="this.style.display='none'"></span><span class="hlstats-name">${geocity}</span></div>
         <div class="hlstats-map-sub">${server}</div>
       </div>
 
