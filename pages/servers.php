@@ -149,7 +149,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 					</tr>
 			<tr class="hlstats-graph">
 			  <td class="responsive" style="padding:0px;text-align:center;" colspan="8">
-<div class="responsive-table">
+<div class="responsive-table scroll">
 				<img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>&amp;theme=<?=$theme?>" style="border:0px;" class="responsive" alt="Server Load Graph" title="Server Load Graph" />
 </div>
 			  </td>
@@ -165,7 +165,7 @@ echo '</div>';
  printSectionTitle('Server Load History');
  ?>
     
-		<div class="hlstats-graph responsive-table">
+		<div class="hlstats-graph responsive-table scroll">
 		<table>
 			<tr>
 				<td class="left">24h View</td>
@@ -177,7 +177,7 @@ echo '</div>';
 			</tr>
 		</table>
 		</div>
-        <div class="responsive-table">
+        <div class="responsive-table scroll">
 		<table>
 			<tr>
 				<td class="left">Last Week</td>
@@ -189,7 +189,7 @@ echo '</div>';
 			</tr>
 		</table>
 		</div>
-		<div class="responsive-table">
+		<div class="responsive-table scroll">
 		<table>
 			<tr>
 				<td class="left">Last Month</td>
@@ -201,7 +201,7 @@ echo '</div>';
 			</tr>
 		</table>
 		</div>
-		<div class="responsive-table">
+		<div class="responsive-table scroll">
 		<table>
 			<tr>
 				<td class="left">Last Year</td>

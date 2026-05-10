@@ -1779,7 +1779,7 @@ display: flex;
 @media (max-width: 810px){
   .hide-2 { display: none; } 
 
-  .responsive-table img.responsive{
+  .responsive-table.scroll img.responsive{
       max-width:none;
   }
 
