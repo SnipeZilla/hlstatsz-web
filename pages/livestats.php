@@ -244,7 +244,7 @@ function printserverstats($server_id)
 						echo '<span class="hlstats-flag"><img src="'.getFlag($thisplayer['cli_flag']).'" alt="'.ucfirst(strtolower($thisplayer['cli_country'])).'" title="'.ucfirst(strtolower($thisplayer['cli_country'])).'" /></span>';
 					}
 					echo '<a href="'.$g_options['scripturl'].'?mode='.$mode.'&amp;player='.$thisplayer['player_id'].'"><span class="hlstats-name">';
-					echo htmlspecialchars($thisplayer['name'], ENT_COMPAT).'</span></a>';
+					echo htmlspecialchars(html_entity_decode($thisplayer['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</span></a>';
 				}
 				else
 				{

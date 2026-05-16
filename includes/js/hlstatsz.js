@@ -318,6 +318,12 @@ function escHtml(s) {
   }[m]));
 }
 
+function decodeAndEsc(s) {
+  const txt = document.createElement('textarea');
+  txt.innerHTML = String(s ?? "");
+  return escHtml(txt.value);
+}
+
 function stripBackslashes(s) {
   return String(s ?? "").replace(/\\/g, "");
 }
@@ -354,7 +360,7 @@ function popupOpts() {
 }
 
 function serverCard(server) {
-  const name = escHtml(server.name);
+  const name = decodeAndEsc(server.name);
   const city = escHtml(server.city);
   const country = escHtml(server.country);
   const addrRaw = stripBackslashes(server.addr);
@@ -391,7 +397,7 @@ function serverCard(server) {
 }
 
 function playerCard(player) {
-  const server = escHtml(player.server_name);
+  const server = decodeAndEsc(player.server_name);
   const name = escHtml(stripBackslashes(player.name));
   const city = escHtml(player.cli_city);
   const state = escHtml(player.cli_state);

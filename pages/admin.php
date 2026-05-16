@@ -955,7 +955,7 @@ function checkVersion() {
     echo '<div><span class="hlstats-name">'.$WEB_version.'Current DB version:</span> <span>'. $g_options['dbversion'] .'</span></div>';
     $version=phpversion();
     echo '<div style="margin:15px 0;">';
-      echo '<div>'.(version_compare($version, '8.0.0', '<') ? "❌ PHP version $version isn't high enough" : "✔️ PHP version $version").'</div>';
+      echo '<div>'.(version_compare($version, '8.3.0', '<') ? "❌ PHP version $version isn't high enough" : "✔️ PHP version $version").'</div>';
       echo '<div>'.(!extension_loaded('curl') ? "❌ PHP extension 'curl' is not loaded" : "✔️ PHP extension 'curl' is loaded").'</div>';
       echo '<div>'.(!extension_loaded('gd') ? "❌ PHP extension 'gd' is not loaded" : "✔️ PHP extension 'gd' is loaded").'</div>';
       echo '<div>'.(!extension_loaded('mbstring') ? "❌ PHP extension 'mbstring' is not loaded" : "✔️ PHP extension 'mbstring' is loaded").'</div>';

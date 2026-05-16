@@ -163,7 +163,7 @@ printSectionTitle('Participating Servers');
 			$map_teamb_wins = $rowdata['map_ts_wins'];
             if ($g_options['slider'] == 0 || $i == 0) {
 ?>
-		  <table class="livestats-table-server<?= $i == 0 ? ' livestats-table-first':' livestats-table-next' ?>">
+		  <table class="livestats-table-server hlstats-table-fixed<?= $i == 0 ? ' livestats-table-first':' livestats-table-next' ?>">
 				<thead><tr>
 					<th class="hlstats-main-server left responsive">Server</th>
 					<th class="hide">Address</th>
@@ -188,7 +188,7 @@ printSectionTitle('Participating Servers');
 				echo IMAGE_PATH . '/game.png';
 			}
 			echo "\" alt=\"$game\" /></span>";
-			echo "<span class=\"hlstats-name\">" . htmlspecialchars($rowdata['name']) . "</span>";
+			echo "<span class=\"hlstats-name\">" . htmlspecialchars(html_entity_decode($rowdata['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT) . "</span>";
 	?></td>
 						<td class="hide nowrap"><?php
 			echo "<a title=\"Click To Join\" href=\"steam://connect/$addr\">$addr <a href=\"steam://connect/$addr\"></a>";
@@ -405,7 +405,7 @@ if ($g_options['slider'] == 1 && count($servers) > 1) {
                     if ($g_options['countrydata']) {
                         echo "<span class=\"hlstats-flag\"><img src=\"".getFlag($awarddata['flag'])."\" alt=\"".$awarddata['country']."\" title=\"".$awarddata['country']."\" /></span>";
                     }
-					echo "<a href=\"{$g_options['scripturl']}?mode=playerinfo&amp;player={$awarddata['d_winner_id']}\"><span class=\"hlstats-name\">" . htmlspecialchars($awarddata['d_winner_name'] ?? '', ENT_COMPAT) . "</span></a> ({$awarddata['d_winner_count']} " . htmlspecialchars($awarddata['verb']) . ")";
+					echo "<a href=\"{$g_options['scripturl']}?mode=playerinfo&amp;player={$awarddata['d_winner_id']}\"><span class=\"hlstats-name\">" . htmlspecialchars(html_entity_decode($awarddata['d_winner_name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT) . "</span></a> ({$awarddata['d_winner_count']} " . htmlspecialchars($awarddata['verb']) . ")";
 				}
 				else
 				{

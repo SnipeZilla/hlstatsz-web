@@ -190,7 +190,7 @@ if ($db->num_rows($result)) {
             if ($g_options['countrydata']) {
                 echo '<span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>';
             }
-            echo '<a href="?mode=playerinfo&amp;player='.$res['killerId'].'"><span class="hlstats-name">'.htmlspecialchars($res['killerName']).'&nbsp;</span></a></td>
+            echo '<a href="?mode=playerinfo&amp;player='.$res['killerId'].'"><span class="hlstats-name">'.htmlspecialchars(html_entity_decode($res['killerName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'&nbsp;</span></a></td>
                   <td class="nowrap">'.nf($res['frags']).'</td>
                   <td class="nowrap hide">'.nf($res['headshots']).'</td>
                   <td class="nowrap hide-1">'.round($res['hpk'], 2).'</td>

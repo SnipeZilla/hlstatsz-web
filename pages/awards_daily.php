@@ -93,7 +93,7 @@ while ($r = $db->fetch_array($resultAwards))
         } else {
             $imagestring = '';
         }
-        $winnerstring = '<span class="hlstats-name">'.htmlspecialchars($r['d_winner_name'], ENT_COMPAT).'</span>';
+        $winnerstring = '<span class="hlstats-name">'.htmlspecialchars(html_entity_decode($r['d_winner_name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</span>';
         $achvd = "{$imagestring} <a href=\"hlstats.php?mode=playerinfo&amp;player={$r['d_winner_id']}&amp;game={$game}\">{$winnerstring}</a>";
         $wincount = $r['d_winner_count'];
         $class = "";

@@ -190,7 +190,7 @@ if ($g_options['show_google_map'] == 1) {
                 <td><?php echo ($numplayers ? $player_string : '-'); ?></td>
                 <td class="hide">
             <?php if ($topplayer) { ?>
-                    <a href="<?= $g_options['scripturl'] . "?mode=playerinfo&amp;player=" . $topplayer[0] . "&amp;game=" . $gamedata[0] ?>"><?= htmlspecialchars($topplayer[1]) ?></a>
+                    <a href="<?= $g_options['scripturl'] . "?mode=playerinfo&amp;player=" . $topplayer[0] . "&amp;game=" . $gamedata[0] ?>"><?= htmlspecialchars(html_entity_decode($topplayer[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT) ?></a>
             <?php } else { echo '-'; } ?>
                 </td>
                 <td class="hide-2">

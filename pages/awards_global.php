@@ -65,7 +65,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 			} else {
 				$imagestring = '';
 			}
-			$winnerstring = '<span class="hlstats-name">'.htmlspecialchars($r['g_winner_name'], ENT_COMPAT).'</span>';
+			$winnerstring = '<span class="hlstats-name">'.htmlspecialchars(html_entity_decode($r['g_winner_name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</span>';
 			$achvd = "{$imagestring}<a href=\"hlstats.php?mode=playerinfo&amp;player={$r['g_winner_id']}&amp;game={$game}\">{$winnerstring}</a>";
 			$wincount = $r['g_winner_count'];			
 		} else {

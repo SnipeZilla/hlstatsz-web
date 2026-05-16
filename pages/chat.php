@@ -94,9 +94,9 @@ if (!is_ajax()){
 						$serverids[] = $rowdata['serverId'];
 						$dates[] = $rowdata; 
 						if ($showserver == $rowdata['serverId'])
-							echo '<option value="'.$rowdata['serverId'].'" selected>'.htmlspecialchars($rowdata['name']).'</option>';
+							echo '<option value="'.$rowdata['serverId'].'" selected>'.htmlspecialchars(html_entity_decode($rowdata['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</option>';
 						else
-							echo '<option value="'.$rowdata['serverId'].'">'.htmlspecialchars($rowdata['name']).'</option>';
+							echo '<option value="'.$rowdata['serverId'].'">'.htmlspecialchars(html_entity_decode($rowdata['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</option>';
 					}
 					echo '</select>';
 					$filter=isset($_REQUEST['filter'])?$_REQUEST['filter']:"";
@@ -218,11 +218,11 @@ if ($numitems) {
                     if ($g_options['countrydata']) {
                     $html .= '<span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>';
                     }
-                    $html .= '<a href="?mode=playerinfo&amp;player='.$res['playerId'].'"><span class="hlstats-name">'.htmlspecialchars($res['lastName']).'&nbsp;</span></a>
+                    $html .= '<a href="?mode=playerinfo&amp;player='.$res['playerId'].'"><span class="hlstats-name">'.htmlspecialchars(html_entity_decode($res['lastName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'&nbsp;</span></a>
                   </td>
                   <td class="left">'.htmlspecialchars(stripslashes($res['message']), ENT_QUOTES).'</td>';
             if ($showserver ) {
-                $html .= '<td class="">'.htmlspecialchars($res['serverName']).'</td>';
+                $html .= '<td class="">'.htmlspecialchars(html_entity_decode($res['serverName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</td>';
             }
               $html .= '<td class="nowrap hide">'.htmlspecialchars($res['map']).'</td>
                 </tr>';

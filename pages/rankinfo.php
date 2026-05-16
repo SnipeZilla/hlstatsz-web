@@ -168,7 +168,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
                   <td class="nowrap right">'.$res['rank_position'].'</td>
                   <td class="hlstats-main-description left">
                        <span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>
-                       <a href="'.$g_options['scripturl'].'?mode=playerinfo&amp;player='.$res['playerId'].'"><span class="hlstats-name">'.htmlspecialchars($res['playerName']).'</span></a>
+                       <a href="'.$g_options['scripturl'].'?mode=playerinfo&amp;player='.$res['playerId'].'"><span class="hlstats-name">'.htmlspecialchars(html_entity_decode($res['playerName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</span></a>
                    </td>
                   <td class="nowrap">'.$res['kills'].'</td>
                   <td class="nowrap">'.$res['skill'].'</td>

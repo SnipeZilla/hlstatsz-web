@@ -93,7 +93,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	
 	function clean_data($data)
 	{
-		return trim(htmlspecialchars(mystripslashes($data)));
+		return trim(mystripslashes($data));
 	}
 
     $server_ip = (!empty($_POST['server_address'])) ? clean_data($_POST['server_address']) : "";
@@ -113,23 +113,23 @@ The "Public Address" should be the address you want shown to users. If left blan
 		<table class="responsive-task">
 			<tr>
 				<td class="left">Server IP Address</td>
-				<td class="left"><input type="text" name="server_address" maxlength="15" size="15" value="<?=$server_ip;?>" /></td>
+				<td class="left"><input type="text" name="server_address" maxlength="15" size="15" value="<?=htmlspecialchars($server_ip, ENT_COMPAT)?>" /></td>
 			</tr>
 			<tr>
 				<td class="left">Server Port</td>
-				<td class="left"><input type="text" name="server_port" maxlength="5" size="5" value="<?=$server_port;?>" /></td>
+				<td class="left"><input type="text" name="server_port" maxlength="5" size="5" value="<?=htmlspecialchars($server_port, ENT_COMPAT)?>" /></td>
 			</tr>
 			<tr>
 				<td class="left">Server Name</td>
-				<td class="left"><input type="text" name="server_name" maxlength="255" size="35" value="<?=$server_name;?>" /></td>
+				<td class="left"><input type="text" name="server_name" maxlength="255" size="35" value="<?=htmlspecialchars($server_name, ENT_COMPAT)?>" /></td>
 			</tr>
 			<tr>
 				<td class="left">Rcon Password</td>
-				<td class="left"><input type="text" name="server_rcon" maxlength="128" size="15" value="<?=$server_rcon;?>" /></td>
+				<td class="left"><input type="text" name="server_rcon" maxlength="128" size="15" value="<?=htmlspecialchars($server_rcon, ENT_COMPAT)?>" /></td>
 			</tr>
 			<tr>
 				<td class="left">Public Address</td>
-				<td class="left"><input type="text" name="public_address" maxlength="128" size="15" value="<?=$server_public_address;?>" /></td>
+				<td class="left"><input type="text" name="public_address" maxlength="128" size="15" value="<?=htmlspecialchars($server_public_address, ENT_COMPAT)?>" /></td>
 			</tr>
 			<tr>
 				<td class="left">Admin Mod</td>

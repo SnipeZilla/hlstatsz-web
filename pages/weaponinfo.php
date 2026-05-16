@@ -172,7 +172,7 @@ if ($db->num_rows($result)) {
                     if ($g_options['countrydata']) {
                        echo '<span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>';
                     }
-                    echo '<a href="'.$g_options['scripturl'].'?mode=playerinfo&amp;player='.$res['killerId'].'" title=""><span class="hlstats-name">'.htmlspecialchars($res['killerName']).'&nbsp;</span></a>
+                    echo '<a href="'.$g_options['scripturl'].'?mode=playerinfo&amp;player='.$res['killerId'].'" title=""><span class="hlstats-name">'.htmlspecialchars(html_entity_decode($res['killerName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'&nbsp;</span></a>
                    </td>
                   <td class="nowrap">'.$res['frags'].'</td>
                   <td class="nowrap hide">'.$res['headshots'].'</td>

@@ -131,7 +131,7 @@ printSectionTitle('Ribbon Details');
                   <td class="nowrap right">'.$res['rank_position'].'</td>
                   <td class="hlstats-main-description left">
                       <span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>
-                      <a href="?mode=playerinfo&amp;player='.$res['playerId'].'"><span class="hlstats-name">'.htmlspecialchars($res['playerName']).'&nbsp;</span></a>
+                      <a href="?mode=playerinfo&amp;player='.$res['playerId'].'"><span class="hlstats-name">'.htmlspecialchars(html_entity_decode($res['playerName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'&nbsp;</span></a>
                   </td>
                   <td class="nowrap">'.$res['numawards'].' times</td>
                   <td class="nowrap"><span class="hlstats-name">'.htmlspecialchars($awardName).'</span></td>

@@ -101,7 +101,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
             echo '<tr>
                   <td class="nowrap right">'.$i.'</td>
                   <td class="hlstats-main-description left">
-                       <span class="hlstats-name">'.htmlspecialchars($res['name']).'</span>
+                       <span class="hlstats-name">'.htmlspecialchars(html_entity_decode($res['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</span>
                    </td>
                   <td class="nowrap">'.str_replace(" ","<br>@",$res['lastuse']).'</td>
                   <td class="nowrap">'.nf($res['kills']).'</td>

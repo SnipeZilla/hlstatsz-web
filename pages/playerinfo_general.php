@@ -146,7 +146,7 @@ if ($image) {
                                  title="<?= htmlspecialchars($playerdata['country'] ?? '', ENT_QUOTES) ?>" />
                     </span>
                 <?php  } ?>
-                    <span><?= htmlspecialchars($playerdata['lastName'], ENT_COMPAT) ?></span>
+                    <span><?= htmlspecialchars(html_entity_decode($playerdata['lastName'], ENT_QUOTES | ENT_HTML5, 'UTF-8')) ?></span>
                 </div>
 
                 <div class="hlstats-meta">
@@ -207,7 +207,7 @@ if ($image) {
       <div class="label">Favorite Server:<?= $asterisk ?></div>
       <div class="value">
         <a href="hlstats.php?game=<?= urlencode($game) ?>&amp;mode=servers&amp;server_id=<?= (int)$favServerId ?>">
-          <?= htmlspecialchars($favServerName, ENT_COMPAT) ?>
+          <?= htmlspecialchars(html_entity_decode($favServerName, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT) ?>
         </a>
       </div>
 
@@ -373,7 +373,7 @@ flush();
       <div class="hlstats-card-foot hlstats-card-foot-margin">
           <?php
               echo '🗓️ <b>'
-                  . htmlspecialchars($playerdata['lastName'], ENT_COMPAT) . '</b>\'s History: ';
+                  . htmlspecialchars(html_entity_decode($playerdata['lastName'], ENT_QUOTES | ENT_HTML5, 'UTF-8')) . '</b>\'s History: ';
               echo '<a href="' . $g_options['scripturl'] . "?mode=playerhistory&amp;player=$player\">Events</a> &nbsp;|&nbsp; ";
               echo '<a href="' . $g_options['scripturl'] . "?mode=playersessions&amp;player=$player\">Sessions</a> &nbsp;|&nbsp; ";
       

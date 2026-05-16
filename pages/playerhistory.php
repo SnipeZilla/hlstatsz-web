@@ -362,7 +362,7 @@ if (!is_ajax()) {
                   <td class="nowrap left">'.str_replace(" ","<br>@",$res['eventTime']).'</td>
                   <td class="nowrap">'.$res['eventType'].'</td>
                   <td class="hlstats-main-description left">'.$desc.'</td>
-                  <td class="hide">'.htmlspecialchars($res['serverName']).'</td>
+                  <td class="hide">'.htmlspecialchars(html_entity_decode($res['serverName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</td>
                   <td class="nowrap hide-2">'.$res['map'].'</td>
                   </tr>'; $i++;
         }

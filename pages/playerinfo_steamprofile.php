@@ -86,7 +86,7 @@ $statusClass = $status == 'offline'? ' red' : ($status == 'Unknown'? ' orange': 
              title="<?= htmlspecialchars($playerdata['country'] ?? '', ENT_QUOTES) ?>" />
       </span>
 <?php } ?>
-      <span><?= htmlspecialchars($name, ENT_COMPAT) ?></span>
+      <span><?= htmlspecialchars(html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT) ?></span>
     </div>
 
     <div class="hlstats-meta">
