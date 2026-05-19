@@ -58,6 +58,8 @@ For current support and updates:
 			}
 		}
 
+		if (!is_dir('./cache')) mkdir('./cache', 0755, true);
+
 		if ($ts_servers) {
 			require_once(PAGE_PATH . '/teamspeak_class.php');
 			foreach ($ts_servers as $ts_server) {
@@ -114,7 +116,7 @@ For current support and updates:
 				$dc_invite   = '';
 
 				$dc_cache_ttl  = 60;
-				$dc_cache_file = sys_get_temp_dir() . '/hlstatsz_dc_' . md5($dc_server['addr']) . '.json';
+				$dc_cache_file = './cache/hlstatsz_dc_' . md5($dc_server['addr']) . '.json';
 				$dc_widget     = null;
 				if (is_file($dc_cache_file) && (time() - filemtime($dc_cache_file)) < $dc_cache_ttl) {
 					$dc_widget = json_decode(file_get_contents($dc_cache_file), true);

@@ -36,8 +36,9 @@ class TeamSpeak3Query
     public function query($cacheTTL = 0)
     {
         if ($cacheTTL > 0) {
+            if (!is_dir('./cache')) mkdir('./cache', 0755, true);
             $cacheKey  = md5($this->host . ':' . $this->queryPort . ':' . $this->voicePort);
-            $cacheFile = sys_get_temp_dir() . '/hlstatsz_ts3_' . $cacheKey . '.json';
+            $cacheFile = './cache/hlstatsz_ts3_' . $cacheKey . '.json';
             if (is_file($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTTL) {
                 $data = json_decode(file_get_contents($cacheFile), true);
                 if (is_array($data)) return $data;
