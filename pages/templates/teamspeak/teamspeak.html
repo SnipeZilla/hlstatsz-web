@@ -25,28 +25,27 @@
 </div>
 
 <h3>[users_head]</h3>
-<div class="responsive-table">
+<div id="ts3users" class="responsive-table">
 	<table>
 		<tr>
 			<td class="left">[player]</td>
 			<td class="left">[channel]</td>
 			<td class="left">[logintime]</td>
-			<td class="left">[idletime]</td>
+			<td class="left hide">[idletime]</td>
 		</tr>
-		[userstats]	
+		[userstats]
 	</table>
+	[pagination]
 </div>
 
 <h3>[channel_head]</h3>
 <div class="responsive-table">
 	<table>
+		[info]
+	</table>
+	<table>
 		<tr>
-			<td class="left">[uchannels]</td>
-			<td class="left">
-				<form name="ts" action="" method="post">
-					[info]
-				</form>
-			</td>
+			<td class="left" colspan="2">[uchannels]</td>
 		</tr>
-	</table> 
+	</table>
 </div>

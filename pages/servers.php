@@ -119,7 +119,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 				echo IMAGE_PATH . '/game.png';
 			}
 			echo "\" alt=\"$game\" /></span>";
-			echo "<span class=\"hlstats-name\"><a href=\"" . $g_options['scripturl'] . "?game=$game\" style=\"text-decoration:none;\">" . htmlspecialchars($rowdata['name']) . "</a></span>";
+			echo "<span class=\"hlstats-name\"><a href=\"" . $g_options['scripturl'] . "?game=$game\" style=\"text-decoration:none;\">" . htmlspecialchars(html_entity_decode($rowdata['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT) . "</a></span>";
 	?></td>
 						<td class="hide nowrap"><?php
 			echo "<a title=\"Click To Join\" href=\"steam://connect/$addr\">$addr <a href=\"steam://connect/$addr\"></a>";

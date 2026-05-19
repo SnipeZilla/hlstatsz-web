@@ -29,14 +29,23 @@ include (PAGE_PATH . '/voicecomm_serverlist.php');
 	$guild_id = $s['addr'];
 	$server_name = $s['name'];
 
-	$widget_url = 'https://discord.com/api/guilds/' . urlencode($guild_id) . '/widget.json';
-	$ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true]]);
-	$widget_json = @file_get_contents($widget_url, false, $ctx);
-
-	if ($widget_json === false) {
-		$widget = null;
-	} else {
-		$widget = json_decode($widget_json, true);
+	$dc_cache_ttl  = 60;
+	$dc_cache_file = './cache/hlstatsz_dc_' . md5($guild_id) . '.json';
+	if (!is_dir('./cache')) mkdir('./cache', 0755, true);
+	$widget = null;
+	if (is_file($dc_cache_file) && (time() - filemtime($dc_cache_file)) < $dc_cache_ttl) {
+		$widget = json_decode(file_get_contents($dc_cache_file), true);
+	}
+	if (!is_array($widget)) {
+		$widget_url  = 'https://discord.com/api/guilds/' . urlencode($guild_id) . '/widget.json';
+		$ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true]]);
+		$widget_json = @file_get_contents($widget_url, false, $ctx);
+		if ($widget_json !== false) {
+			$widget = json_decode($widget_json, true);
+			if (is_array($widget)) {
+				@file_put_contents($dc_cache_file, json_encode($widget), LOCK_EX);
+			}
+		}
 	}
 
 	function show($tpl, $array)
@@ -113,8 +122,14 @@ include (PAGE_PATH . '/voicecomm_serverlist.php');
 		}
 
 		// Build online members block (not in a voice channel)
+		$perPage      = 20;
+		$currentPage  = max(1, (int)($_GET['page'] ?? 1));
+		$totalMembers = count($online_members);
+		$start        = ($currentPage - 1) * $perPage;
+		$pageMembers  = array_slice($online_members, $start, $perPage);
+
 		$members_html = '';
-		foreach ($online_members as $member) {
+		foreach ($pageMembers as $member) {
 			$m_name    = htmlspecialchars($member['username'] ?? 'Unknown');
 			$m_status  = $member['status'] ?? 'online';
 			$dot_color = $status_colors[$m_status] ?? '#43b581';
@@ -133,6 +148,10 @@ include (PAGE_PATH . '/voicecomm_serverlist.php');
 			$members_html = '<tr><td class="left">No members online</td></tr>';
 		}
 
+		$paginationHtml = $totalMembers > $perPage
+			? preg_replace('/(page=\d+)"/', '$1#discord-members"', Pagination($totalMembers, $currentPage, $perPage, 'page', false))
+			: '';
+
 		$invite_html = '';
 		if (!empty($invite)) {
 			$invite_html = '<a href="' . htmlspecialchars($invite) . '" target="_blank">' . htmlspecialchars($invite) . '</a>';
@@ -148,6 +167,7 @@ include (PAGE_PATH . '/voicecomm_serverlist.php');
 			"uchannels"      => $channel_html,
 			"members_head"   => "Online Members",
 			"umembers"       => $members_html,
+			"pagination"     => $paginationHtml,
 		));
 
 		echo $outp_str;

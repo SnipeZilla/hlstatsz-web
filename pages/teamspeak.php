@@ -160,8 +160,14 @@ foreach ($channels as $c) {
 
 $base = IMAGE_PATH . '/teamspeak3/';
 
+$perPage     = 20;
+$currentPage = max(1, (int)($_GET['page'] ?? 1));
+$totalUsers  = count($clients);
+$start       = ($currentPage - 1) * $perPage;
+$pageClients = array_slice($clients, $start, $perPage);
+
 $userstats = '';
-foreach ($clients as $cl) {
+foreach ($pageClients as $cl) {
     $cid = (int) $cl['cid'];
     $channelName = isset($chanById[$cid])
         ? htmlspecialchars(ts3_clean_name($chanById[$cid]['channel_name']))
@@ -186,6 +192,10 @@ if ($userstats === '') {
     $userstats = '<tr><td class="left" colspan="4">No users connected.</td></tr>';
 }
 
+$paginationHtml = $totalUsers > $perPage
+    ? preg_replace('/(page=\d+)"/', '$1#ts3users"', Pagination($totalUsers, $currentPage, $perPage, 'page', false))
+    : '';
+
 $serverPort = $info['virtualserver_port'] ?? $vPort;
 $infoHtml  = '';
 $infoHtml .= '<tr><td class="left"><strong>Server name:</strong></td><td class="left">' . htmlspecialchars($info['virtualserver_name'] ?? '') . '</td></tr>';
@@ -200,7 +210,7 @@ if (!empty($info['virtualserver_welcomemessage'])) {
 }
 
 // virtualserver_clientsonline counts ServerQuery + our probe; show real users.
-$realUsers = max(0, count($clients));
+$realUsers = max(0, $totalUsers);
 
 echo show('teamspeak', [
     'head'         => 'Teamspeak 3 Overview',
@@ -223,5 +233,6 @@ echo show('teamspeak', [
     'uchannels'    => ts3_render_tree(0, $channels, $clients),
     'info'         => $infoHtml,
     'userstats'    => $userstats,
+    'pagination'   => $paginationHtml,
 ]);
 ?>

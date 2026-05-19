@@ -437,10 +437,10 @@ if ($write_timestamp > 0) {
 				case 2:
 					if (($write_timestamp > 0) && ($last_day !== 0) && ($last_day !== $this_day)) {
 						$last_day = $this_day;
-						if ($bounds['width']-$bounds['indent_x'][1]-$pos['x'] > 120)
+						if ($bounds['width']-$bounds['indent_x'][1]-$pos['x'] > 30)
 							$first_day++;
-						if ($first_day > 0) { 
-							$first_day++;  
+						if ($first_day > 0) {
+							$first_day++;
 							if ($last_day_timestamp == 0)
 								$last_day_timestamp = $first_timestamp;
 							$str = date("l", $last_day_timestamp);
@@ -455,11 +455,15 @@ if ($write_timestamp > 0) {
 						$last_day = $this_day;
 						if ($bounds['width']-$bounds['indent_x'][1]-$pos['x'] > 0)
 							$first_day++;
-						if ($first_day > 0) { 
+						if ($first_day > 0) {
 							if ($last_day_timestamp == 0)
 								$last_day_timestamp = $first_timestamp;
 							$str = date("d", $last_day_timestamp);
-							imagestring($image, $theme['font_size'], $pos['x']-5, $bounds['height']-$bounds['indent_y'][1]+3, $str, $color[2]);
+							static $last_month_label_x = null;
+							if ($last_month_label_x === null || ($last_month_label_x - $pos['x']) >= ($fw * 3)) {
+								imagestring($image, $theme['font_size'], $pos['x']-5, $bounds['height']-$bounds['indent_y'][1]+3, $str, $color[2]);
+								$last_month_label_x = $pos['x'];
+							}
 						}
                     }
                     break;
