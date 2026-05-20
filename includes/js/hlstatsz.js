@@ -64,6 +64,7 @@ const Fetch = {
             if (el) {
                 el.classList.remove("is-loading");
                 el.innerHTML = buffer;
+                if (his) el.scrollIntoView({ behavior: 'instant', block: 'nearest' });
                 el.querySelectorAll('[data-fetch-url]').forEach(function(sub) {
                     Fetch.run(sub.dataset.fetchUrl, sub, false);
                 });
