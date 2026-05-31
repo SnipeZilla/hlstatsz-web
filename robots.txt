@@ -1,0 +1,63 @@
+# HLstatsZ robots.txt
+
+# AI training / LLM crawlers — disallow everything
+User-agent: GPTBot
+Disallow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: AI2Bot
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+# All other bots — block expensive/internal paths
+User-agent: *
+Disallow: /hlstats.php?*ajax=*
+Disallow: /hlstats.php?*mode=admin*
+Disallow: /hlstats.php?*mode=actioninfo*
+Disallow: /hlstats.php?*mode=playersessions*
+Disallow: /hlstats.php?*mode=playerhistory*
+Disallow: /hlstats.php?*mode=playerawards*
+Disallow: /updater/
+Disallow: /cache/
+Disallow: /includes/
+Disallow: /pages/
+Disallow: /bots/
+Disallow: /show_chart.php
+Disallow: /show_graph.php
+Disallow: /ingame.php
+Disallow: /sig.php
+Disallow: /sig2.php

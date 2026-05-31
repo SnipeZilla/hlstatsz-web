@@ -1,0 +1,52 @@
+# HLstatsZ – root Apache hardening
+Options -Indexes -MultiViews
+
+# ── Security headers ──────────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options  "nosniff"
+    Header always set X-Frame-Options         "SAMEORIGIN"
+    Header always set Referrer-Policy         "strict-origin-when-cross-origin"
+    Header always set X-XSS-Protection        "1; mode=block"
+    Header always set Permissions-Policy      "geolocation=(), microphone=(), camera=()"
+    Header unset X-Powered-By
+</IfModule>
+
+# Suppress PHP version (only effective when running as mod_php, not FastCGI)
+<IfModule mod_php.c>
+    php_flag expose_php Off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag expose_php Off
+</IfModule>
+
+# ── Protect sensitive files ───────────────────────────────────────────────────
+<FilesMatch "^(config\.php|_error\.txt|composer\.(json|lock)|\.env)$">
+    Require all denied
+</FilesMatch>
+
+# Block all dot-files (.git, .htpasswd, .env, etc.)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# ── Bot blocking ──────────────────────────────────────────────────────────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # AI training / LLM crawlers — block site-wide (they only burn DB for training data)
+    RewriteCond %{HTTP_USER_AGENT} "GPTBot|OAI-SearchBot|ClaudeBot|anthropic-ai|Google-Extended|Amazonbot|Bytespider|CCBot|PetalBot|DataForSeoBot|PerplexityBot|YouBot|cohere-ai|AI2Bot|Diffbot|magpie-crawler|omgili" [NC]
+    RewriteRule .* - [F,L]
+
+    # Aggressive SEO scrapers — block only the expensive AJAX / paginated endpoints
+    RewriteCond %{HTTP_USER_AGENT} "AhrefsBot|SemrushBot|MJ12bot|DotBot|BLEXBot|SiteExplorerBot|serpstatbot" [NC]
+    RewriteCond %{QUERY_STRING} "(ajax=|mode=actioninfo|mode=playersessions|mode=playerhistory)" [NC]
+    RewriteRule .* - [F,L]
+
+    # Block empty / missing User-Agent (common for cheap scrapers)
+    RewriteCond %{HTTP_USER_AGENT} "^$"
+    RewriteRule .* - [F,L]
+
+    # Reject obviously malformed query strings (URL-encoded semicolons used to pollute params)
+    RewriteCond %{QUERY_STRING} "3[Bb](obj|vpage|page)_" [NC]
+    RewriteRule .* - [F,L]
+</IfModule>

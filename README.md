@@ -12,6 +12,7 @@
 - Multi-language support (Front end only)
 - **True Rank** system
 - Global, Yesterday, Weekends, Last 7 days and Last \<MinActivity\> days rankings
+- Charting options include pChart or Chart.js
 - OpenStreetMap integration
 - TeamSpeak 3, Steam Community, Discord voice/community servers
 - Secure Steam login

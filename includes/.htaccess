@@ -1,0 +1,4 @@
+# Block direct PHP execution — JS/CSS/images in subdirectories remain public
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>

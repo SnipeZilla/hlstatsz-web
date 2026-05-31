@@ -137,7 +137,7 @@ if (!is_ajax()) {
                   <td class="nowrap right">'.$res['rank_position'].'</td>
                   <td class="nowrap"><span class="hlstats-name">'.$res['awardTime'].'</span></a></td>
                   <td class="hlstats-main-description left">
-                      <span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" data-tooltip="'.htmlspecialchars($res['country'], ENT_QUOTES).'" alt="'.$res['flag'].'"></span>
+                      <span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" data-tooltip="'.htmlspecialchars($res['country'] ?? '', ENT_QUOTES).'" alt="'.$res['flag'].'"></span>
                       <a href="?mode=playerinfo&amp;player='.$res['playerId'].'"></span><span class="hlstats-name">'.htmlspecialchars($res['lastName'] ?? '').'&nbsp;</span></a>
                   </td>
                   <td class="nowrap">'.$res['count'].' times</td>

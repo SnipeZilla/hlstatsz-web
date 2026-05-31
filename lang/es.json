@@ -266,7 +266,7 @@
     "slots.used":                  "Slots utilizados",
     "notes":                       "Notas",
     "view.graphs":                 "Ver Gráficos de Carga",
-    "click.detail":                "Haz clic para expandir/cerrar la vista en vivo del servidor",
+    "click.detail":                "Expandir/Contraer servidor",
     "last.points":                 "{last} puntos",
     "no.winner":                   "Sin Ganador",
 

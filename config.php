@@ -39,6 +39,7 @@ For support and installation notes visit http://www.hlxcommunity.com
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 // Warning and error output to _error.txt
+// Not for production!!
 define("DEBUG", false);
 
 // DB_ADDR - The address of the database server, in host:port format.
@@ -111,7 +112,4 @@ define("STEAM_ADMIN", '');
 // Uppercase Characters: ✅ 
 // Numbers:              ✅ 
 define("SECRET_KEY", 'GdXtjLW6A8eIgoeYMbnRFhf366e111SAQMomkeYqDVGMOwjxY4WOd4y7t5er7F2b');
-
-define("DEBUG", true);
-
 ?>
