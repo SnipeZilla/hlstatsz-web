@@ -215,24 +215,3 @@ if (!isset($g_options['chart']) || $g_options['chart'] == 0) { //pChart
         </tr>
     </table>
 <?php } ?>
-<script>
-(function() {
-    function updateGraphColspan() {
-        document.querySelectorAll('.hlstats-graph').forEach(function(graphRow) {
-            var table = graphRow.closest('table');
-            if (!table) return;
-            var headerCells = table.querySelectorAll('thead tr th, tbody tr:not(.hlstats-graph) td');
-            var firstDataRow = table.querySelector('thead tr') || table.querySelector('tbody tr:not(.hlstats-graph)');
-            if (!firstDataRow) return;
-            var visibleCols = Array.from(firstDataRow.cells).filter(function(cell) {
-                return window.getComputedStyle(cell).display !== 'none';
-            }).length;
-            graphRow.querySelector('td').colSpan = visibleCols || 1;
-        });
-    }
-    updateGraphColspan();
-    window.addEventListener('resize', updateGraphColspan);
-})();
-</script>
-
-
