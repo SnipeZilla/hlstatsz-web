@@ -138,12 +138,12 @@ printSectionTitle(t('title.servers'));
 		}
 		if ($g_options['show_server_load_image'] == 1) {
 ?>
-		<tr class="hlstats-graph hide-3">
+		<tr class="hlstats-graph hide-2">
 			<td style="text-align:center;padding:0px;">
 				<?php if (!isset($g_options['chart']) || $g_options['chart'] == 0) {//pChart ?>
 				<img src="show_graph.php?type=1&amp;game=<?=$game?>" class="responsive" alt="Server Load Graph" />
                 <?php } else { //Chart.js ?>
-                <div class="hlstats-chart hlstats-chart-full"
+                <div class="hlstats-chart hlstats-chart-full servers"
                      data-chart="game-trend"
                      data-game="<?= htmlspecialchars($game, ENT_QUOTES) ?>">
                     <div class="hlstats-chart-canvas"><canvas></canvas></div>
@@ -239,7 +239,7 @@ printSectionTitle(t('title.servers'));
 				<?php } else { //Chart.js ?>
 				<a href="<?= $g_options['scripturl'] ?>?mode=servers&amp;server_id=<?= (int)$server_id ?>&amp;game=<?= htmlspecialchars($game, ENT_QUOTES) ?>"
 				   style="text-decoration:none;" data-tooltip="<?= t('view.graphs') ?>">
-				    <div class="hlstats-chart hlstats-chart-thumb hide-2"
+				    <div class="hlstats-chart hlstats-chart-thumb hide-2 servers"
 				         data-chart="server-load"
 				         data-server-id="<?= (int)$server_id ?>"
 				         data-range="1">

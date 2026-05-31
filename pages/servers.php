@@ -76,7 +76,7 @@ if ($g_options['show_google_map'] == 1) {
     </table>
 <?php } ?>
 
-<div class="hlstats-table-server hlstats-charts livestats">
+<div class="hlstats-table-server livestats">
     <table class="livestats-table-server">
         <tr>
             <th class="hlstats-main-server left"><?= t('th.server') ?></th>
@@ -130,23 +130,26 @@ if ($g_options['show_google_map'] == 1) {
             ?>
             </td>
         </tr>
-        <tr class="hlstats-graph">
-            <td class="responsive" style="padding:0px;text-align:center;" colspan="8">
-                <div class="responsive-table">
-                    <?php if (!isset($g_options['chart']) || $g_options['chart'] == 0) {//pChart ?>
-                    <img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>" style="border:0px;" class="responsive" alt="Server Load Graph"/>
-                    <?php } else { //Chart.js ?>
-                    <div class="hlstats-chart hlstats-chart-thumb"
-                         data-chart="server-load"
-                         data-server-id="<?= (int)$server_id ?>"
-                         data-range="1">
-                        <div class="hlstats-chart-canvas"><canvas></canvas></div>
-                    </div>
-                    <?php } ?>
-                </div>
-            </td>
-        </tr>
-    </table>
+</table>
+
+<table class="hlstats-table-fixed">
+  <tr class="hlstats-graph hlstats-chart">
+   <td style="text-align:center; padding:0;">
+     <div class="responsive-table">
+        <?php if (!isset($g_options['chart']) || $g_options['chart'] == 0) { //pChart ?>
+         <img src="show_graph.php?type=0&amp;game=<?php echo $game; ?>&amp;server_id=<?=$server_id?>" style="border:0px;" class="responsive" alt="Server Load Graph"/>
+         <?php } else { //Chart.js ?>
+         <div class="hlstats-chart hlstats-chart-thumb servers"
+             data-chart="server-load"
+             data-server-id="<?= (int)$server_id ?>"
+             data-range="1">
+            <div class="hlstats-chart-canvas"><canvas></canvas></div>
+         </div>
+        <?php } ?>
+      </div>
+     </td>
+  </tr>
+</table>
 
 <?php
     printserverstats($server_id, $server);
@@ -194,8 +197,9 @@ if (!isset($g_options['chart']) || $g_options['chart'] == 0) { //pChart
 <?php } else { //Chart.js ?>
     <table class="hlstats-table-fixed">
         <tr class="hlstats-graph hlstats-chart">
-            <td style="text-align:center; padding:0;overflow:hidden;">
-                <div class="hlstats-chart hlstats-chart-full responsive-table"
+            <td style="text-align:center; padding:0;">
+             <div class="responsive-table">
+                <div class="hlstats-chart hlstats-chart-thumb servers"
                     data-chart="server-load"
                     data-server-id="<?= (int)$server_id ?>"
                     data-range="2">
@@ -205,12 +209,30 @@ if (!isset($g_options['chart']) || $g_options['chart'] == 0) { //pChart
                         <button type="button" data-range="4"><?= t('last.year') ?></button>
                     </div>
                     <div class="hlstats-chart-canvas"><canvas></canvas></div>
-                    <div class="hlstats-chart-caption"></div>
                 </div>
+              </div>
             </td>
         </tr>
     </table>
 <?php } ?>
-
+<script>
+(function() {
+    function updateGraphColspan() {
+        document.querySelectorAll('.hlstats-graph').forEach(function(graphRow) {
+            var table = graphRow.closest('table');
+            if (!table) return;
+            var headerCells = table.querySelectorAll('thead tr th, tbody tr:not(.hlstats-graph) td');
+            var firstDataRow = table.querySelector('thead tr') || table.querySelector('tbody tr:not(.hlstats-graph)');
+            if (!firstDataRow) return;
+            var visibleCols = Array.from(firstDataRow.cells).filter(function(cell) {
+                return window.getComputedStyle(cell).display !== 'none';
+            }).length;
+            graphRow.querySelector('td').colSpan = visibleCols || 1;
+        });
+    }
+    updateGraphColspan();
+    window.addEventListener('resize', updateGraphColspan);
+})();
+</script>
 
 

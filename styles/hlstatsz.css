@@ -1962,6 +1962,30 @@ display: flex;
   border-bottom-color: var(--header-dropmenu-bg);
 }
 
+/* Chart.js wrappers (used when $g_options['chart'] != 0) */
+.hlstats-chart { position: relative; width: 100%; --chart-text: var(--main-color, #c6d4df); }
+.hlstats-chart.is-loading { opacity: .6; }
+.hlstats-chart-canvas { position: relative; width: 100%; height: 260px; }
+.hlstats-chart-canvas.trend-player { position: relative; width: 100%; height: 100%; }
+.hlstats-chart-thumb .hlstats-chart-canvas { height: 260px; }
+.hlstats-chart-thumb canvas { pointer-events: auto; }
+.hlstats-chart-canvas canvas { width: 100% !important; height: 100% !important; display: block; }
+.hlstats-chart-range { display: flex; gap: 4px; padding: 4px 6px; flex-wrap: wrap; }
+.hlstats-chart-range button {
+    cursor: pointer;
+    padding: 4px 10px;
+    font: inherit;
+    border: 1px solid currentColor;
+    background: transparent;
+    color: inherit;
+    border-radius: 3px;
+    opacity: .65;
+}
+.hlstats-chart-range button:hover { opacity: 1; }
+.hlstats-chart-range button.active { opacity: 1; font-weight: bold; }
+.hlstats-chart-caption { text-align: right; font-size: .95em; padding: 2px 6px 6px; opacity: .8; }
+
+
 /* ── Responsive ── */
 .show,.show-1,.show-2,.show-3{ display:none; padding: 15px; }
 
@@ -1983,7 +2007,6 @@ display: flex;
   .hlstats-contents table.livestats-table-server td:nth-child(2),
   .hlstats-contents table.livestats-table-server th:nth-child(2) { width: 18%; }
 
-
 }
 
 @media (max-width: 900px){
@@ -1998,14 +2021,13 @@ display: flex;
   .hide-2 { display: none; } 
   .show-2 { display: block; }
 
-  .responsive-table img.responsive{
-      max-width:none;
-  }
-
+  .hlstats-chart.servers{ width:1118px;}
   .hlstats-charts td.responsive{
       max-width: calc(100vw - 30px);
   }
-
+  .responsive-table img.responsive{
+      max-width:none;
+  }
   .responsive-task thead{ display:none; }
 
   .responsive-task, .responsive-task tbody, .responsive-task tr, .responsive-task td, .responsive-task th{
@@ -2099,27 +2121,4 @@ display: flex;
   .hlstats-main-column{ width:60% }
   .hlstats-lang{ max-width: 160px; }
 }
-
-/* Chart.js wrappers (used when $g_options['chart'] != 0) */
-.hlstats-chart { position: relative; width: 100%; --chart-text: var(--main-color, #c6d4df); }
-.hlstats-chart.is-loading { opacity: .6; }
-.hlstats-chart-canvas { position: relative; width: 100%; height: 260px; }
-.hlstats-chart-canvas.trend-player { position: relative; width: 100%; height: 100%; }
-.hlstats-chart-thumb .hlstats-chart-canvas { height: 260px; }
-.hlstats-chart-thumb canvas { pointer-events: auto; }
-.hlstats-chart-canvas canvas { width: 100% !important; height: 100% !important; display: block; }
-.hlstats-chart-range { display: flex; gap: 4px; padding: 4px 6px; flex-wrap: wrap; }
-.hlstats-chart-range button {
-    cursor: pointer;
-    padding: 4px 10px;
-    font: inherit;
-    border: 1px solid currentColor;
-    background: transparent;
-    color: inherit;
-    border-radius: 3px;
-    opacity: .65;
-}
-.hlstats-chart-range button:hover { opacity: 1; }
-.hlstats-chart-range button.active { opacity: 1; font-weight: bold; }
-.hlstats-chart-caption { text-align: right; font-size: .95em; padding: 2px 6px 6px; opacity: .8; }
 

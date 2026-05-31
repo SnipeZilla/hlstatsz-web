@@ -25,9 +25,13 @@
         max_slots: 'rgb(160, 160, 160)'
     };
 
-    var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
     function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+    var _fmt = {
+        weekday:  new Intl.DateTimeFormat(undefined, { weekday: 'short' }),
+        dayMonth: new Intl.DateTimeFormat(undefined, { day: '2-digit', month: '2-digit' }),
+        monYear:  new Intl.DateTimeFormat(undefined, { month: '2-digit', year: 'numeric' })
+    };
 
     function fmtLabel(ts, range) {
         var d = new Date(ts * 1000);
@@ -35,12 +39,12 @@
             return pad2(d.getHours()) + ':' + pad2(d.getMinutes());
         }
         if (range === '2' || range === 2) {
-            return DAYS[d.getDay()] + ' ' + pad2(d.getHours()) + 'h';
+            return _fmt.weekday.format(d) + ' ' + pad2(d.getHours()) + 'h';
         }
         if (range === '3' || range === 3) {
-            return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1);
+            return _fmt.dayMonth.format(d);
         }
-        return pad2(d.getMonth() + 1) + '/' + d.getFullYear();
+        return _fmt.monYear.format(d);
     }
 
     function buildUrl(params) {
@@ -296,7 +300,7 @@
                         position: 'right',
                         beginAtZero: true,
                         grid: { drawOnChartArea: false },
-                        title: { display: true, color: textColor, text: 'FPS' },
+                        title: { display: true, color: textColor, text: t('chart.fps') },
                         ticks: { color: textColor, precision: 0 }
                     },
                     y3: {
@@ -314,8 +318,7 @@
     function gameTrendConfig(json, textColor) {
         var rows = json.data || [];
         var labels = rows.map(function (r) {
-            var d = new Date(r.t * 1000);
-            return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1);
+            return _fmt.dayMonth.format(new Date(r.t * 1000));
         });
 
         return {
