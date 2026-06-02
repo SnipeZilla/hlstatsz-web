@@ -66,6 +66,14 @@ For current support and updates:
 	}
 	$game_escaped = $db->escape($game);
 
+	$realgame = 'unset';
+	$toMin   = 1;
+	if (isset($_GET['realgame'])) {
+		$realgame = valid_request($_GET['realgame'], false);
+		if ($realgame == 'cs2') $toMin = 60;
+	}
+
+
 	$bar_type = 0;
 	if (isset($_GET['type']) && is_numeric($_GET['type'])) {
 		$bar_type = valid_request($_GET['type'], true);
@@ -128,7 +136,7 @@ For current support and updates:
 					$agg['act']    += (int)$e['act_players'];
 					$agg['min']    += (int)$e['min_players'];
 					$agg['max']    += (int)$e['max_players'];
-					$agg['uptime'] += (int)$e['uptime'];
+					$agg['uptime'] += (int)$e['uptime'] / $toMin;
 					$agg['fps']    += (float)$e['fps'];
 					$agg['map']     = $e['map'];
 				}
