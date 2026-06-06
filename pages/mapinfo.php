@@ -138,22 +138,22 @@ if (!is_ajax()) {
 		if (substr($map_dlurl, -1) !== '/') {
 			$map_dlurl .= '/';
 		}
-		$file=$map_dlurl.$map.'.bsp.bz2';
+		$ext='.bsp.bz2';
+		$file=$map_dlurl.$map.$ext;
 		$exist=stripos( get_headers($file)[0], "200 OK" )?true:false;
 		if ( !$exist ) {
-			$file=$map_dlurl.$map.'.bsp';
+			$ext='.bsp';
+			$file=$map_dlurl.$map.$ext;
 			$exist=stripos( get_headers($file)[0], "200 OK" )?true:false;
 		}
 
 		if ($exist) {
-			echo "<p><a href=\"$file\">🔗 Download this map</a></p>";
+			$_SESSION['map'] = $map.$ext;
+			$payload = array('map' => $map.$ext, 'session' => $_SESSION['map']);
+			$token   = hash_hmac('sha256', json_encode($payload, JSON_UNESCAPED_SLASHES), SECRET_KEY);
+			echo '<p>🔗 <a href="'.$g_options['scripturl'].'?mode=download&amp;game='.$game.'&amp;token='.$token.'">'.$map.'</a></p>';
 		}
 	}
-
-	//if ($heatmap)
-	//{
-	//	echo "<a href=\"" . $heatmap['url'] . "\" rel=\"boxed\" title=\"Heatmap: $map\"><br /><img src=\"" . $heatmapthumb['url'] . "\" alt=\"$map\" /></a>";
-	//}
 ?>
 </div>
 

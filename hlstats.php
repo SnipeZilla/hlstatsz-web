@@ -152,7 +152,8 @@ $valid_modes = array(
 	'countryclansinfo',
 	'teamspeak',
 	'discord',
-	'steamcommunity'
+	'steamcommunity',
+	'download'
 );
 
 if ( !in_array($mode, $valid_modes) ) {
@@ -263,7 +264,7 @@ if ($mode == 'contents' || $mode == 'teamspeak' || $mode == 'discord' || $mode =
     }
 }
 
-if (!is_ajax() && $mode !== 'admin')
+if (!is_ajax() && $mode !== 'admin' && $mode !== 'download')
 	include (PAGE_PATH . '/header.php');
 
 
