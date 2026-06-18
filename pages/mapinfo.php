@@ -138,14 +138,25 @@ if (!is_ajax()) {
 		if (substr($map_dlurl, -1) !== '/') {
 			$map_dlurl .= '/';
 		}
-		$ext='.bsp.bz2';
-		$file=$map_dlurl.$map.$ext;
-		$exist=stripos( get_headers($file)[0], "200 OK" )?true:false;
-		if ( !$exist ) {
-			$ext='.bsp';
-			$file=$map_dlurl.$map.$ext;
-			$exist=stripos( get_headers($file)[0], "200 OK" )?true:false;
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_NOBODY, true);
+		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 2);
+		curl_setopt($curl, CURLOPT_TIMEOUT, 3);
+
+		$exist = false;
+		foreach (array('.bsp.bz2', '.bsp') as $ext) {
+			$file = $map_dlurl.$map.$ext;
+			curl_setopt($curl, CURLOPT_URL, $file);
+			curl_exec($curl);
+			if (curl_getinfo($curl, CURLINFO_HTTP_CODE) == 200) {
+				$exist = true;
+				break;
+			}
 		}
+		curl_close($curl);
 
 		if ($exist) {
 			$_SESSION['map'] = $map.$ext;

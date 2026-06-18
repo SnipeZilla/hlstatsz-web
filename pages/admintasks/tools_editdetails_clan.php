@@ -44,8 +44,14 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	));
 
 	if (isset($_POST['name'])) {
-		$proppage->update();
-		message("success", "Profile updated successfully.");
+		$tag = trim($_POST['tag'] ?? '');
+		if ($tag === '') {
+			message("warning", "Clan tag cannot be empty. Please enter a unique clan tag.");
+		} elseif ($proppage->update()) {
+			message("success", "Profile updated successfully.");
+		} else {
+			message("warning", "Update failed. The clan tag may already be in use by another clan in the same game.");
+		}
 	}
 
 	$result = $db->query("

@@ -805,7 +805,7 @@ class PropertyPage
 				}
 				else
 				{
-					$setstrings[] = $prop->name . "='" . $db->escape(valid_request($value, 0)) . "'";
+					$setstrings[] = $prop->name . "='" . $db->escape($value) . "'";
 				}
 			}
 		}
@@ -817,7 +817,7 @@ class PropertyPage
 				" . implode(",\n", $setstrings) . "
 			WHERE
 				" . $this->keycol . "='" . $db->escape($this->keyval) . "'
-		");
+		", false);
 	}
 }
 
