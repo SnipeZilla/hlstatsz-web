@@ -232,6 +232,8 @@ message("warning","Options with an asterisk (*) beside them require a restart of
 	$optiongroups[40]->options[] = new Option('LogChat', '*Log player chat to database', 'select');
 	$optiongroups[40]->options[] = new Option('LogChatAdmins', '*Log admin chat to database', 'select');
 	$optiongroups[40]->options[] = new Option('GlobalChat', '*Broadcast chat messages through all particapting servers. To all, none, or admins only', 'select');
+	$optiongroups[40]->options[] = new Option('Daemon_Host', 'Default hostname or IP for the Daemon Control page. Leave empty to use <code>localhost</code>.', 'text');
+	$optiongroups[40]->options[] = new Option('Daemon_Port', 'Default port for the Daemon Control page. Leave empty to use <code>27500</code>.', 'text');
 
 	$optiongroups[50] = new OptionGroup('Ranking & Point calculation settings');
 	$optiongroups[50]->options[] = new Option('rankingtype', '*Ranking type', 'select');

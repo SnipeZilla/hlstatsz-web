@@ -37,7 +37,7 @@ $commands[3]["cmd"] = "KILL";
 		$cmd_index = (int)$_POST["command"];
 		$command = $commands[$cmd_index]["cmd"];
 		if (!$command) die ('Invalid command!');
-		if (!$port) $port = "27500";
+		if (!$port) $port = !empty($g_options['Daemon_Port']) ? $g_options['Daemon_Port'] : "27500";
 
 		// Check if we're contacting a remote host -- if so, need proxy_key configured for this to work (die and throw an error if we're missing it)
 		if (($host != "127.0.0.1") && ($host != "localhost")) 
@@ -144,8 +144,8 @@ $commands[3]["cmd"] = "KILL";
 		}
 		else
 		{
-		$form_host    = isset($_GET['masterserver']) ? htmlspecialchars($_GET['masterserver']) : 'localhost';
-		$form_port    = isset($_GET['port'])         ? htmlspecialchars($_GET['port'])         : '27500';
+		$form_host    = isset($_GET['masterserver']) ? htmlspecialchars($_GET['masterserver']) : (!empty($g_options['Daemon_Host']) ? $g_options['Daemon_Host'] : 'localhost');
+		$form_port    = isset($_GET['port'])         ? htmlspecialchars($_GET['port'])         : (!empty($g_options['Daemon_Port']) ? $g_options['Daemon_Port'] : '27500');
 		$form_command = isset($_GET['command'])      ? (int)$_GET['command']                  : 0;
 ?>
 <div class="hlstats-admin-note">
