@@ -93,6 +93,9 @@ if (!is_ajax()) {
 ?>
 
 <?php printSectionTitle(t('title.bans')); ?>
+<?php if (trim((string) ($g_options['appeal_url'] ?? '')) !== ''): // on the forum or Discord (Bans settings) ?>
+<p class="sb-details-appeal"><a href="<?= htmlspecialchars(trim($g_options['appeal_url'])) ?>" target="_blank" rel="noopener"><?= t('sb.appeal') ?> &#8599;</a></p>
+<?php endif; ?>
 
 
 <div id="players">

@@ -105,9 +105,16 @@
   --pagination-hover-bg: rgba(47,137,188,.4);
   --pagination-hover-border: 1px solid rgba(255,255,255,.12);
   
-  --red: linear-gradient(to right, #f44336, #b71c1c);
-  --orange: linear-gradient(to right, #ff9800, #f57c00);
-  --green: linear-gradient(to right, #4caf50, #2e7d32);
+  --red: #e64e4e;
+  --orange: #f39c12;
+  --green: #339966;
+
+  /* SourceBans: accent of the selected controls, and status colors (badges, toasts, errors) */
+  --sba-accent: var(--input-border-color-focus);
+  --sba-danger: #e5534b;
+  --sba-ok: #3fb950;
+  --sba-warn: #d29922;
+  --sba-gold: #d4a72c;
 
   --ajax-bg: #2f89bc;
 
@@ -196,7 +203,6 @@ textarea {
 input.hlstats-user{
   max-width: calc(100% - 24px);
 }
-select{ height:30px}
 select option {
   background: var(--select-option-bg);
   color: var(--main-color);
@@ -240,26 +246,18 @@ meter {
   border-radius: 3px;
   background: rgba(255,255,255,0.1);
 }
-/* Chrome, Safari, Edge */
-meter::-webkit-meter-bar {
+/* Chrome, Safari, Edge (kept apart from ::-moz-meter-bar: an unknown pseudo-element drops the whole rule) */
+meter::-webkit-meter-bar,
+meter::-webkit-meter-optimum-value,
+meter::-webkit-meter-suboptimum-value,
+meter::-webkit-meter-even-less-good-value{ border-radius: 3px; }
+meter::-webkit-meter-bar{
   background: rgba(255,255,255,0.1);
-  border-radius: 3px;
   height:14px;
 }
-meter::-webkit-meter-optimum-value {
-  background: var(--green);
-  border-radius: 3px;
-}
-
-meter::-webkit-meter-suboptimum-value {
-  background: var(--orange);
-  border-radius: 3px;
-}
-
-meter::-webkit-meter-even-less-good-value {
-  background: var(--red);
-  border-radius: 3px;
-}
+meter::-webkit-meter-optimum-value{ background: var(--green); }
+meter::-webkit-meter-suboptimum-value{ background: var(--orange); }
+meter::-webkit-meter-even-less-good-value{ background: var(--red); }
 /* Firefox */
 meter::-moz-meter-bar {
   border-radius: 3px;
@@ -288,9 +286,6 @@ meter::-moz-meter-bar {
   padding:0 15px 92px 15px;
   flex: 1 0 auto;
 }
-.hlstats-ingame .hlstats-contents{
-  padding:15px;
-}
 
 .hlstats-select{
   display: flex; 
@@ -318,34 +313,14 @@ td.blue::after,
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
 -webkit-appearance: none;
+appearance: none;
 margin: 0;
 }
 
 /* Firefox */
 input[type=number] {
 -moz-appearance: textfield;
-}
-
-.hlstats-sb{
-  height: 24px;
-  min-width: 144px;
-  padding: 0 8px;
-  border-radius: 12px;
-  vertical-align: text-bottom;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-  color: #fff;
-}
-.hlstats-sb.red{
-  background: var(--red);
-}
-.hlstats-sb.orange{
-  background: var(--orange);
-}
-.hlstats-sb.green{
-  background: var(--green);
+appearance: textfield;
 }
 
 .hlstats-banner{
@@ -356,8 +331,151 @@ input[type=number] {
   max-width:100%;
 }
 
-/* ────────────── Header ────────────── */
+/* ────────────── Scrollbars ────────────── */
+.hlstats-scrollbar,
+.responsive-table{
+  scrollbar-width: thin;
+  scrollbar-color: var(--card-scrollbar-color);
+}
 
+/* Safari: Chrome and Firefox draw the scrollbar from the two properties above and ignore these */
+:is(.hlstats-scrollbar, .responsive-table)::-webkit-scrollbar{
+  width: 8px;
+  height: 8px;
+}
+:is(.hlstats-scrollbar, .responsive-table)::-webkit-scrollbar-track{
+  background: transparent;
+  margin: 4px;
+}
+:is(.hlstats-scrollbar, .responsive-table)::-webkit-scrollbar-thumb{
+  background: #666;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* ────────────── Components ────────────── */
+.hlstats-btn,
+.sba-btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border: var(--input-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--main-color);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+.hlstats-btn:hover,
+.sba-btn:hover{ border-color: var(--sba-accent); }
+.hlstats-btn svg{ flex: none; opacity: .85; }
+.hlstats-btn.is-active{ border-color: var(--sba-accent); background: var(--table-td-bg-hover); }
+:is(.hlstats-btn, .sba-btn):disabled{ opacity: .5; cursor: progress; }
+:is(.hlstats-btn, .sba-btn).is-primary{ border-color: transparent; background: var(--button-bg); color: var(--button-color); }
+:is(.hlstats-btn, .sba-btn).is-danger{ color: var(--sba-danger); }
+:is(.hlstats-btn, .sba-btn).is-danger:hover{ border-color: currentColor; }
+:is(.hlstats-btn, .sba-btn).is-danger.is-solid{ border-color: transparent; background: #d73a49; color: #fff; }
+:is(.hlstats-btn, .sba-btn).is-small{ height: 26px; padding: 0 10px; font-size: 12px; }
+/* a count in a button (Awards 212) */
+.hlstats-count{
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--table-td-bg-hover);
+  font-size: 11px;
+}
+
+/* Pill: a status in an outline of its text color (.red, .orange, .green, .neutral); .is-status adds a dot.
+   .hlstats-sb.sb-pill is the SourceBans one, of a fixed width */
+.hlstats-pill,
+.hlstats-sb.sb-pill{
+  display: inline-flex;
+  flex: none;
+  color: var(--main-color);
+  justify-content: center;
+  align-items: center;
+  text-shadow: none;
+  height: 22px;
+  padding: 0 10px;
+  border: 1px solid;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.hlstats-sb.sb-pill{ min-width: 84px; }
+:is(.hlstats-pill, .hlstats-sb.sb-pill).neutral{
+  color: rgb(from var(--main-color) r g b / 70%);
+  font-weight: 500;
+}
+:is(.hlstats-pill, .hlstats-sb.sb-pill).red{ color: var(--red); }
+:is(.hlstats-pill, .hlstats-sb.sb-pill).orange{ color: var(--orange); }
+:is(.hlstats-pill, .hlstats-sb.sb-pill).green{ color: var(--green); }
+.hlstats-pill.is-status{ gap: 6px; }
+.hlstats-pill.is-status::before{
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Chip: Steam ID, clan, karma; .green and .red tint it with their color */
+.hlstats-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: var(--table-td-bg-hover);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+}
+a.hlstats-chip,
+.hlstats-chip a{ color: inherit; }
+a.hlstats-chip:hover,
+.hlstats-chip a:hover{ color: var(--a-color-hover); }
+.hlstats-chip.is-mono{
+  padding-right: 3px;
+  font: 12px ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+.hlstats-chip.green,
+.hlstats-chip.red{ background: color-mix(in srgb, currentColor 14%, transparent); }
+
+.hlstats-copy{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  opacity: .7;
+}
+.hlstats-copy:hover{
+  opacity: 1;
+  filter: none;
+  background: var(--header-dropmenu-bg-hover);
+}
+[data-copy] > svg + svg,
+[data-copy].is-copied > svg:first-child{ display: none; }
+[data-copy].is-copied > svg + svg{ display: block; }
+
+/* ────────────── Header ────────────── */
 .hlstats-header { width: 100%; }
 
 .hlstats-inner{
@@ -377,7 +495,6 @@ input[type=number] {
   border-bottom: var(--header-border-bottom);
 }
 .hlstats-top .hlstats-inner{ height: 104px; }
-.hlstats-ingame .hlstats-top .hlstats-inner{ height: 61px; }
 
 .hlstats-brand{
   display: inline-flex;
@@ -440,20 +557,6 @@ input[type=number] {
   gap: 2px;
   overflow-x: auto;
   max-width: 600px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--card-scrollbar-color);
-}
-
-/* Chrome / Edge / WebKit — height controls horizontal scrollbar thickness */
-.hlstats-lang::-webkit-scrollbar {
-  height: 4px;
-}
-.hlstats-lang::-webkit-scrollbar-track {
-  background: transparent;
-}
-.hlstats-lang::-webkit-scrollbar-thumb {
-  background: #666;
-  border-radius: 4px;
 }
 
 .hlstats-lang-flag img{
@@ -545,21 +648,6 @@ input[type=number] {
   padding: 0;
 }
 
-#gamelist-menu li a{
-  display: block;
-  width: 100%;
-  padding: 10px 12px;
-  color: var(--header-dropmenu-color);
-  text-decoration: none;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-#gamelist-menu li a:hover{
-  background: var(--header-dropmenu-bg-hover);
-  color: var(--header-dropmenu-color-hover);
-}
-
 /* ────────────── dropdown ────────────── */
 /* ───────── dropdown container ──────────*/
 .hlstats-dropdown{
@@ -577,7 +665,7 @@ input[type=number] {
   min-width: 180px;
   background: var(--header-dropmenu-bg);
   border: var(--header-dropmenu-border);
-  box-shadow: var(--header-dropmenu-border);
+  box-shadow: var(--header-dropmenu-shadow);
   border-radius: 4px;
   overflow: hidden;
   z-index: 9999;
@@ -734,9 +822,6 @@ button.svg:hover svg{
   border-top: var(--header-border-bottom);
   padding: 22px 0;
 }
-.hlstats-ingame .hlstats-footer{
-  padding: 8px 0;
-}
 .hlstats-footer-inner{
   max-width: 1180px;
   margin: 0 auto;
@@ -818,18 +903,49 @@ button.svg:hover svg{
 
 .hlstats-forum-signature{
   background: var(--card-bg);
-  border: var( --card-section-border);
+  border: var(--card-section-border);
   border-radius: 10px;
   padding: 10px;
   margin: 0 auto;
-
 }
 .hlstats-forum-signature img{
+  display: block;
   max-width: 100%;
+  margin: 0 auto;
+}
+
+/* The signature's code for a forum or Discord */
+.hlstats-sigcode{
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+.hlstats-sigcode-formats{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.hlstats-sigcode-text{
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font: 12px/1.5 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  resize: vertical;
+  overflow-wrap: anywhere;
+}
+.hlstats-sigcode-foot{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hlstats-sigcode-hint{
+  flex: 1;
+  font-size: 12px;
+  opacity: .7;
 }
 
 input:focus::placeholder{
-  color: transparent; /
+  color: transparent;
 }
 
 /* ────────────── Tabs ────────────── */
@@ -838,7 +954,6 @@ input:focus::placeholder{
   padding: 0 12px;
 }
 
-/* ── Prevent margin collapse from content below ── */
 .hlstats-tabs-bar::after{
   content:"";
   display:block;
@@ -851,7 +966,7 @@ input:focus::placeholder{
   justify-content:center;
   margin: 0;
   padding: 0;
-  list-style:none;;
+  list-style:none;
 }
 
 .hlstats-tabs li a{
@@ -862,7 +977,7 @@ input:focus::placeholder{
   text-decoration:none;
   color:  var(--tab-color);
   white-space: nowrap;
-  background: var(--tab-bg);
+  background: var(--tabs-bg);
   border-right: var(--tab-border);
 
   box-shadow: var(--tab-shadow);
@@ -892,26 +1007,6 @@ input:focus::placeholder{
 }
 
 /* ────────────── Table ────────────── */
-.responsive-table{
-  scrollbar-width: thin;
-  scrollbar-color: var(--card-scrollbar-color);
-}
-
-/* Chrome / Edge / WebKit */
-.responsive-table::-webkit-scrollbar {
-  width: 8px;
-}
-.responsive-table::-webkit-scrollbar-track {
-  background: transparent;
-  margin: 4px;
-}
-.responsive-table::-webkit-scrollbar-thumb {
-  background: #666;
-  border-radius: 8px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-
 .hlstats-contents table{
   width: 100%;
   border-collapse: collapse;
@@ -942,26 +1037,15 @@ input:focus::placeholder{
   table-layout:fixed;
   width:100%;
 }
-.hlstats-contents table.livestats-table-server th,
-.hlstats-contents table.livestats-table-server td {
-  overflow:hidden;
-}
-.hlstats-contents table.livestats-table-server td:nth-child(1),
-.hlstats-contents table.livestats-table-server th:nth-child(1) { width: 32%; }
-.hlstats-contents table.livestats-table-server td:nth-child(2),
-.hlstats-contents table.livestats-table-server th:nth-child(2) { width: 13%; }
-.hlstats-contents table.livestats-table-server td:nth-child(3),
-.hlstats-contents table.livestats-table-server th:nth-child(3) { width: 12%; }
-.hlstats-contents table.livestats-table-server td:nth-child(4),
-.hlstats-contents table.livestats-table-server th:nth-child(4) { width: 10%; }
-.hlstats-contents table.livestats-table-server td:nth-child(5),
-.hlstats-contents table.livestats-table-server th:nth-child(5) { width: 8%; }
-.hlstats-contents table.livestats-table-server td:nth-child(6),
-.hlstats-contents table.livestats-table-server th:nth-child(6) { width: 10%; }
-.hlstats-contents table.livestats-table-server td:nth-child(7),
-.hlstats-contents table.livestats-table-server th:nth-child(7) { width: 10%; }
-.hlstats-contents table.livestats-table-server td:nth-child(8),
-.hlstats-contents table.livestats-table-server th:nth-child(8) { width: 5%; }
+.hlstats-contents table.livestats-table-server :is(th, td){ overflow:hidden; }
+.hlstats-contents table.livestats-table-server :is(th, td):nth-child(1){ width: 32%; }
+.hlstats-contents table.livestats-table-server :is(th, td):nth-child(2){ width: 13%; }
+.hlstats-contents table.livestats-table-server :is(th, td):nth-child(3){ width: 12%; }
+.hlstats-contents table.livestats-table-server :is(th, td):nth-child(4){ width: 10%; }
+.hlstats-contents table.livestats-table-server :is(th, td):nth-child(5){ width: 8%; }
+.hlstats-contents table.livestats-table-server :is(th, td):nth-child(6){ width: 10%; }
+.hlstats-contents table.livestats-table-server :is(th, td):nth-child(7){ width: 10%; }
+.hlstats-contents table.livestats-table-server :is(th, td):nth-child(8){ width: 5%; }
 
 .hlstats-contents table.livestats-table-next th {
     border-top: var(--table-th-border-bottom);
@@ -981,7 +1065,8 @@ input:focus::placeholder{
     vertical-align: middle;
 }
 
-.hlstats-server-row.is-open .hlstats-slider-arrow {
+/* the arrow of a row that opens */
+.is-open .hlstats-slider-arrow {
     transform: rotate(0deg);
     opacity: 1;
 }
@@ -1024,7 +1109,7 @@ th.kd .sep,td.kd .sep {
 
 div.hlstats-stats,
 .hlstats-contents table tr.hlstats-stats th{
-  Font-size: 14px;
+  font-size: 14px;
   padding: 10px;
   text-align: left;
   font-weight: 400;
@@ -1067,8 +1152,6 @@ th.active::after {
 }
 th:hover::after{
   opacity:0.7;
-}
-th:hover::after{
   transform: rotate(180deg);
 }
 
@@ -1092,8 +1175,10 @@ th:hover::after{
   opacity: 1;
 }
 
-/* data cells */
+/* data cells (positioned for the team color overlay below) */
 .hlstats-contents table td{
+  position: relative;
+  z-index: 1;
   padding: 10px 10px;
   color: var(--table-td-color);
   border-bottom: var(--table-td-border-bottom);
@@ -1102,10 +1187,10 @@ th:hover::after{
 }
 
 /* zebra rows */
-.hlstats-contents table tbody tr:nth-child(odd) td{
+.hlstats-contents table tbody tr:nth-child(odd of :where(:not(.sb-details-row))) td{
   background: var(--table-td-bg-odd);
 }
-.hlstats-contents table tbody tr:nth-child(even) td{
+.hlstats-contents table tbody tr:nth-child(even of :where(:not(.sb-details-row))) td{
   background: var(--table-td-bg-even);
 }
 
@@ -1118,7 +1203,7 @@ th:hover::after{
 }
 
 /* hover (nice but subtle) */
-.hlstats-contents table tbody tr:not(.hlstats-graph):hover td{
+.hlstats-contents table tbody tr:not(.hlstats-graph, .sb-details-row):hover td{
   background: var(--table-td-bg-hover);
 }
 
@@ -1152,11 +1237,6 @@ th:hover::after{
 
 /* ────────────── team color ────────────── */
 /* ───────── team color overlays ────────── */
-.hlstats-contents table td {
-  position: relative;
-  z-index: 1;
-}
-
 .hlstats-contents table td::before {
   content: "";
   position: absolute;
@@ -1210,28 +1290,23 @@ th:hover::after{
 
 
 /* =======================
-   Playerinfo Cards Layout
+   Cards: playerinfo, clan, map... panels, headline tiles, SourceBans panels
    ======================= */
-/* Cards grid wrapper */
+/* Cards grid wrapper: columns of at least --card-min */
 .hlstats-cards-grid{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--card-min, 420px), 100%), 1fr));
   gap: 15px;
   align-items: stretch;
   margin-top: 15px;
   width:100%;
   margin-bottom: 15px;
 }
-.hlstats-ingame .hlstats-cards-grid{
-  margin: 0;
-}
 /* Card base */
-.hlstats-section.hlstats-card{
-display: flex;
- flex-direction: column;
- height: 100%; 
-  width: auto;
-  max-width: none;
+.hlstats-card{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   padding: 10px;
   background: var(--card-section-bg);
   border: var(--card-section-border);
@@ -1239,29 +1314,334 @@ display: flex;
   border-radius: 10px;
 }
 
+/* Headline tiles (General Statistics, Ban Statistics): a grid of small cards */
+.hlstats-kpis{ --card-min: 160px; }
+.hlstats-kpi{ padding: 14px 16px; }
+.hlstats-kpi-label{
+  font-size: 13px;
+  font-weight: 600;
+  opacity: .8;
+}
+.hlstats-kpi-label[data-tooltip]{
+  width: max-content;
+  max-width: 100%;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+.hlstats-kpi-value{
+  margin: 4px 0 2px;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.15;
+  font-variant-numeric: proportional-nums;
+}
+.hlstats-kpi-note{
+  font-size: 12px;
+  opacity: .7;
+}
+@media (max-width: 600px){
+  .hlstats-kpi{ padding: 12px; }
+  .hlstats-kpi-value{ font-size: 24px; }
+}
+
 .hlstats-card-body.hlstats-center {
   max-height: 408px;
   overflow-y: auto;
   padding-right: 12px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--card-scrollbar-color);
 }
 
-/* Chrome / Edge / WebKit */
-.hlstats-card-body.hlstats-center::-webkit-scrollbar {
-  width: 8px;
+
+/* Card header: title, note, link; the link goes under the title when they do not fit side by side */
+.hlstats-card-head{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin-bottom: 10px;
 }
-.hlstats-card-body.hlstats-center::-webkit-scrollbar-track {
-  background: transparent;
-  margin: 4px;
+/* the title of a card head, or of an admin card head (.sba-card-head) */
+.hlstats-card-head .hlstats-card-title,
+.sba-card-head .hlstats-card-title{
+  margin: 0;
+  font-weight: 600;
 }
-.hlstats-card-body.hlstats-center::-webkit-scrollbar-thumb {
-  background: #666;
+.hlstats-card-note{
+  font-size: 12px;
+  opacity: .65;
+}
+
+/* =======================
+   Profile header (General tab of a player or a clan): identity, rank, points and activity, links;
+   then its headline tiles (.hlstats-profile-kpis) and its cards (favorites, statistics)
+   ======================= */
+.hlstats-card.hlstats-profile{
+  padding: 0;
+  background: var(--card-bg);
+  border: var(--card-border);
+}
+.hlstats-profile-main{
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 22px;
+}
+/* avatar, name and status, meta, chips: drawn again once Steam answers (playerIdentity() in playerinfo.php) */
+.hlstats-profile-identity{
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+/* Steam is asked in the background: its "Loading..." pill tells it, not the page spinner */
+.hlstats-profile-identity.is-loading{ pointer-events: auto; }
+.hlstats-profile-identity.is-loading::after{ content: none; }
+.hlstats-profile-avatar{
+  flex: none;
+  width: 112px;
+  height: 112px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+/* a clan's badge in place of the avatar: its tag, or the initials of its name, at a size fitting its length (--badge-size) */
+.hlstats-profile-badge{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: var(--table-td-bg-hover);
+  border: var(--card-border);
+  font-size: var(--badge-size, 30px);
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.hlstats-profile-info{
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hlstats-profile-name{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.hlstats-profile-name .hlstats-flag{ padding: 0; }
+.hlstats-profile-name .hlstats-flag img{ display: block; }
+.hlstats-profile-meta{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  font-size: 13px;
+  opacity: .8;
+}
+.hlstats-profile-meta > span{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.hlstats-profile-chips{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Rank, Points, Activity */
+.hlstats-profile-headline{
+  flex: none;
+  display: flex;
+}
+.hlstats-profile-headline > div{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 22px;
+}
+.hlstats-profile-headline > div + div{ border-left: var(--card-border); }
+.hlstats-profile-headline > div:last-child{ padding-right: 0; }
+.hlstats-profile-label{
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .7;
+}
+.hlstats-profile-big{
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap;
+  font-variant-numeric: proportional-nums;
+}
+.hlstats-profile-activity{ min-width: 140px; }
+.hlstats-profile-activity meter{
+  height: 6px;
+  margin-top: 6px;
+  border: 0;
+}
+.hlstats-profile-activity meter::-webkit-meter-bar{ height: 6px; }
+
+/* Links, and the edit of one's own profile (clan, home page) in a panel under them */
+.hlstats-profile-actions{
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-top: var(--card-border);
+}
+.hlstats-profile-find{
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.hlstats-profile-find:hover{ color: var(--a-color-hover); }
+.hlstats-profile-edit > summary{ list-style: none; }
+.hlstats-profile-edit > summary::-webkit-details-marker{ display: none; }
+.hlstats-profile-edit[open] > summary{ border-color: var(--sba-accent); }
+.hlstats-profile-editform{
+  position: absolute;
+  z-index: 20;
+  top: calc(100% - 6px);
+  left: 22px;
+  width: min(380px, calc(100% - 44px));
+  display: grid;
+  gap: 10px;
+  padding: 14px;
   border-radius: 8px;
-  border: 2px solid transparent;
-  background-clip: content-box;
+  background: var(--header-dropmenu-bg);
+  border: var(--header-dropmenu-border);
+  box-shadow: var(--header-dropmenu-shadow);
+}
+.hlstats-profile-editform label{
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.hlstats-profile-editform input[type="text"]{
+  width: 100%;
+  border-radius: 6px;
 }
 
+/* Favorites: server, map, weapon */
+.hlstats-profile-favs{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.hlstats-profile-fav{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.hlstats-profile-fav-icon{
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--table-td-bg-hover);
+}
+.hlstats-profile-fav-text{
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.hlstats-profile-fav-label{
+  font-size: 12px;
+  opacity: .7;
+}
+.hlstats-profile-fav-value{
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hlstats-profile-fav-image{
+  flex: none;
+  margin-left: 15px;
+  max-width: 45%;
+  max-height: 36px;
+}
+
+/* The other statistics, in two columns; a dotted value has its recent count in a tooltip */
+.hlstats-profile-list{
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 28px;
+}
+.hlstats-profile-list > div{
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: var(--table-td-border-bottom);
+}
+.hlstats-profile-list dt{ opacity: .75; }
+.hlstats-profile-list dd{
+  min-width: 0;
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.hlstats-profile-list dd[data-tooltip]{
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+/* the six headline tiles: one row, then 3 + 3, then 2 + 2 + 2 (never a tile alone on its row) */
+@media (max-width: 1080px){
+  .hlstats-profile-kpis{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 600px){
+  .hlstats-profile-kpis{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px){
+  .hlstats-profile-main{
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 18px;
+  }
+  .hlstats-profile-headline{
+    padding-top: 14px;
+    border-top: var(--card-border);
+  }
+  .hlstats-profile-headline > div{ flex: 1; padding: 0 14px; }
+  .hlstats-profile-headline > div:first-child{ padding-left: 0; }
+  .hlstats-profile-actions{ padding: 12px 18px; }
+  .hlstats-profile-editform{ left: 18px; width: min(380px, calc(100% - 36px)); }
+}
+@media (max-width: 600px){
+  .hlstats-profile-identity{ align-items: flex-start; gap: 14px; }
+  .hlstats-profile-avatar{ width: 72px; height: 72px; border-radius: 10px; }
+  .hlstats-profile-badge{ padding: 6px; font-size: calc(var(--badge-size, 30px) * .64); }
+  .hlstats-profile-name{ font-size: 20px; }
+  .hlstats-profile-big{ font-size: 22px; }
+  .hlstats-profile-headline > div{ padding: 0 10px; }
+  .hlstats-profile-activity{ min-width: 0; }
+  .hlstats-profile-find{ margin-left: 0; width: 100%; }
+  .hlstats-profile-list{ grid-template-columns: minmax(0, 1fr); }
+}
 
 /* Profile header: avatar left, identity right */
 .hlstats-profile-head{
@@ -1333,6 +1713,46 @@ display: flex;
     width:100%;
     max-width:100%;
 }
+
+/* Ranks: the current rank in a narrow card, the rank history beside it (under it on a phone) */
+.hlstats-cards-grid.hlstats-ranks{
+  grid-template-columns: 360px minmax(0, 1fr);
+}
+@media (max-width: 800px){
+  .hlstats-cards-grid.hlstats-ranks{ grid-template-columns: minmax(0, 1fr); }
+}
+.hlstats-rank-current{ text-align: center; }
+.hlstats-rank-current .hlstats-card-title{ text-align: left; }
+/* its picture large, the upper half over the game's banner fading out */
+.hlstats-rank-hero{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+.hlstats-rank-banner{
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 8px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent);
+  mask-image: linear-gradient(to bottom, #000 45%, transparent);
+}
+.hlstats-rank-image{
+  width: 192px;
+  height: 192px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,.6));
+}
+.hlstats-rank-hero.has-banner .hlstats-rank-image{ margin-top: -96px; }
+.hlstats-rank-name{
+  margin: 6px 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--card-title-color);
+  text-shadow: 0 1px 0 rgba(0,0,0,.5);
+}
 /* vignette */
 /* container */
 .hlstats-center{
@@ -1351,7 +1771,7 @@ display: flex;
   background: var(--card-bg);
   border: var(--card-border);
 
-  box-shadow:var(--card-shadow);
+  box-shadow: var(--card-award-shadow);
 
   text-align:center;
   display:flex;
@@ -1571,12 +1991,17 @@ display: flex;
 
 .theme-menu a{
   display: block;
-  color: var(--header-dropmenu-color);
   padding: 6px 10px;
   text-align: right;
 }
 
-.theme-menu a:hover{
+/* Menu links (themes, games) */
+.theme-menu a,
+#gamelist-menu li a{
+  color: var(--header-dropmenu-color);
+}
+.theme-menu a:hover,
+#gamelist-menu li a:hover{
   background: var(--header-dropmenu-bg-hover);
   color: var(--header-dropmenu-color-hover);
 }
@@ -1815,7 +2240,7 @@ display: flex;
   border-radius: 6px;
   margin-bottom: 15px;
   overflow: hidden;
-  box-shadow: var(--card-shadow);
+  box-shadow: var(--card-section-shadow);
 }
 
 .hlstats-steam-stats {
@@ -2005,8 +2430,7 @@ display: flex;
 @media (max-width: 1000px){
   .hide-3 { display: none; }
   .show-3 { display: block; }
-  .hlstats-contents table.livestats-table-server td:nth-child(2),
-  .hlstats-contents table.livestats-table-server th:nth-child(2) { width: 18%; }
+  .hlstats-contents table.livestats-table-server :is(th, td):nth-child(2){ width: 18%; }
 
 }
 
@@ -2114,7 +2538,6 @@ display: flex;
 
   #map { height: 240px; }
   .hlstats-map-row{ padding: 2px 0; }
-  .leaflet-popup-content { margin: 4px; }
   .hlstats-contents table .hlstats-map-top { margin-bottom: 2px; }
   .hide{ display: none; }
   .show{ display: block; }
@@ -2123,3 +2546,322 @@ display: flex;
   .hlstats-lang{ max-width: 160px; }
 }
 
+
+/* =======================
+   SourceBans
+   ======================= */
+
+/* Hint under the options of the header search on the SourceBans pages */
+.sb-search-hint{
+  max-width: 260px;
+  margin: 10px 0 0;
+  font-size: 12px;
+  opacity: .7;
+}
+
+.sb-more{
+  margin-left: auto;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.sb-more:hover{ color: var(--a-color-hover); }
+.sb-empty{
+  margin: 6px 0;
+  font-style: italic;
+  opacity: .7;
+}
+
+/* Ban history columns: the scale stays, the columns scroll sideways when they do not fit */
+.sb-chart{
+  display: flex;
+  align-items: flex-start;
+  --sb-top: 18px;      /* room for the value above the highest column */
+  --sb-col: 30px;      /* narrowest column */
+}
+.sb-chart.is-year{ --sb-col: 40px; }
+.sb-chart.is-day{ --sb-col: 22px; }
+.sb-chart-y{
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 150px;
+  margin-top: var(--sb-top);
+}
+.sb-chart-y span{
+  position: absolute;
+  right: 8px;
+  transform: translateY(50%);
+  font-size: 11px;
+  opacity: .6;
+}
+.sb-chart-scroll{
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.sb-chart-inner{
+  flex: 1 0 auto;
+  min-width: calc(var(--sb-cols) * var(--sb-col));
+  padding: var(--sb-top) 4px 4px 0;
+}
+/* The whole history opens on its latest columns: a reversed row starts scrolled to its end */
+.sb-chart.is-latest .sb-chart-scroll{
+  display: flex;
+  flex-direction: row-reverse;
+}
+.sb-chart-plot{
+  position: relative;
+  height: 150px;
+}
+.sb-chart-grid{
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: var(--table-td-border-bottom);
+}
+.sb-chart-cols{
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+.sb-chart-col{
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  align-items: flex-end;
+  justify-content: center;
+  border: 0;
+  border-radius: 4px 4px 0 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+.sb-chart-col:hover{ background: var(--table-td-bg-hover); }
+button.sb-chart-col:hover{ filter: none; }
+button.sb-chart-col:focus-visible{
+  outline: 2px solid var(--input-border-color-focus);
+  outline-offset: -2px;
+}
+.sb-chart-col i{
+  display: block;
+  width: min(24px, 60%);
+  background: var(--button-bg);
+  border-radius: 4px 4px 0 0;
+}
+.sb-chart-col:hover i{ filter: brightness(1.15); }
+.sb-chart-value{
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+.sb-chart-x{
+  display: flex;
+  margin-top: 6px;
+}
+.sb-chart-x span{
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+  opacity: .7;
+}
+.sb-chart-reset{ margin-left: auto; }
+
+/* Latest bans and comm blocks */
+.sb-list{
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sb-item{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 6px;
+}
+.sb-item + .sb-item{ border-top: var(--table-td-border-bottom); }
+.sb-item:hover{ background: var(--table-td-bg-hover); }
+.sb-item-icon{
+  flex: none;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+.sb-item-main{
+  flex: 1;
+  min-width: 0;
+}
+.sb-item-name{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.sb-item-name .hlstats-flag img{
+  display: block;
+  max-height: 14px;
+}
+.sb-item-name .hlstats-name,
+.sb-item-note{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sb-item-sub{
+  display: flex;
+  min-width: 0;
+  margin-top: 1px;
+  font-size: 12px;
+  opacity: .7;
+}
+.sb-item-sub time{ flex: none; }
+.sb-item-note{ min-width: 0; }
+.sb-item-note::before{
+  content: "\00B7";
+  margin: 0 6px;
+}
+.sb-item-note.is-empty{ font-style: italic; }
+
+/* Recent activity: bans, comm blocks and blocked joins side by side (bans alone with AMXBans alone) */
+.hlstats-cards-grid.sb-latest{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+}
+.hlstats-cards-grid.sb-latest.is-pair{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.hlstats-cards-grid.sb-latest.is-single{ grid-template-columns: minmax(0, 1fr); }
+/* opening a player in one card must not stretch the others */
+.hlstats-cards-grid.sb-latest > .hlstats-card{ height: auto; }
+
+/* Comm type (mute, gag) */
+.sb-type{
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  opacity: .85;
+}
+.sb-item-icon .sb-type{
+  width: 22px;
+  height: 22px;
+}
+.sb-type svg{
+  width: 100%;
+  height: 100%;
+}
+
+
+.sb-muted{ opacity: .65; }
+
+/* Rows that open their details (bans, comms) or their players (servers, for admins), with the row under them:
+   the zebra rows skip that details row and the arrow turns (see the Table section) */
+.sb-expand,
+.sba-server{ cursor: pointer; }
+.sb-open{ color: inherit; }
+.sb-open:hover{ text-decoration: underline; }
+.sb-item.is-open,
+.hlstats-contents table tbody tr.is-open > td{ background: var(--table-td-bg-hover); }
+/* only its own cell: the players table of a server has its own rows */
+.hlstats-contents table tbody tr.sb-details-row > td{
+  padding: 0;
+  background: var(--card-section-bg);
+}
+.sb-list > .sb-details-row{
+  padding: 0 6px 8px;
+  background: var(--table-td-bg-hover);
+}
+
+/* Details panel and page */
+.sb-details{
+  padding: 12px 14px;
+  text-align: left;
+}
+.sb-details.is-loading{ opacity: .6; }
+.sb-list .sb-details{ padding: 8px 4px 4px 32px; }
+.sb-fields{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px 24px;
+}
+.sb-field{ min-width: 0; }
+.sb-field.is-wide{ grid-column: 1 / -1; }
+.sb-field-label{
+  margin-bottom: 2px;
+  font-size: 12px;
+  opacity: .65;
+}
+/* narrow dashboard cards: one "label  value" line per field */
+.sb-list .sb-fields{
+  grid-template-columns: 1fr;
+  gap: 5px;
+}
+.sb-list .sb-field{
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+}
+.sb-list .sb-field-label{ margin: 0; }
+.sb-field-value{
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.sb-field-value a{ text-decoration: underline; }
+.sb-field-value .sb-type{
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+}
+.sb-field-icon{
+  height: 16px;
+  margin-right: 6px;
+  vertical-align: -3px;
+}
+.sb-details-note{ margin: 10px 0 0; font-size: 12px; opacity: .6; }
+/* "Your status" card of the bans dashboard: a dot says it (green all good, red a ban or block on you), then the links.
+   Between the tiles and the chart: the 15px the tiles grid keeps above it, the same below */
+.sb-record{ margin-bottom: 15px; }
+.sb-record-state{ display: flex; align-items: baseline; gap: 9px; margin: 2px 0 12px; font-size: 14px; }
+.sb-record-state::before{ content: ""; flex: none; width: 9px; height: 9px; border-radius: 50%; background: currentColor; opacity: .4; }
+.sb-record-state.is-good::before{ background: var(--green); opacity: 1; }
+.sb-record-state.is-bad::before{ background: var(--red); opacity: 1; }
+.sb-record-state .sb-muted{ margin-left: 6px; }
+.sb-record .sb-list{ margin-bottom: 12px; }
+.sb-record-actions{ display: flex; flex-wrap: wrap; gap: 8px; }
+/* where an active ban or block is appealed (Bans settings of the HLstatsZ admin) */
+.sb-details-appeal{ margin: 10px 0 0; font-size: 13px; }
+.sb-details-appeal a{ font-weight: 600; }
+.sb-details-head{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: var(--card-border);
+  font-size: 16px;
+}
+.sb-details-head .hlstats-flag img{ display: block; }
+.sb-details-head .hlstats-name{
+  min-width: 0;
+  margin-right: auto;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1049px){
+  .hlstats-cards-grid.sb-latest{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hlstats-cards-grid.sb-latest > :nth-child(3){ grid-column: 1 / -1; }
+}
+@media (max-width: 705px){
+  .hlstats-cards-grid.sb-latest,
+  .hlstats-cards-grid.sb-latest.is-pair{ grid-template-columns: minmax(0, 1fr); }
+}

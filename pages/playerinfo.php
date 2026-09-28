@@ -30,6 +30,64 @@ function makeClanTag(string $name): array{
     return [$tag , $name];
 }
 
+function playerIdentity(array $playerdata, string $uqid, string $coid, array $steam): void
+{
+    global $g_options;
+
+    $player   = (int) $playerdata['playerId'];
+    $isBot    = (bool) preg_match('/^BOT/i', $uqid);
+    $name     = htmlspecialchars(html_entity_decode($playerdata['lastName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT);
+    $location = $isBot ? '(Server)' : Location($playerdata['city'], $playerdata['state'], $playerdata['country'], $g_options['countrydata']);
+    $steamId  = $isBot ? $uqid : ($g_options['Mode'] == 'Normal' ? 'STEAM_0:' : '') . $uqid;
+    $tip      = fn($key) => ' data-tooltip="' . htmlspecialchars(tLabel($key), ENT_QUOTES) . '"';
+
+    if ($isBot) {
+        $statusPill = '';
+    } elseif ($steam['status'] === '') {
+        $statusPill = '<span class="hlstats-pill neutral">' . t('loading') . '</span>';
+    } else {
+        $color      = $steam['status'] === 'offline' ? 'red' : ($steam['status'] === 'Unknown' ? 'orange' : 'green');
+        $statusPill = '<span class="hlstats-pill is-status ' . $color . '"' . $tip('status') . '>' . htmlspecialchars(ucfirst($steam['status']), ENT_COMPAT) . '</span>';
+    }
+?>
+<img class="hlstats-profile-avatar" src="<?= htmlspecialchars($steam['avatar'], ENT_QUOTES) ?>" alt="" />
+<div class="hlstats-profile-info">
+    <div class="hlstats-profile-name">
+<?php if ($g_options['countrydata']) { ?>
+        <span class="hlstats-flag"><img src="<?= getFlag($isBot ? 'bot' : $playerdata['flag']) ?>" alt="<?= htmlspecialchars($playerdata['country'] ?? '', ENT_QUOTES) ?>" data-tooltip="<?= htmlspecialchars($playerdata['country'] ?? '', ENT_QUOTES) ?>" /></span>
+<?php } ?>
+        <span><?= $name ?></span>
+        <?= $statusPill ?>
+<?php if (!empty($steam['vac'])) { ?>
+        <span class="hlstats-pill red">VAC banned</span>
+<?php } ?>
+    </div>
+    <div class="hlstats-profile-meta">
+<?php if ($g_options['countrydata'] && $location !== '(Unknown)') { ?>
+        <span<?= $tip('location') ?>><?= svgIcon('pin', 15) . $location ?></span>
+<?php } ?>
+<?php if (!$isBot) { ?>
+        <span<?= $tip('member.since') ?>><?= svgIcon('calendar', 15) ?><span id="steam-member-since-<?= $player ?>"><?= htmlspecialchars($steam['member_since'], ENT_COMPAT) ?></span></span>
+<?php } ?>
+<?php if ($playerdata['last_event']) { ?>
+        <span<?= $tip('last.connect') ?>><?= svgIcon('clock', 15) . formatDate($playerdata['last_event'], IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT) ?></span>
+<?php } ?>
+    </div>
+    <div class="hlstats-profile-chips">
+<?php if ($isBot) { ?>
+        <span class="hlstats-chip is-mono"><?= htmlspecialchars($steamId, ENT_COMPAT) ?></span>
+<?php } else { ?>
+        <span class="hlstats-chip is-mono"><a href="https://steamcommunity.com/profiles/<?= htmlspecialchars($coid, ENT_QUOTES) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($steamId, ENT_COMPAT) ?></a><button type="button" class="hlstats-copy" data-copy="<?= htmlspecialchars($steamId, ENT_QUOTES) ?>" data-tooltip="<?= htmlspecialchars(t('copy.steamid'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('copy.steamid'), ENT_QUOTES) ?>"><?= svgIcon('copy', 14) . svgIcon('check', 14) ?></button></span>
+<?php } ?>
+<?php if ($playerdata['clan']) { ?>
+        <a class="hlstats-chip" href="?mode=claninfo&amp;clan=<?= (int) $playerdata['clan'] ?>"<?= $tip('member.clan') ?>><?= svgIcon('users', 14) . htmlspecialchars($playerdata['clan_name'] ?? '', ENT_COMPAT) ?></a>
+<?php } ?>
+        <span class="hlstats-chip <?= $playerdata['hideranking'] == 2 ? 'red' : 'green' ?>"<?= $tip('karma') ?>><?= svgIcon('shield', 14) . t($playerdata['hideranking'] == 2 ? 'karma.banned' : 'karma.good') ?></span>
+    </div>
+</div>
+<?php
+}
+
     // Player Details
     $player = valid_request(intval($_GET['player'] ?? 0), true);
     $uniqueid = valid_request(strval($_GET['uniqueid'] ?? ''), false);
@@ -222,8 +280,6 @@ function makeClanTag(string $name): array{
     } else {
         $statusmsg = '<span class="hlstats-status good;">'.t('karma.good').'</span>';
     }
-// Required on a few pages, just decided to add it here
-// May get moved in the future
 
 $db->query("
         SELECT
@@ -287,15 +343,6 @@ $db->query("
         exit;
     }
 
-
-    if ($g_options['modrewrite'] == 0) {
-       $imglink  = $script_path.'/sig.php?player_id='.$player.'&amp;background='.$g_options['sigbackground'];
-        $jimglink = $script_path.'/sig.php?player_id='.$player.'&background='.$g_options['sigbackground'];
-    } else {
-        $imglink  = $script_path.'/sig-'.$player.'-'.$g_options['sigbackground'].'.png';
-        $jimglink = $imglink;
-    }
-
 ?>
 <div class="hlstats-tabs-bar">
 <ul class="hlstats-tabs" id="tabs_playerinfo">
@@ -335,20 +382,11 @@ function loadPlayerSteamProfile() {
     }
 
     el.dataset.loaded = "true";
-    Fetch.run(playerSteamProfileUrl, el, false).then(() => {
-        const memberSince = document.getElementById("steam-member-since-value-<?= (int)$player ?>");
-        const target = document.getElementById("steam-member-since-<?= (int)$player ?>");
-
-        if (memberSince && target) {
-            target.textContent = memberSince.dataset.memberSince || memberSince.textContent || "Private";
-        }
-    }).catch(() => {
-        const target = document.getElementById("steam-member-since-<?= (int)$player ?>");
-
-        if (target) {
-            target.textContent = "Unavailable";
-        }
-
+    // The answer draws the header's identity part again, with Steam's avatar, status and join date
+    Fetch.run(playerSteamProfileUrl, el, false).catch(() => {
+        // No answer from Steam: keep the header without its "Loading..." parts
+        el.querySelector(".hlstats-profile-name .hlstats-pill.neutral")?.remove();
+        document.getElementById("steam-member-since-<?= (int)$player ?>")?.parentElement.remove();
         el.classList.remove("is-loading");
     });
 }
@@ -367,21 +405,19 @@ Tabs.init({
     }
 });
 
-function setForumText(val) {
-    var txtArea = document.getElementById('siglink');
-    switch(val)
-    {
-        case 0:
-            <?php echo "txtArea.value = '$jimglink'\n"; ?>
-            break;
-        case 1:
-            <?php echo "txtArea.value = '[url=$script_path/hlstats.php?mode=playerinfo&player=$player"."][img]$jimglink"."[/img][/url]'\n"; ?>
-            break;
-        case 2:
-            <?php echo "txtArea.value = '[url=\"$script_path/hlstats.php?mode=playerinfo&player=$player\"][img]$jimglink"."[/img][/url]'\n"; ?>
-            break;
-    }
-}
+// Forum signature: a format button puts its code in the box and on the Copy button
+document.addEventListener("click", event => {
+    const button = event.target instanceof Element ? event.target.closest("[data-sigcode] [data-code]") : null;
+    if (!button) return;
+    const box = button.closest("[data-sigcode]");
+    box.querySelectorAll("[data-code]").forEach(b => {
+        b.classList.toggle("is-active", b === button);
+        b.setAttribute("aria-pressed", b === button ? "true" : "false");
+    });
+    box.querySelector("textarea").value = button.dataset.code;
+    box.querySelector("[data-copy]").dataset.copy = button.dataset.code;
+    box.querySelector(".hlstats-sigcode-hint").textContent = button.dataset.hint;
+});
 </script>
 <div class="hlstats-note">
     <a href="?mode=players&amp;game=<?= $game ?>">&larr;&nbsp;<?= t('goto.player.rankings') ?></a>
@@ -394,7 +430,7 @@ function setForumText(val) {
     if ((!empty($_SESSION['loggedin']) && (int)($_SESSION['acclevel'] ?? 0) >= 100) || (isset($_SESSION['ID64']) && isSteamAdmin($_SESSION['ID64'])))
     {
         echo "<div class=\"center\">
-         <button onclick=\"window.location.href='?mode=admin&task=tools_editdetails_player&id=$player'\">".t('edit.player')."</button>
+         <button class=\"hlstats-btn\" onclick=\"window.location.href='?mode=admin&task=tools_editdetails_player&id=$player'\">".t('edit.player')."</button>
        </div>";
     }
 ?>

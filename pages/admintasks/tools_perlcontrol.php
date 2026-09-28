@@ -163,15 +163,15 @@ $commands[3]["cmd"] = "KILL";
 	<table>
 		<tr>
 			<td class="left"><label for="masterserver">Daemon IP or Hostname:</label><p>Hostname or IP address of your HLstats Daemon<br>Normally 'localhost' or IP or Hostname listed in the "logaddress_add" line on your game server.<br />example: daemon1.yoursite.com <em>or</em> 0.0.0.0</p></td>
-			<td class="right"><input type="text" name="masterserver" value="<?= $form_host ?>"></td>
+			<td class="right"><input type="text" id="masterserver" name="masterserver" value="<?= $form_host ?>"></td>
 		</tr>
 		<tr>
 			<td class="left"><label for="port">Daemon Port:</label><p>Port number the daemon (or proxy_daemon) is listening on.<br>Normally the port listed in the "logaddress_add" line on your game server configuration.<br />example: 27500</p></td>
-			<td class="right"><input type="text" name="port" value="<?= $form_port ?>" size="6"></td>
+			<td class="right"><input type="text" id="port" name="port" value="<?= $form_port ?>" size="6"></td>
 		</tr>
 		<tr>
 			<td class="left"><label for="command">Command:</label><p>Select the operation to perform on the daemon<br /><strong>* Note: If you shut the daemon down through this page it can not be restarted through this interface!</strong></p></td>
-			<td class="right"><select name="command"><?php
+			<td class="right"><select id="command" name="command"><?php
   foreach ($commands as $i => $cmd) {
     $sel = ($i === $form_command) ? ' selected' : '';
     echo "<option value=\"$i\"$sel>" . htmlspecialchars($cmd["name"]) . "</option>";

@@ -1,0 +1,311 @@
+:root{
+  /* logo */
+  --logo-color: #efe6d8;
+  --logo-color-z: #ff7a1a;
+
+  /* Base: purple night, a pumpkin glow and a violet haze at the top */
+  --body-bg:
+    radial-gradient(1000px 400px at 20% -8%, rgba(255,122,26,.11), rgba(255,122,26,0) 65%),
+    radial-gradient(900px 380px at 82% -6%, rgba(150,80,220,.16), rgba(150,80,220,0) 62%),
+    linear-gradient(to bottom, #170d26 0%, #120a1e 50%, #150b22 100%);
+  --main-color: #efe6d8;
+
+  /* Links (pumpkin) */
+  --a-color: #ff9a4a;
+  --a-color-hover: #ffc08a;
+
+  /* Section titles (pumpkin to violet) */
+  --h-tag-bg: linear-gradient(-60deg, rgba(255,122,26,.20) 5%, rgba(140,70,200,.22) 95%);
+
+  /* Inputs */
+  --input-border: 1px solid rgba(210,170,255,.16);
+  --input-bg: rgba(8,4,14,.5);
+  --input-border-color-focus: rgba(255,138,42,.85);
+  --select-option-bg: #1c0f2e;
+  --input-placeholder-color: rgba(239,230,216,.5);
+
+  /* Buttons (pumpkin, dark text) */
+  --button-bg: #ff7a1a;
+  --button-color: #1a0d0a;
+
+  /* Header: night sky over a graveyard, then the ground */
+  --header-top-bg: linear-gradient(to bottom, #07030d 0%, #160a2a 40%, #2f1447 75%, #4d2152 100%);
+  --header-border-bottom: none;
+  --header-top-nav-color: #e8dcc8;
+  --header-top-nav-color-active: #ff9a4a;
+
+  --header-sub-bar-bg: linear-gradient(to bottom, #0c0612 0%, #150a22 100%);
+  --header-dropmenu-bg: #1a0e2a;
+  --header-dropmenu-bg-hover: rgba(255,122,26,.16);
+  --header-dropmenu-border: 1px solid rgba(210,170,255,.14);
+  --header-dropmenu-border-color: rgba(210,170,255,.14);
+  --header-dropmenu-color: #e8dcc8;
+  --header-dropmenu-color-hover: #ffffff;
+  --header-dropmenu-shadow: 0 14px 34px rgba(0,0,0,.6);
+
+  /* Search panel */
+  --search-panel-bg: linear-gradient(#2a1540, #170b26);
+  --search-panel-border: 1px solid rgba(0,0,0,.55);
+  --search-panel-shadow: 0 14px 34px rgba(0,0,0,.6);
+
+  /* Footer: the graveyard ground */
+  --footer-color: #a99bbd;
+  --footer-color-small: rgba(200,185,220,.6);
+  --footer-color-a: #ff9a4a;
+  --footer-color-meta-a: #e8dcc8;
+  --footer-color-a-hover: #ffffff;
+
+  /* Tabs */
+  --tabs-bg: linear-gradient(#2a1540, #1a0d2a);
+  --tab-border: 1px solid rgba(0,0,0,.4);
+  --tab-color: #e0d2ee;
+  --tab-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 -1px 0 rgba(0,0,0,.35) inset;
+  --tab-color-hover: #ffffff;
+  --tab-bg-hover: linear-gradient(#3a1d52, #251238);
+  --tab-color-active: #1a0d0a;
+  --tab-bg-active: linear-gradient(#ff8c2b, #d9600f);
+
+  /* Tables */
+  --table-bg: rgba(12,6,20,.45);
+  --table-border: 1px solid rgba(210,170,255,.10);
+  --table-th-bg: linear-gradient(to bottom, rgba(58,28,84,.95) 65%, rgba(36,16,56,.95));
+  --table-th-color: #f4ead9;
+  --table-th-border-bottom: 1px solid rgba(210,170,255,.10);
+  --table-td-color: rgba(244,234,217,.86);
+  --table-td-border-bottom: 1px solid rgba(210,170,255,.06);
+  --table-td-bg-odd: rgba(0,0,0,.12);
+  --table-td-bg-even: rgba(255,255,255,.02);
+  --table-td-bg-hover: rgba(255,122,26,.10);
+  --table-a-color: #f4ead9;
+  --table-a-color-hover: #ff9a4a;
+  --table-shadow: 0 10px 28px rgba(0,0,0,.35);
+
+  /* Cards: violet glass */
+  --card-bg: linear-gradient(180deg, rgba(46,24,66,.70), rgba(24,12,38,.72));
+  --card-section-bg: rgba(0,0,0,.14);
+  --card-section-border: 1px solid rgba(210,170,255,.08);
+  --card-section-shadow: 0 10px 30px rgba(0,0,0,.4);
+  --card-border: 1px solid rgba(210,170,255,.12);
+  --card-border-color-hover: rgba(255,122,26,.50);
+  --card-title-color: #e6d9c6;
+
+  /* Awards: candle-lit counts */
+  --card-award-bg: radial-gradient(circle at 30% 25%, rgba(255,190,120,.14), rgba(0,0,0,.2));
+  --card-award-border: 1px solid rgba(210,170,255,.10);
+  --card-award-winner-color: rgba(239,230,216,.88);
+  --card-award-winner-count-bg: rgba(0,0,0,.3);
+  --card-award-winner-count-color: #ffb347;
+  --card-award-winner-count-border: 1px solid rgba(255,179,71,.22);
+  --card-award-has-winner-border: rgba(255,122,26,.40);
+  --card-scrollbar-color: rgba(255,154,74,.45) transparent;
+  --card-award-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 12px 24px rgba(0,0,0,.15);
+  --card-award-has-winner-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 16px 32px rgba(0,0,0,.5);
+  --card-award-rank-has-winner-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 2px 4px rgba(0,0,0,.5);
+
+  /* Pagination */
+  --pagination-hover-bg: rgba(255,122,26,.25);
+  --pagination-hover-border: 1px solid rgba(210,170,255,.14);
+
+  /* Ajax loader */
+  --ajax-bg: #ff7a1a;
+
+  /* Hitbox */
+  --hitbox-model-bg:
+    radial-gradient(ellipse at 50% 35%, rgba(255,122,26,.10) 0%, rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(46,24,66,.40), rgba(0,0,0,.55));
+}
+
+.z{ color: #ff7a1a; }
+
+/* Night sky: stars, and from 1000 px the harvest moon and the graveyard (the haunted house from 1600 px) */
+.hlstats-top{
+  position: relative;
+  background:
+    url('halloween-stars.svg') 0 0 / 460px 104px repeat-x,
+    var(--header-top-bg);
+}
+@media (min-width: 1000px){
+  .hlstats-top{
+    background:
+      url('halloween-graveyard.svg') right 18px bottom 0 / 360px 88px no-repeat,
+      url('halloween-moon.svg') left 63% top 4px / 96px 96px no-repeat,
+      url('halloween-stars.svg') 0 0 / 460px 104px repeat-x,
+      var(--header-top-bg);
+  }
+}
+@media (min-width: 1600px){
+  .hlstats-top{
+    background:
+      url('halloween-graveyard.svg') right 18px bottom 0 / 360px 88px no-repeat,
+      url('halloween-house.svg') left calc(50% - 730px) bottom 0 / 230px 92px no-repeat,
+      url('halloween-moon.svg') left 63% top 4px / 96px 96px no-repeat,
+      url('halloween-stars.svg') 0 0 / 460px 104px repeat-x,
+      var(--header-top-bg);
+  }
+}
+
+/* Grass along the bottom of the header, the same colour as the ground below */
+.hlstats-top::after{
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 14px;
+  background: url('halloween-grass.svg') 0 0 / 200px 14px repeat-x;
+  pointer-events: none;
+}
+
+/* Fog drifting over the graves (halloween.js): one 600 px tile of mist, moved by one tile */
+.halloween-fog{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  height: 38px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.halloween-fog i{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(100% + 600px);
+  background:
+    radial-gradient(ellipse 110px 12px at 130px 25px, rgba(214,196,245,.30), rgba(214,196,245,0)) 0 0 / 600px 38px repeat-x,
+    radial-gradient(ellipse 140px 14px at 310px 19px, rgba(214,196,245,.22), rgba(214,196,245,0)) 0 0 / 600px 38px repeat-x,
+    radial-gradient(ellipse 105px 11px at 480px 26px, rgba(214,196,245,.28), rgba(214,196,245,0)) 0 0 / 600px 38px repeat-x,
+    radial-gradient(ellipse 80px 8px at 400px 11px, rgba(214,196,245,.15), rgba(214,196,245,0)) 0 0 / 600px 38px repeat-x;
+  animation: halloween-fog 45s linear infinite;
+}
+@keyframes halloween-fog{
+  to{ transform: translateX(-600px); }
+}
+
+/* Witch hat on the logo */
+.hlstats-top .hlstats-brand{ position: relative; }
+.hlstats-top .hlstats-brand::before{
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: -24px;
+  width: 42px;
+  height: 36px;
+  background: url('halloween-hat.svg') center / contain no-repeat;
+  transform: rotate(-14deg);
+  pointer-events: none;
+}
+
+/* Cobwebs in the corner of the section titles */
+.hlstats-contents h1{ position: relative; }
+.hlstats-contents h1::after{
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border-top-right-radius: 10px;
+  background: url('halloween-web.svg') top right / contain no-repeat;
+  pointer-events: none;
+}
+
+/* Graves along the top of the footer */
+.hlstats-footer{
+  position: relative;
+  background: linear-gradient(to bottom, #0c0612 0%, #07040b 100%);
+  border-top: 0;
+}
+.hlstats-footer::before{
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -40px;
+  height: 46px;
+  background: url('halloween-graves.svg') 0 0 / 520px 46px repeat-x;
+  pointer-events: none;
+}
+
+/* The admin menu shows its current item in the text colour of the active tab, without the tab: the tabs' dark text
+   would vanish there, so the pumpkin accent instead */
+.hlstats-sub-task li.active > a,
+.hlstats-admin-active{ color: var(--a-color) !important; }
+
+/* Bats and ghosts crossing the page now and then (halloween.js) */
+.halloween-night{
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 999998;
+}
+.halloween-bat,
+.halloween-ghost{
+  position: absolute;
+  left: 0;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.halloween-bat b,
+.halloween-ghost b{
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.halloween-bat{
+  width: 34px;
+  height: 12px;
+  transform: translateX(110vw);
+  animation-name: halloween-fly;
+}
+.halloween-bat b{
+  background: url('halloween-bat.svg') center / contain no-repeat;
+  animation: halloween-flap .17s ease-in-out infinite alternate;
+}
+@keyframes halloween-fly{
+  0%{ transform: translate(110vw, 0); }
+  8%{ transform: translate(80vw, 18px); }
+  16%{ transform: translate(50vw, -10px); }
+  24%{ transform: translate(20vw, 14px); }
+  32%, 100%{ transform: translate(-12vw, 0); }
+}
+@keyframes halloween-flap{
+  from{ transform: scaleY(1); }
+  to{ transform: scaleY(.45); }
+}
+
+.halloween-ghost{
+  width: 24px;
+  height: 29px;
+  opacity: .55;
+  transform: translateX(-12vw);
+  animation-name: halloween-drift;
+}
+.halloween-ghost b{
+  background: url('halloween-ghost.svg') center / contain no-repeat;
+  filter: drop-shadow(0 0 6px rgba(220,200,255,.55));
+  animation: halloween-bob 2.6s ease-in-out infinite alternate;
+}
+@keyframes halloween-drift{
+  0%{ transform: translateX(-12vw); }
+  45%, 100%{ transform: translateX(112vw); }
+}
+@keyframes halloween-bob{
+  from{ transform: translateY(-7px) rotate(-5deg); }
+  to{ transform: translateY(7px) rotate(5deg); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .halloween-fog i{ animation: none; }
+}

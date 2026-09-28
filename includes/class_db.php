@@ -1,56 +1,17 @@
 <?php
 /*
-HLstatsX Community Edition - Real-time player and clan rankings and statistics
-Copyleft (L) 2008-20XX Nicholas Hastings (nshastings@gmail.com)
-http://www.hlxcommunity.com
+HLstatsZ - Real-time player and clan rankings and statistics
+Originally HLstatsX Community Edition by Nicholas Hastings (2008–20XX)
+Based on ELstatsNEO by Malte Bayer, HLstatsX by Tobias Oetzel, and HLstats by Simon Garner
 
-HLstatsX Community Edition is a continuation of
-ELstatsNEO - Real-time player and clan rankings and statistics
-Copyleft (L) 2008-20XX Malte Bayer (steam@neo-soft.org)
-http://ovrsized.neo-soft.org/
+HLstats > HLstatsX > HLstatsX:CE > HLStatsZ
+HLstatsZ continues a long lineage of open-source server stats tools for Half-Life and Source games.
+This version is released under the GNU General Public License v2 or later.
 
-ELstatsNEO is an very improved & enhanced - so called Ultra-Humongus Edition of HLstatsX
-HLstatsX - Real-time player and clan rankings and statistics for Half-Life 2
-http://www.hlstatsx.com/
-Copyright (C) 2005-2007 Tobias Oetzel (Tobi@hlstatsx.com)
-
-HLstatsX is an enhanced version of HLstats made by Simon Garner
-HLstats - Real-time player and clan rankings and statistics for Half-Life
-http://sourceforge.net/projects/hlstats/
-Copyright (C) 2001  Simon Garner
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-For support and installation notes visit http://www.hlxcommunity.com
-*/
-
-
-/* Profile support:
-
-To see SQL run counts and run times, set the $profile variable below to something
-that evaluates as true.
-
-Add the following table to your database:
-CREATE TABLE IF NOT EXISTS `hlstats_sql_web_profile` (
-`queryid` int(11) NOT NULL AUTO_INCREMENT,
-`source` tinytext NOT NULL,
-`run_count` int(11) NOT NULL,
-`run_time` float NOT NULL,
-PRIMARY KEY (`queryid`),
-UNIQUE KEY `source` (`source`(64))
-) ENGINE=MyISAM;
+For current support and updates:
+   https://snipezilla.com
+   https://github.com/SnipeZilla
+   https://forums.alliedmods.net/forumdisplay.php?f=156
 */
 
 if (!defined('IN_HLSTATS')) {
@@ -72,7 +33,16 @@ class DB_mysql
 	public $querycount = 0;
 	public $last_calc_rows = 0;
 
-	function __construct($db_addr, $db_user, $db_pass, $db_name, $use_pconnect = false)
+	// The last error of the connection, a database selection or a query: array(MySQL error number, message)
+	public $last_error = array(0, '');
+	// false: a failed query that would show its error and end the page is recorded in $failures and returns false
+	// (the installer runs the database updates so)
+	public $exit_on_error = true;
+	public $failures = array();
+
+	// $exit false: without a connection or the database, the page goes on ($link false, $db_name null) and
+	// $last_error says why (hlstats.php then shows the installer)
+	function __construct($db_addr, $db_user, $db_pass, $db_name, $exit = true)
 	{
 		$this->db_addr = $db_addr;
 		$this->db_user = $db_user;
@@ -80,9 +50,13 @@ class DB_mysql
 
 		$this->querycount = 0;
 
-		// Persistent connections use the "p:" prefix; regular connections do not.
-		$host = $use_pconnect ? "p:$db_addr" : $db_addr;
-		$this->link = @mysqli_connect($host, $db_user, $db_pass);
+		// mysqli throws on errors since PHP 8.1
+		try {
+			$this->link = @mysqli_connect($db_addr, $db_user, $db_pass);
+		} catch (\mysqli_sql_exception $e) {
+			$this->link = false;
+			$this->last_error = array((int) $e->getCode(), $e->getMessage());
+		}
 
 		if ( $this->link )
 		{
@@ -90,21 +64,21 @@ class DB_mysql
 			$query_str = "SET collation_connection = " . DB_COLLATE;
 			mysqli_query($this->link, $query_str);
 
-			if ( $db_name != '' )
+			if ( $db_name != '' && !$this->select_db($db_name) && $exit )
 			{
-				$this->db_name = $db_name;
-				if ( !@mysqli_select_db($this->link, $db_name) )
-				{
-					@mysqli_close($this->link);
-					$this->error("Could not select database '$db_name'. Check that the value of DB_NAME in config.php is set correctly.");
-				}
+				$this->error("Could not select database '$db_name'. Check that the value of DB_NAME in config.php is set correctly.");
 			}
 
 			return $this->link;
 		}
 		else
 		{
-			$this->error('Could not connect to database server. Check that the values of DB_ADDR, DB_USER and DB_PASS in config.php are set correctly.');
+			if (!$this->last_error[0]) {
+				$this->last_error = array((int) mysqli_connect_errno(), (string) mysqli_connect_error());
+			}
+			if ($exit) {
+				$this->error('Could not connect to database server. Check that the values of DB_ADDR, DB_USER and DB_PASS in config.php are set correctly.');
+			}
 		}
 	}
 
@@ -211,8 +185,12 @@ class DB_mysql
 		$starttime = microtime(true);
 		try {
 			$this->last_result = @mysqli_query($this->link, $query);
+			if ($this->last_result === false) {
+				$this->last_error = array((int) mysqli_errno($this->link), (string) mysqli_error($this->link));
+			}
 		} catch (\mysqli_sql_exception $e) {
 			$this->last_result = false;
+			$this->last_error = array((int) $e->getCode(), $e->getMessage());
 		}
 		$endtime = microtime(true);
 
@@ -247,14 +225,15 @@ class DB_mysql
 		}
 		else
 		{
-			if ($showerror)
+			if ($showerror && $this->exit_on_error)
 			{
 				$this->error('Bad query.');
 			}
-			else
+			if ($showerror)
 			{
-				return false;
+				$this->failures[] = array('query' => $query, 'errno' => $this->last_error[0], 'error' => $this->last_error[1]);
 			}
+			return false;
 		}
 	}
 
@@ -275,9 +254,14 @@ class DB_mysql
 
 	function select_db($db_name)
 	{
-		if (@mysqli_select_db($this->link, $db_name)) {
-			$this->db_name = $db_name;
-			return true;
+		try {
+			if (@mysqli_select_db($this->link, $db_name)) {
+				$this->db_name = $db_name;
+				return true;
+			}
+			$this->last_error = array((int) mysqli_errno($this->link), (string) mysqli_error($this->link));
+		} catch (\mysqli_sql_exception $e) {
+			$this->last_error = array((int) $e->getCode(), $e->getMessage());
 		}
 		return false;
 	}
@@ -294,11 +278,12 @@ class DB_mysql
 
 	function error($message, $exit=true)
 	{
+		list($errno, $error) = $this->last_error;
 		error(
 			"<b>Database Error</b><br />\n<br />\n" .
 			"<i>Error Diagnostic:</i><br />\n$message<br /><br />\n" .
-			"<i>Server Error:</i> (" . @mysqli_errno($this->link) . ") " . @mysqli_error($this->link) . "<br /><br />\n" .
-			"<i>Last SQL Query:</i><br />\n<pre>$this->last_query</pre>",
+			"<i>Server Error:</i> (" . $errno . ") " . htmlspecialchars((string) $error) . "<br /><br />\n" .
+			"<i>Last SQL Query:</i><br />\n<pre>" . htmlspecialchars((string) $this->last_query) . "</pre>",
 			$exit
 		);
 	}

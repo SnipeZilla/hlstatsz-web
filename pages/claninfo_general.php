@@ -16,212 +16,206 @@ For current support and updates:
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 $is_Ajax = (isset($_GET['ajax']) && $_GET['ajax'] == 'members');
-$asterisk = $g_options['DeleteDays'] ? '*' : '';
 
 if (!$is_Ajax) {
+$days    = (int) $g_options['DeleteDays'];
+$members = (int) $clandata['nummembers'];
+$kills   = (int) $clandata['kills'];
+
+// Rank among the clans of the game, counted as the clan rankings count it (clans of two ranked players or more)
+list($rank1, $rank2, $order2) = $g_options['rankingtype'] !== 'kills' ? array('skill', 'kills', 'DESC') : array('kills', 'deaths', 'ASC');
+$db->query("
+    SELECT
+        rank_position
+    FROM (
+        SELECT
+            clan,
+            RANK() OVER (ORDER BY AVG($rank1) DESC, SUM($rank2) $order2) AS rank_position
+        FROM
+            hlstats_Players
+        WHERE
+            hideranking = 0
+            AND lastAddress <> ''
+            AND game = '$game'
+            AND clan > 0
+        GROUP BY
+            clan
+        HAVING
+            COUNT(playerId) > 1
+    ) AS ranked
+    WHERE
+        clan = $clan
+");
+list($clanRank) = $db->fetch_row() ?: array(null);
+
+$db->query("SELECT name FROM hlstats_Games WHERE code = '$game'");
+list($gameName) = $db->fetch_row() ?: array('');
+
+// Favorite server, map and weapon of its members (from the events kept)
+$db->query("
+    SELECT
+        hlstats_Events_Entries.serverId,
+        hlstats_Servers.name,
+        COUNT(hlstats_Events_Entries.serverId) AS cnt
+    FROM
+        hlstats_Events_Entries
+    INNER JOIN
+        hlstats_Servers
+    ON
+        hlstats_Servers.serverId=hlstats_Events_Entries.serverId
+    INNER JOIN
+        hlstats_Players
+    ON
+        (hlstats_Events_Entries.playerId=hlstats_Players.playerId)
+    WHERE
+        clan=$clan
+    GROUP BY
+        hlstats_Events_Entries.serverId
+    ORDER BY
+        cnt DESC
+    LIMIT 1
+");
+list($favServerId, $favServerName) = $db->fetch_row() ?: array(0, '');
+
+$db->query("
+    SELECT
+        hlstats_Events_Entries.map,
+        COUNT(map) AS cnt
+    FROM
+        hlstats_Events_Entries
+    INNER JOIN
+        hlstats_Players
+    ON
+        (hlstats_Events_Entries.playerId=hlstats_Players.playerId)
+    WHERE
+        clan=$clan
+    GROUP BY
+        hlstats_Events_Entries.map
+    ORDER BY
+        cnt DESC
+    LIMIT 1
+");
+list($favMap) = $db->fetch_row() ?: array('');
+
+$db->query("
+    SELECT
+        hlstats_Events_Frags.weapon,
+        hlstats_Weapons.name,
+        COUNT(hlstats_Events_Frags.weapon) AS kills,
+        SUM(hlstats_Events_Frags.headshot=1) as headshots
+    FROM
+        hlstats_Events_Frags
+    INNER JOIN
+        hlstats_Weapons
+    ON
+        hlstats_Weapons.code = hlstats_Events_Frags.weapon
+    INNER JOIN
+        hlstats_Players
+    ON
+        hlstats_Events_Frags.killerId=hlstats_Players.playerId
+    WHERE
+        clan=$clan
+    AND
+        hlstats_Weapons.game='$game'
+    GROUP BY
+        hlstats_Events_Frags.weapon
+    ORDER BY
+        kills desc, headshots desc
+    LIMIT 1
+");
+list($favWeapon, $favWeaponName) = $db->fetch_row() ?: array('', '');
+
+// The clan's badge in place of an avatar: its tag, else the initials of its name
+$badge = trim((string) $clandata['tag']);
+if ($badge === '') {
+    foreach (array_slice(preg_split('/\s+/', trim($clandata['name'])), 0, 3) as $word) {
+        $badge .= mb_strtoupper(mb_substr($word, 0, 1, 'UTF-8'), 'UTF-8');
+    }
+}
+// its letters sized to fit the badge on one line (a bold letter is about .62 of the font size wide)
+$badgeSize = max(11, min(30, (int) floor(88 / (max(1, mb_strlen($badge, 'UTF-8')) * .62))));
+$activity  = max(0, (int) $clandata['activity']);   // -1: no activity recorded
+
+$homepage = trim((string) $clandata['homepage']);
+if ($homepage !== '' && !preg_match('#^https?://#i', $homepage)) {
+    $homepage = 'https://' . $homepage;
+}
+$homepage = filter_var($homepage, FILTER_VALIDATE_URL) ? $homepage : '';
+
+// Headline tiles: label, value, note
+$hours = fn($seconds) => nf(floor($seconds / 3600)) . ' h';
+$tiles = array(
+    array(tLabel('total.kills'), nf($kills), $members ? tLabel('avg.kills') . ' ' . nf($kills / $members) : ''),
+    array(tLabel('total.deaths'), nf($clandata['deaths']), ''),
+    array(tLabel('kills.death'), $clandata['deaths'] ? sprintf('%.2f', $kills / $clandata['deaths']) : '-', ''),
+    array(tLabel('headshots.kill'), $kills ? round($clandata['headshots'] / $kills * 100) . '%' : '-', tLabel('headshots') . ' ' . nf($clandata['headshots'])),
+    array(tLabel('kills.minute'), $clandata['connection_time'] > 0 ? sprintf('%.2f', $kills / ($clandata['connection_time'] / 60)) : '-', ''),
+    array(tLabel('total.time'), $hours($clandata['connection_time']), $members ? tLabel('avg.time') . ' ' . $hours($clandata['connection_time'] / $members) : ''),
+);
+$tip = fn($key) => ' data-tooltip="' . htmlspecialchars(tLabel($key), ENT_QUOTES) . '"';
+
 printSectionTitle(t('title.clan.info'));
 ?>
+<section class="hlstats-section hlstats-card hlstats-profile">
+    <div class="hlstats-profile-main">
+        <div class="hlstats-profile-identity">
+            <span class="hlstats-profile-avatar hlstats-profile-badge" style="--badge-size: <?= $badgeSize ?>px"<?= $clandata['tag'] ? $tip('tag') : ' aria-hidden="true"' ?>><?= htmlspecialchars($badge, ENT_COMPAT) ?></span>
+            <div class="hlstats-profile-info">
+                <div class="hlstats-profile-name">
+                    <span><?= htmlspecialchars($clandata['name'], ENT_COMPAT) ?></span>
+<?php if ($gameName) { ?>
+                    <span class="hlstats-pill neutral"><?= htmlspecialchars($gameName, ENT_COMPAT) ?></span>
+<?php } ?>
+                </div>
+                <div class="hlstats-profile-meta">
+                    <span><?= svgIcon('users', 15) . t('members') . ' ' . nf($members) ?></span>
+<?php if ($clandata['last_event']) { ?>
+                    <span<?= $tip('last.connect') ?>><?= svgIcon('clock', 15) . formatDate($clandata['last_event'], IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT) ?></span>
+<?php } ?>
+                </div>
+<?php if ($homepage) { ?>
+                <div class="hlstats-profile-chips">
+                    <a class="hlstats-chip" href="<?= htmlspecialchars($homepage, ENT_QUOTES) ?>" target="_blank" rel="noopener nofollow"<?= $tip('homepage') ?>><?= svgIcon('globe', 14) . htmlspecialchars(preg_replace('#^https?://(www\.)?#i', '', rtrim($homepage, '/')), ENT_COMPAT) ?></a>
+                </div>
+<?php } ?>
+            </div>
+        </div>
+
+        <div class="hlstats-profile-headline">
+            <div>
+                <span class="hlstats-profile-label"><?= tLabel('rank') ?></span>
+                <span class="hlstats-profile-big"><?= $clanRank ? '#' . nf($clanRank) : '-' ?></span>
+            </div>
+<?php if ($g_options['rankingtype'] != 'kills') { ?>
+            <div>
+                <span class="hlstats-profile-label"><?= tLabel('avg.points') ?></span>
+                <span class="hlstats-profile-big"><?= nf($clandata['avgskill']) ?></span>
+            </div>
+<?php } ?>
+            <div class="hlstats-profile-activity">
+                <span class="hlstats-profile-label"><?= tLabel('activity') ?></span>
+                <span class="hlstats-profile-big"><?= $activity ?>%</span>
+                <meter min="0" max="100" low="25" high="50" optimum="75" value="<?= $activity ?>"></meter>
+            </div>
+        </div>
+    </div>
+</section>
+
+<?php kpiTiles($tiles, 'hlstats-profile-kpis'); ?>
+
 <div class="hlstats-cards-grid">
-  <section class="hlstats-section hlstats-card">
-    <div class="hlstats-card-title"><?= t('statistics.summary') ?></div>
-      <div class="hlstats-pname">⚔️ <?= htmlspecialchars($clandata['name']) ?></div>
-      <div class="hlstats-card-body hlstats-card-grid">
-        <div class="label"><?= t('tag') ?></div>
-        <div class="value">
-        <?php
-            if ($clandata['tag']) {
-                echo htmlspecialchars($clandata['tag']);
-            } else {
-                echo '(Not specified.)';
-            }
-        ?>
-        </div>
-        <div class="label"><?= t('members') ?></div>
-        <div class="value"><strong><?php echo $clandata['nummembers']."</strong>"; ?></div>
-        <div class="label"><?= t('activity') ?></div>
-        <div class="value meter-ratio">
-         <div class="meter-container">
-          <meter min="0" max="100" low="25" high="50" optimum="75" value="<?= $clandata['activity'] ?>" data-tooltip="<?= htmlspecialchars(formatDate($clandata['last_event'], ENT_QUOTES)) ?>"></meter>
-          <div class="meter-value"><?php echo $clandata['activity'].'%'; ?></div>
-         </div>
-        </div>
-        <div class="label"><?= t('homepage') ?></div>
-        <div class="value">
-        <?php
-            if ($url = getLink($clandata['homepage'])) {
-                echo $url;
-            } else {
-                echo t('not.specified');
-            }
-        ?>
-        </div>
-
-        <div class="label"><?= t('avg.points') ?></div>
-        <div class="value"><?php echo nf($clandata['avgskill']); ?></div>
-        <div class="label"><?= t('total.kills') ?></div>
-        <div class="value"><?php echo nf($clandata['kills']); ?></div>
-        <div class="label"><?= t('total.deaths') ?></div>
-        <div class="value"><?php echo nf($clandata['deaths']); ?></div>
-        <div class="label"><?= t('avg.kills') ?></div>
-        <?php if ($clandata['nummembers'] != 0) { ?>
-        <div class="value"><?php echo nf($clandata['kills'] / ($clandata['nummembers'])); ?></div>
-        <?php } else {
-                  echo '<div class="value">-</div>';
-              }?>
-        <div class="label"><?= t('kills.death') ?></div>
-        <div class="value">
-        <?php if ($clandata['deaths'] != 0) {
-                  echo sprintf('%0.2f', $clandata['kills'] / $clandata['deaths']);
-              } else {
-                  echo '-';
-              }?>
-        </div>
-        <div class="label"><?= t('kills.minute') ?></div>
-        <div class="value">
-        <?php if ($clandata['connection_time'] > 0) {
-                  echo sprintf("%.2f", ($clandata['kills'] / ($clandata['connection_time'] / 60)));
-              } else {
-                  echo '-'; 
-              }?>
-        </div>
-        <div class="label"><?= t('total.time') ?></div>
-        <div class="value"><?php echo TimeStamp($clandata['connection_time']); ?></div>
-        <div class="label"><?= t('avg.time') ?></div>
-        <div class="value">
-            <?php if ($clandata['connection_time'] > 0) {
-                      echo TimeStamp($clandata['connection_time'] / ($clandata['nummembers']));
-                  } else {
-                      echo '-'; 
-                  } ?>
-        </div>
-        <div class="label"><?= t('favorite.server').$asterisk ?></div>
-        <div class="value">
-            <?php
-            $db->query("
-                SELECT
-                    hlstats_Events_Entries.serverId,
-                    hlstats_Servers.name,
-                    COUNT(hlstats_Events_Entries.serverId) AS cnt
-                FROM
-                    hlstats_Events_Entries
-                INNER JOIN
-                    hlstats_Servers
-                ON
-                    hlstats_Servers.serverId=hlstats_Events_Entries.serverId
-                INNER JOIN 
-                    hlstats_Players
-                ON
-                    (hlstats_Events_Entries.playerId=hlstats_Players.playerId)   
-                WHERE   
-                    clan=$clan
-                GROUP BY
-                    hlstats_Events_Entries.serverId
-                ORDER BY
-                    cnt DESC
-                LIMIT 1
-            ");
-
-            list($favServerId,$favServerName) = $db->fetch_row();
-
-            echo "<a href='hlstats.php?game=$game&amp;mode=servers&amp;server_id=$favServerId'>".htmlspecialchars(html_entity_decode($favServerName, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT)."</a>";
-            ?>
-        </div>
-
-        <div class="label"><?= t('favorite.map').$asterisk ?></div>
-        <div class="value">
-            <?php
-            $db->query("
-                SELECT
-                    hlstats_Events_Entries.map,
-                    COUNT(map) AS cnt
-                FROM
-                    hlstats_Events_Entries
-                INNER JOIN 
-                    hlstats_Players
-                ON
-                    (hlstats_Events_Entries.playerId=hlstats_Players.playerId)   
-                WHERE   
-                    clan=$clan
-                GROUP BY
-                    hlstats_Events_Entries.map
-                ORDER BY
-                    cnt DESC
-                LIMIT 1
-            ");
-
-            list($favMap) = $db->fetch_row();
-
-            echo "<a href='hlstats.php?game=$game&amp;mode=mapinfo&amp;map=$favMap'>".htmlspecialchars($favMap)."</a>";
-            ?>
-         </div>
-
-        <div class="label"><?= t('favorite.weapon').$asterisk ?></div>
-        <div class="value">
-            <?php
-            $result = $db->query("
-                SELECT
-                    hlstats_Events_Frags.weapon,
-                    hlstats_Weapons.name,
-                    COUNT(hlstats_Events_Frags.weapon) AS kills,
-                    SUM(hlstats_Events_Frags.headshot=1) as headshots
-                FROM
-                    hlstats_Events_Frags
-                INNER JOIN
-                    hlstats_Weapons
-                ON
-                    hlstats_Weapons.code = hlstats_Events_Frags.weapon
-                INNER JOIN 
-                    hlstats_Players
-                ON
-                    hlstats_Events_Frags.killerId=hlstats_Players.playerId
-                WHERE
-                    clan=$clan
-                AND
-                    hlstats_Weapons.game='$game'
-                GROUP BY
-                    hlstats_Events_Frags.weapon
-                ORDER BY
-                    kills desc, headshots desc
-                LIMIT 1
-            ");
-
-             $weap_name = "";
-             $fav_weapon = "";
-             
-             while ($rowdata = $db->fetch_row($result))
-             { 
-                $fav_weapon = $rowdata[0];
-                $weap_name = htmlspecialchars($rowdata[1]);
-             }
-             
-             if ($fav_weapon == '')
-                 $fav_weapon = 'Unknown';
-             $image = getImage("/games/$game/weapons/$fav_weapon");
-             // check if image exists
-             $weaponlink = "<a href=\"hlstats.php?mode=weaponinfo&amp;weapon=$fav_weapon&amp;game=$game\">";
-             
-             if ($image) {
-                $cellbody = "$weaponlink<img src=\"" . $image['url'] . "\" alt=\"$weap_name\" data-tooltip=\"".htmlspecialchars($weap_name, ENT_QUOTES)."\" />";
-             } else {
-                $cellbody = "$weaponlink<strong> $weaponlink$weap_name</strong>";
-             }
-             
-            $cellbody .= "</a>";
-
-            echo $cellbody;
-            ?>
-        </div>
-      </div>
-    </section>
-<?php 
+<?php profileFavorites($game, $realgame ?? '', array('server_id' => $favServerId, 'server_name' => $favServerName, 'map' => $favMap, 'weapon' => $favWeapon, 'weapon_name' => $favWeaponName), $days); ?>
+<?php
 ob_flush();
 flush();
 
 if ($g_options['show_google_map'] == 1) { ?>
-    <section class="hlstats-section hlstats-card">
-      <div class="hlstats-card-title"><?= t('player.location') ?></div>
-         <div id="map" style="margin:0 auto;width:100%;height:100%;min-height:380px;"></div>
-    </section>
+<section class="hlstats-section hlstats-card">
+    <div class="hlstats-card-head">
+        <div class="hlstats-card-title"><?= t('player.location') ?></div>
+    </div>
+    <div id="map" style="margin:0 auto;width:100%;height:100%;min-height:380px;"></div>
+</section>
 <?php } ?>
 </div>
 <?php
@@ -354,8 +348,8 @@ echo '<div class="responsive-table">
              <td class="nowrap hide">'.$res['kpd'].'</td>
              <td class="meter-ratio nowrap hide-2">
                  <div class="meter-container">
-                   <meter min="0" max="100" low="25" high="50" optimum="75" value="'.$res['activity'].'" data-tooltip="'.htmlspecialchars(formatDate($res['last_event']), ENT_QUOTES).'"></meter>
-                   <div class="meter-value">'.$res['activity'].'%</div>
+                   <meter min="0" max="100" low="25" high="50" optimum="75" value="'.max(0, (int) $res['activity']).'" data-tooltip="'.htmlspecialchars(formatDate($res['last_event']), ENT_QUOTES).'"></meter>
+                   <div class="meter-value">'.max(0, (int) $res['activity']).'%</div>
                  </div>
              </td>
              <td class="nowrap hide-3">'.$time.'</td>

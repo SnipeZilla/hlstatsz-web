@@ -49,64 +49,133 @@ require (INCLUDE_PATH . '/class_db.php');
 require (INCLUDE_PATH . '/functions.php');
 
 if (defined('DEBUG') && DEBUG === true) {
-    ini_set('display_errors', '1');
-    ini_set('log_errors', '1');
-    error_reporting(-1);
-    ini_set('error_log', '_error.txt');
-} else {
-    error_reporting(0);
+	ini_set('log_errors', '1');
+	ini_set('error_log', __DIR__ . '/_error.txt');
+	error_reporting(-1);
+	ini_set('display_errors', '0');
 }
 
-$db_classname = 'DB_' . DB_TYPE;
-if (class_exists($db_classname))
-{
-	$db = new $db_classname(DB_ADDR, DB_USER, DB_PASS, DB_NAME, DB_PCONNECT);
-}
-else
-{
-	error('Database class does not exist.  Please check your config.php file for DB_TYPE');
-}
+$db = new DB_mysql(DB_ADDR, DB_USER, DB_PASS, DB_NAME);
 
 $g_options = getOptions();
 
-function imagecopymerge_alpha($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h, $pct){
-	$opacity=$pct;
-	// getting the watermark width
-	$w = imagesx($src_im);
-	// getting the watermark height
-	$h = imagesy($src_im);
-	 
-	// creating a cut resource
-	$cut = imagecreatetruecolor($src_w, $src_h);
-	// copying that section of the background to the cut
-	imagecopy($cut, $dst_im, 0, 0, $dst_x, $dst_y, $src_w, $src_h);
-	// inverting the opacity
-	$opacity = 100 - $opacity;
-	 
-	// placing the watermark now
-	imagecopy($cut, $src_im, 0, 0, $src_x, $src_y, $src_w, $src_h);
-	imagecopymerge($dst_im, $cut, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h, $opacity);
+/*
+ * Drawing helpers of the signature card (FreeType text, colors with opacity, rounded corners)
+ */
+
+// A color given as 'rrggbb', with an opacity from 0 to 1 (GD's alpha: 0 opaque .. 127 transparent)
+function sigColor($im, string $hex, float $opacity = 1.0): int
+{
+	[$r, $g, $b] = sscanf($hex, '%02x%02x%02x');
+	return imagecolorallocatealpha($im, $r, $g, $b, (int) round(127 * (1 - $opacity)));
 }
 
-function f_num($number) {
-	if (($number >= 10) &&($number < 20))
-		return $number.'th';
-	else {
-		switch ($number % 10) {
-			case 1:
-				return $number.'st';
-				break;
-			case 2:
-				return $number.'nd';
-				break;
-			case 3:
-				return $number.'rd';
-				break;
-			default:
-				return $number.'th';
-				break;
+// Width of a text, in pixels
+function sigTextWidth(string $font, float $size, string $text): int
+{
+	$box = imageftbbox($size, 0, $font, $text);
+	return $box[2] - $box[0];
+}
+
+// A text cut with an ellipsis to fit a width
+function sigFit(string $font, float $size, string $text, int $width): string
+{
+	if (sigTextWidth($font, $size, $text) <= $width) {
+		return $text;
+	}
+	while (mb_strlen($text, 'UTF-8') > 1 && sigTextWidth($font, $size, $text . "\u{2026}") > $width) {
+		$text = mb_substr($text, 0, -1, 'UTF-8');
+	}
+	return rtrim($text) . "\u{2026}";
+}
+
+// A text from its left edge and baseline, over a soft shadow; returns its right edge
+function sigText($im, string $font, float $size, int $x, int $y, int $color, string $text, bool $shadow = true): int
+{
+	if ($shadow) {
+		imagefttext($im, $size, 0, $x + 1, $y + 1, imagecolorallocatealpha($im, 0, 0, 0, 80), $font, $text);
+	}
+	$box = imagefttext($im, $size, 0, $x, $y, $color, $font, $text);
+	return $box[2];
+}
+
+// Anti-aliased rounded corners: the pixels outside them turn transparent
+function sigRoundCorners($im, int $radius): void
+{
+	$w = imagesx($im);
+	$h = imagesy($im);
+	imagealphablending($im, false);
+	for ($y = 0; $y < $radius; $y++) {
+		for ($x = 0; $x < $radius; $x++) {
+			$cover = max(0, min(1, $radius - hypot($radius - $x - 0.5, $radius - $y - 0.5) + 0.5));
+			if ($cover >= 1) {
+				continue;
+			}
+			foreach (array(array($x, $y), array($w - 1 - $x, $y), array($x, $h - 1 - $y), array($w - 1 - $x, $h - 1 - $y)) as [$px, $py]) {
+				$c = imagecolorsforindex($im, imagecolorat($im, $px, $py));
+				$alpha = 127 - (int) round((127 - $c['alpha']) * $cover);
+				imagesetpixel($im, $px, $py, imagecolorallocatealpha($im, $c['red'], $c['green'], $c['blue'], $alpha));
+			}
 		}
 	}
+	imagealphablending($im, true);
+}
+
+// How far a text moves the pen (its ink box would drop a trailing space)
+function sigAdvance(string $font, float $size, string $text): int
+{
+	return imageftbbox($size, 0, $font, $text . 'H')[2] - imageftbbox($size, 0, $font, 'H')[2];
+}
+
+// A text in the first of $fonts that has each of its characters (player names mix scripts and symbols),
+// cut with an ellipsis to fit $width; the characters no font has are left out
+function sigTextFallback($im, array $fonts, float $size, int $x, int $y, int $color, string $text, int $width): void
+{
+	$missing = array();   // a font lacking a character draws its .notdef box, as for this private-use one
+	foreach ($fonts as $font) {
+		$missing[$font] = imageftbbox($size, 0, $font, "\u{E000}");
+	}
+	$runs = array();      // [font, text], one per change of font
+	foreach (mb_str_split($text, 1, 'UTF-8') as $char) {
+		$use = null;
+		foreach ($fonts as $font) {
+			if ($char === ' ' || imageftbbox($size, 0, $font, $char) !== $missing[$font]) {
+				$use = $font;
+				break;
+			}
+		}
+		if ($use === null) {
+			continue;
+		}
+		if ($runs && $runs[count($runs) - 1][0] === $use) {
+			$runs[count($runs) - 1][1] .= $char;
+		} else {
+			$runs[] = array($use, $char);
+		}
+	}
+	$measure = fn($runs) => array_sum(array_map(fn($run) => sigAdvance($run[0], $size, $run[1]), $runs));
+	if ($measure($runs) > $width) {
+		$ellipsis = sigAdvance($fonts[0], $size, "\u{2026}");
+		while ($runs && $measure($runs) + $ellipsis > $width) {
+			$last = count($runs) - 1;
+			$runs[$last][1] = mb_substr($runs[$last][1], 0, -1, 'UTF-8');
+			if ($runs[$last][1] === '') {
+				array_pop($runs);
+			}
+		}
+		$runs[] = array($fonts[0], "\u{2026}");
+	}
+	foreach ($runs as [$font, $part]) {
+		sigText($im, $font, $size, $x, $y, $color, $part);
+		$x += sigAdvance($font, $size, $part);
+	}
+}
+
+// A small triangle pointing up or down (the trend of the points)
+function sigTriangle($im, int $x, int $y, bool $up, int $color): void
+{
+	$points = $up ? array($x, $y + 5, $x + 6, $y + 5, $x + 3, $y) : array($x, $y, $x + 6, $y, $x + 3, $y + 5);
+	imagefilledpolygon($im, $points, $color);
 }
 
 	if (!isset($g_options['scripturl']))
@@ -197,13 +266,6 @@ function f_num($number) {
 	//// Main
 	////
 
-if ((isset($_GET['color'])) && (is_string($_GET['color'])))
-	$color = hex2rgb(valid_request($_GET['color'], 0));
-if ((isset($_GET['caption_color'])) && (is_string($_GET['caption_color'])))
-	$caption_color = hex2rgb(valid_request($_GET['caption_color'], 0));
-if ((isset($_GET['link_color'])) && (is_string($_GET['link_color'])))
-	$link_color = hex2rgb(valid_request($_GET['link_color'], 0));
-  
 if ($player_id > 0) {
     if ($g_options['rankingtype'] !== 'kills') {
         $rank_type1 = 'skill';
@@ -341,187 +403,137 @@ if ($player_id > 0) {
 	if ($playerdata['activity'] == -1)
 		$playerdata['activity'] = 0;
 
-	$skill_change = '0';
-	if ($playerdata['last_skill_change'] > 0)
-		$skill_change = $playerdata['last_skill_change'];
-	else if ($playerdata['last_skill_change'] < 0)
-		$skill_change = $playerdata['last_skill_change'];  
-	
-	$background='random';
-	if ((isset($_GET['background'])) && ( (($_GET['background'] > 0) && ($_GET['background'] < 12)) || ($_GET['background']=='random')) )
+	// The card's accent: links pick one with background=1..11 (or random), the numbers of the old background images
+	$background = 'random';
+	if ((isset($_GET['background'])) && ( (($_GET['background'] > 0) && ($_GET['background'] < 12)) || ($_GET['background'] == 'random')) )
 		$background = valid_request($_GET['background'], 0);
-
 	if ($background == 'random')
-		$background = rand(1,11);
-	
-	$hlx_sig_image = getImage('/games/'.$playerdata['game'].'/sig/'.$background);
-	if ($hlx_sig_image)
-	{
-		$hlx_sig = $hlx_sig_image['path'];
+		$background = rand(1, 11);
+	$accents = array(1 => '4aa3df', '9cb36b', 'a4c639', 'e64e4e', '3f8fd8', 'f7a531', 'e0533d', 'ff7a2e', 'cbb89a', 'd9443c', '5fb3b3');
+	$accent  = $accents[(int) $background] ?? $accents[1];
+
+	$W = 400;
+	$H = 75;
+	$image = imagecreatetruecolor($W, $H);
+	imagesavealpha($image, true);
+	imagealphablending($image, true);
+
+	// Ground: a dark gradient, the colors of the site's default theme
+	for ($y = 0; $y < $H; $y++) {
+		$t = $y / ($H - 1);
+		imageline($image, 0, $y, $W - 1, $y, imagecolorallocate($image, (int) (31 - 13 * $t), (int) (43 - 17 * $t), (int) (58 - 22 * $t)));
 	}
-	elseif ($hlx_sig_image = getImage('/games/'.$realgame.'/sig/'.$background))
-	{
-		$hlx_sig = $hlx_sig_image['path'];
+
+	// The game's art (banner.jpg) fading in on the right
+	$art = null;
+	foreach (array($playerdata['game'], $realgame) as $dir) {
+		if ($dir && is_file(IMAGE_PATH . "/games/$dir/banner.jpg")) {
+			$art = @imagecreatefromjpeg(IMAGE_PATH . "/games/$dir/banner.jpg");
+			break;
+		}
 	}
-	else
-	{
-		$hlx_sig = IMAGE_PATH."/sig/$background.png";
+	if ($art) {
+		$aw    = 250;
+		$scale = max($aw / imagesx($art), $H / imagesy($art));
+		$sw    = (int) round($aw / $scale);
+		$sh    = (int) round($H / $scale);
+		$strip = imagecreatetruecolor($aw, $H);
+		imagecopyresampled($strip, $art, 0, 0, (int) ((imagesx($art) - $sw) / 2), (int) ((imagesy($art) - $sh) / 2), $aw, $H, $sw, $sh);
+		for ($i = 0; $i < $aw; $i++) {
+			$t = $i / ($aw - 1);
+			$pct = (int) round(50 * $t * $t * (3 - 2 * $t));
+			if ($pct > 0) {
+				imagecopymerge($image, $strip, $W - $aw + $i, 0, $i, 0, 1, $H, $pct);
+			}
+		}
+		unset($art, $strip);
 	}
 
-	switch ($background) {
-		case 1:		$caption_color = array('red' => 0, 'green' => 0, 'blue' => 255);
-					$link_color = array('red' => 0, 'green' => 0, 'blue' => 255);
-					$color = array('red' => 0, 'green' => 0, 'blue' => 0);
-					break;
-		case 2:		$caption_color = array('red' => 147, 'green' => 23, 'blue' => 18);
-					$link_color = array('red' => 147, 'green' => 23, 'blue' => 18);
-					$color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					break;
-		case 3:		$caption_color = array('red' => 150, 'green' => 180, 'blue' => 99);
-					$link_color = array('red' => 150, 'green' => 180, 'blue' => 99);
-					$color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					break;
-		case 4:		$caption_color = array('red' => 255, 'green' => 203, 'blue' => 4);
-					$link_color = array('red' => 255, 'green' => 203, 'blue' => 4);
-					$color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					break;
-		case 5:		$caption_color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					$link_color = array('red' => 0, 'green' => 102, 'blue' => 204);
-					$color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					break;
-		case 6:		$caption_color = array('red' => 0, 'green' => 0, 'blue' => 0);
-					$link_color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					$color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					break;
-		case 7:		$caption_color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					$link_color = array('red' => 100, 'green' => 100, 'blue' => 100);
-					$color = array('red' => 0, 'green' => 0, 'blue' => 0);
-					break;
-		case 8:		$caption_color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					$link_color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					$color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					break;
-		case 9:		$caption_color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					$link_color = array('red' => 0, 'green' => 0, 'blue' => 0);
-					$color = array('red' => 0, 'green' => 0, 'blue' => 0);
-					break;
-		case 10:		$caption_color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					$link_color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					$color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					break;
-		case 11:		$caption_color = array('red' => 150, 'green' => 180, 'blue' => 99);
-					$link_color = array('red' => 150, 'green' => 180, 'blue' => 99);
-					$color = array('red' => 255, 'green' => 255, 'blue' => 255);
-					break;
-		default:		$caption_color = array('red' => 0, 'green' => 0, 'blue' => 255);
-					$link_color = array('red' => 0, 'green' => 155, 'blue' => 0);
-					$color = array('red' => 0, 'green' => 0, 'blue' => 0);
-					break;
-}
+	$regular = realpath(IMAGE_PATH . '/sig/font/NotoSans-Regular.ttf');
+	$bold    = realpath(IMAGE_PATH . '/sig/font/NotoSans-Bold.ttf') ?: $regular;
+	$text    = sigColor($image, 'eef3f8');
+	$muted   = sigColor($image, 'eef3f8', .62);
+	$label   = sigColor($image, 'eef3f8', .58);
+	$site    = preg_replace('#^https?://(www\.)?#i', '', rtrim((string) ($g_options['siteurl'] ?? ''), '/'));
+	$hours   = floor($playerdata['connection_time'] / 3600);
+	$played  = $hours > 0 ? nf($hours) . ' h played' : '';
 
-	$image			= imagecreatetruecolor(400, 75);
+	if (function_exists('imagefttext') && $regular) {
+		// Rank: a panel on the left, its number in the accent color
+		imagefilledrectangle($image, 0, 0, 77, $H - 1, sigColor($image, '000000', .28));
+		imagefilledrectangle($image, 0, 0, 77, 1, sigColor($image, $accent));
+		imageline($image, 78, 0, 78, $H - 1, sigColor($image, 'ffffff', .07));
 
-        imagealphablending($image, false);
-        imagesavealpha($image, true);
+		$rankText = is_numeric($rank) ? '#' . nf($rank) : $rank;
+		$rankSize = 15;
+		while ($rankSize > 8 && sigTextWidth($bold, $rankSize, $rankText) > 64) {
+			$rankSize -= .5;
+		}
+		$center = fn($font, $size, $str) => 39 - (int) round(sigTextWidth($font, $size, $str) / 2);
+		sigText($image, $bold, 6, $center($bold, 6, 'RANK'), 20, $label, 'RANK', false);
+		sigText($image, $bold, $rankSize, $center($bold, $rankSize, $rankText), 45, is_numeric($rank) ? sigColor($image, $accent) : sigColor($image, 'e64e4e'), $rankText);
+		if (is_numeric($rank)) {
+			$of = 'of ' . nf($playerdata['total_rows']);
+			sigText($image, $regular, 6.5, $center($regular, 6.5, $of), 60, $muted, $of, false);
+		}
 
-	$white			= imagecolorallocate($image, 255, 255, 255); 
-	$bgray			= imagecolorallocate($image, 192, 192, 192); 
-	$yellow			= imagecolorallocate($image, 255, 255,   0); 
-	$black			= imagecolorallocate($image,   0,   0,   0); 
-	$red			= imagecolorallocate($image, 255,   0,   0); 
-	$green			= imagecolorallocate($image,   0, 155,   0); 
-	$blue			= imagecolorallocate($image,   0,   0, 255); 
-	$grey_shade		= imagecolorallocate($image, 204, 204, 204); 
-	$font_color		= imagecolorallocate($image, $color['red'], $color['green'], $color['blue']);
-	$caption_color	= imagecolorallocate($image, $caption_color['red'], $caption_color['green'], $caption_color['blue']);
-	$link_color		= imagecolorallocate($image, $link_color['red'], $link_color['green'], $link_color['blue']);
-
-
-	$background_img = imagecreatefrompng($hlx_sig);
-
-	if ($background_img) {
-		imagecopy($image, $background_img, 0, 0, 0, 0, 400, 75);
-		unset($background_img);
-	}   
-
-	if ($background == 0)
-		imagerectangle($image, 0, 0, 400, 75, $bgray);
-
-	$start_header_name = 9;
-	if ($show_flags > 0)  {
-		$flag = imagecreatefrompng(getFlag($playerdata['flag'],'path'));
-		if ($flag) {
-			imagecopy($image, $flag, 8, 4, 0, 0, 18, 12); 
-			$start_header_name += 22;
+		// Name, after the flag
+		$x = 90;
+		if ($show_flags > 0 && ($flag = @imagecreatefrompng(getFlag($playerdata['flag'], 'path')))) {
+			imagecopyresampled($image, $flag, $x, 11, 0, 0, 18, 12, imagesx($flag), imagesy($flag));
+			$x += 24;
 			unset($flag);
 		}
-	}
-        imagealphablending($image, true);
-	$timestamp   = ($playerdata['connection_time']);
-	$days        = floor($timestamp / 86400);
-	$hours       = $days * 24;  
-	$hours       += (floor($timestamp / 3600) % 24);
-	if ($hours < 10)
-		$hours = '0'.$hours; 
-	$min         = ( floor($timestamp / 60) % 60); 
-	if ($min < 10)
-		$min = '0'.$min; 
-	$sec         = floor($timestamp % 60);
-	if ($sec < 10)
-		$sec = '0'.$sec; 
-	$con_time = $hours.':'.$min.':'.$sec;
+		$fallback = realpath(IMAGE_PATH . '/sig/font/DejaVuSans.ttf');
+		sigTextFallback($image, array_values(array_filter(array($bold, $fallback))), 11, $x, 23, $text, $pl_name, $W - 10 - $x);
 
-	if ($playerdata['last_skill_change'] == '')
-		$playerdata['last_skill_change'] = 0;
-	if ($playerdata['last_skill_change'] == 0)
-		$trend_image_name = IMAGE_PATH.'/t1.gif';
-	elseif ($playerdata['last_skill_change'] > 0)
-		$trend_image_name = IMAGE_PATH.'/t0.gif';
-	elseif ($playerdata['last_skill_change'] < 0)
-		$trend_image_name = IMAGE_PATH.'/t2.gif';
-	$trend = imagecreatefromgif($trend_image_name);
-
-	if(function_exists('imagefttext'))
-	{
-		$font = realpath(IMAGE_PATH.'/sig/font/NotoSans-Regular.ttf');
-		if ($font && file_exists($font)) {
-			imagefttext($image, 10, 0, 30, 15, $caption_color, $font, $pl_name);
-		} else {
-			error_log("NotoSans-Regular.ttf not found in hlstatsimg/sig/font". PHP_EOL, 3, '_error.txt');
-			imagestring($image, 9, $start_header_name, 2, $pl_name, $caption_color);
+		// Statistics: a value over its label, in columns; the last ones go when they do not fit
+		$change  = (int) $playerdata['last_skill_change'];
+		$columns = array(
+			array(nf($playerdata['skill']), 'POINTS', $change),
+			array(nf($playerdata['kills']), 'KILLS', 0),
+			array(is_numeric($playerdata['kpd']) ? nf($playerdata['kpd'], 2) : '-', 'K/D', 0),
+			array(is_numeric($playerdata['hpk']) ? $playerdata['hpk'] . '%' : '-', 'HS', 0),
+			array($playerdata['activity'] . '%', 'ACTIVE', 0),
+		);
+		$widths = array();
+		foreach ($columns as $k => [$value, $name, $delta]) {
+			$trend = $delta ? 10 + sigTextWidth($bold, 6.5, (string) abs($delta)) : 0;
+			$widths[$k] = max(sigTextWidth($bold, 9.5, $value) + $trend, sigTextWidth($bold, 6, $name)) + 17;
 		}
-	}
-	else
-	{
-		imagestring($image, 9, $start_header_name, 2, $playerdata['lastName'], $caption_color);
-	}
+		while (count($columns) > 3 && 90 + array_sum($widths) - 17 > $W - 10) {
+			array_pop($columns);
+			array_pop($widths);
+		}
+		$x = 90;
+		foreach ($columns as $k => [$value, $name, $delta]) {
+			$right = sigText($image, $bold, 9.5, $x, 46, $text, $value);
+			if ($delta) {
+				$color = sigColor($image, $delta > 0 ? '46c26a' : 'e64e4e');
+				sigTriangle($image, $right + 4, 39, $delta > 0, $color);
+				sigText($image, $bold, 6.5, $right + 12, 46, $color, (string) abs($delta), false);
+			}
+			sigText($image, $bold, 6, $x, 57, $label, $name, false);
+			$x += $widths[$k];
+		}
 
-	imagestring($image, 2, 15, 22, 'Position ', $font_color);
-	if (is_numeric($rank)) {
-		imagestring($image, 3, 70, 22, nf($rank), $font_color);
-		$start_pos_x = 71 + (imagefontwidth(3) * strlen(nf($rank))) + 7;
+		// Footer: time played and the site, left of the HLstatsZ mark
+		$footer = implode("  \u{00B7}  ", array_filter(array($played, $site)));
+		sigText($image, $regular, 6.5, 90, 70, $muted, sigFit($regular, 6.5, $footer, 354 - 90), false);
 	} else {
-		imagestring($image, 3, 70, 22, $rank, $font_color);
-		$start_pos_x = 71 + (imagefontwidth(3) * strlen($rank)) + 7;
+		// No FreeType in this PHP: GD's built-in font
+		imagestring($image, 3, 10, 6, $pl_name, $text);
+		imagestring($image, 2, 10, 24, 'Rank ' . (is_numeric($rank) ? '#' . nf($rank) . ' of ' . nf($playerdata['total_rows']) : $rank) . ' - ' . nf($playerdata['skill']) . ' points', $text);
+		imagestring($image, 2, 10, 38, 'Kills ' . nf($playerdata['kills']) . ' - K/D ' . nf($playerdata['kpd'], 2) . ' - HS ' . $playerdata['hpk'] . '%', $text);
+		imagestring($image, 2, 10, 52, implode(' - ', array_filter(array($played, $site))), $muted);
 	}
-	$ranktext = 'of '.$playerdata['total_rows'].' players with '.$playerdata['skill'].' (';
-	imagestring($image, 2, $start_pos_x, 22, $ranktext, $font_color);
-	
-	$start_pos_x += (imagefontwidth(2) * strlen($ranktext));
-	
-	if ($trend) {
-		imagecopy($image, $trend, $start_pos_x, 26, 0, 0, 7, 7);
-		$start_header_name += 22;
-		unset($trend);
-		$start_pos_x += 10;
-	}
-	imagestring($image, 2, $start_pos_x, 22, $skill_change.') points', $font_color);
-	imagestring($image, 2,  15, 34, 'Kills: '.$playerdata['kills'].', Deaths: '.$playerdata['deaths'].' ('.nf($playerdata['kpd'], 2, '.', '').'), Headshots: '.$playerdata['headshots'].' ('.$playerdata['hpk'].'%)', $font_color);
-	imagestring($image, 2,  15, 45, 'Activity: '.$playerdata['activity'].'%, Time: '.$con_time.' hours', $font_color);
-	imagestring($image, 2,  15, 56, 'Statistics: ', $font_color);imagestring($image, 2,  85, 56, $g_options['siteurl'], $link_color);
 
-	$watermark = imagecreatefrompng(IMAGE_PATH.'/watermark.png');
-	imagecopymerge_alpha($image, $watermark, 364, 54, 0, 0, 32, 16, 0);
+	if ($watermark = @imagecreatefrompng(IMAGE_PATH . '/watermark.png')) {
+		imagecopy($image, $watermark, $W - 38, $H - 21, 0, 0, imagesx($watermark), imagesy($watermark));
+		unset($watermark);
+	}
+
+	sigRoundCorners($image, 8);
 
 	@imagepng($image, IMAGE_PATH.'/progress/sig_'.$player_id.'.png');
 	$mod_date = date('D, d M Y H:i:s \G\M\T', time());
@@ -530,7 +542,6 @@ if ($player_id > 0) {
 	header('Last-Modified: ' . $mod_date);
 	imagepng($image);
 	unset($image);
-	unset($watermark);
 
 }
 ?>

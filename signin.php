@@ -149,6 +149,28 @@ function steamAuthCookieValue(array $steam)
     return bin2hex(json_encode($steam));
 }
 
+function steamAuthFetch($url, $context = null, &$responseHeaders = [], $attempts = 3)
+{
+
+    for ($attempt = 1; $attempt <= $attempts; $attempt++) {
+        $result = @file_get_contents($url, false, $context);
+        $responseHeaders = function_exists('http_get_last_response_headers')
+            ? (http_get_last_response_headers() ?? [])
+            : ($http_response_header ?? []);
+
+        if ($result !== false || !empty($responseHeaders)) {
+            return $result;
+        }
+
+        $host = parse_url($url, PHP_URL_HOST);
+        $error = error_get_last();
+        error_log(sprintf('HLstatsZ Steam sign-in: %s unreachable (attempt %d/%d): %s',
+            $host, $attempt, $attempts, str_replace($url, $host, $error['message'] ?? 'unknown error')));
+    }
+
+    return false;
+}
+
 $hasSteamAPI = defined('STEAM_API') && is_string(STEAM_API) && preg_match('/\A[a-f0-9]{32}\z/i', STEAM_API) === 1;
 
 if ( isset($_GET['openid_assoc_handle']) ) {
@@ -191,11 +213,12 @@ if ( isset($_GET['openid_assoc_handle']) ) {
             "Referer: https://steamcommunity.com/\r\n".
             "Origin: https://steamcommunity.com\r\n",
             'content' => $data,
+            'timeout' => 10,
         ],
     ]);
 
     // Steam Validation:
-    $result = file_get_contents('https://steamcommunity.com/openid/login', false, $context);
+    $result = steamAuthFetch('https://steamcommunity.com/openid/login', $context);
     $url = $returnTo;
 
     if ( $isTrustedReturnTo && preg_match("/is_valid:true$/",$result) ) {
@@ -204,12 +227,10 @@ if ( isset($_GET['openid_assoc_handle']) ) {
         $steamID64 = !empty($matches[1]) && is_numeric($matches[1]) ? $matches[1] : 0;
         
         if ($steamID64 > 0) {
-            $apiResult = @file_get_contents('https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key='.STEAM_API.'&steamids='.$steamID64);
+            $apiContext = stream_context_create(['http' => ['timeout' => 10]]);
+            $apiResult = steamAuthFetch('https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key='.STEAM_API.'&steamids='.$steamID64, $apiContext, $responseHeaders);
 
             if ($apiResult === false) {
-                $responseHeaders = function_exists('http_get_last_response_headers')
-                    ? http_get_last_response_headers()
-                    : ($http_response_header ?? []);
                 foreach ($responseHeaders as $header) {
                     if (preg_match('/^HTTP\/\S+\s+(401|403)/', $header)) {
                         error("STEAM_API &rarr; invalid_key");

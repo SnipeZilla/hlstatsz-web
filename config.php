@@ -1,117 +1,91 @@
 <?php
 /*
-HLstatsX Community Edition - Real-time player and clan rankings and statistics
-Copyleft (L) 2008-20XX Nicholas Hastings (nshastings@gmail.com)
-http://www.hlxcommunity.com
+HLstatsZ - Real-time player and clan rankings and statistics
+Originally HLstatsX Community Edition by Nicholas Hastings (2008–20XX)
+Based on ELstatsNEO by Malte Bayer, HLstatsX by Tobias Oetzel, and HLstats by Simon Garner
 
-HLstatsX Community Edition is a continuation of 
-ELstatsNEO - Real-time player and clan rankings and statistics
-Copyleft (L) 2008-20XX Malte Bayer (steam@neo-soft.org)
-http://ovrsized.neo-soft.org/
+HLstats > HLstatsX > HLstatsX:CE > HLStatsZ
+HLstatsZ continues a long lineage of open-source server stats tools for Half-Life and Source games.
+This version is released under the GNU General Public License v2 or later.
 
-ELstatsNEO is an very improved & enhanced - so called Ultra-Humongus Edition of HLstatsX
-HLstatsX - Real-time player and clan rankings and statistics for Half-Life 2
-http://www.hlstatsx.com/
-Copyright (C) 2005-2007 Tobias Oetzel (Tobi@hlstatsx.com)
-
-HLstatsX is an enhanced version of HLstats made by Simon Garner
-HLstats - Real-time player and clan rankings and statistics for Half-Life
-http://sourceforge.net/projects/hlstats/
-Copyright (C) 2001  Simon Garner
-            
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-For support and installation notes visit http://www.hlxcommunity.com
+For current support and updates:
+   https://snipezilla.com
+   https://github.com/SnipeZilla
+   https://forums.alliedmods.net/forumdisplay.php?f=156
 */
+if (!defined('IN_HLSTATS')) { die('Do not access this file directly'); }
 
-if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
-
-// Warning and error output to _error.txt
-// Not for production!!
-define("DEBUG", false);
-
-// DB_ADDR - The address of the database server, in host:port format.
-//           (You might also try setting this to e.g. ":/tmp/mysql.sock" to
-//           use a Unix domain socket, if your mysqld is on the same box as
-//           your web server.)
-define("DB_ADDR", "localhost");
-
-// DB_USER - The username to connect to the database as
-define("DB_USER", "root");
-
-// DB_PASS - The password for DB_USER
-define("DB_PASS", "");
-
-// DB_NAME - The name of the database
-define("DB_NAME", "");
-
-// DB_TYPE - The database server type. Only "mysql" is supported currently
-define("DB_TYPE", "mysql");
-// default 'utf8mb4'
-define("DB_CHARSET", 'utf8mb4');
-
-// default 'utf8mb4_unicode_ci'
-define("DB_COLLATE", 'utf8mb4_general_ci');
-// DB_PCONNECT - Set to 1 to use persistent database connections. Persistent
-//               connections can give better performance, but may overload
-//               the database server. Set to 0 to use non-persistent
-//               connections.
-define("DB_PCONNECT", 0);
-
-// INCLUDE_PATH - Filesystem path to the includes directory, relative to hlstats.php. This must be specified
-//		as a relative path.
-//
-//                Under Windows, make sure you use forward slash (/) instead
-//                of back slash (\) and use absolute paths if you are having any issue.
-define("INCLUDE_PATH", "./includes");
+// The settings of the HLstatsZ website; the rest is set in the admin panel.
+// This file holds passwords and keys: keep it private.
 
 
-// PAGE_PATH - Filesystem path to the pages directory, relative to hlstats.php. This must be specified
-//		as a relative path.
-//
-//                Under Windows, make sure you use forward slash (/) instead
-//                of back slash (\) and use absolute paths if you are having any issue.
-define("PAGE_PATH", "./pages");
+// ── Database ─────────────────────────────────────────────────────────────────────────────────────────
 
-// PAGE_PATH - Filesystem path to the hlstatsimg directory, relative to hlstats.php. This must be specified
-//		as a relative path.
-//
-//                Under Windows, make sure you use forward slash (/) instead
-//                of back slash (\) and use absolute paths if you are having any issue.
-//
-// 		Note: the progress directory under hlstatsimg must be writable!!
-define("IMAGE_PATH", "./hlstatsimg");
+// The MySQL or MariaDB database that the daemon fills (DBHost, DBName... in its hlstats.conf).
+// DB_ADDR is 'localhost', a host name or an IP address, with ':port' after it when the port is not 3306.
+define('DB_ADDR', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', '');
 
-// How often dynamicly generated images are updated (in seconds)
-define("IMAGE_UPDATE_INTERVAL", 300);
+// The character set and collation of HLstatsZ's tables: leave them as they are.
+// Tables from an older HLstats or HLstatsX are converted by Admin > Tools > Reset DB Collations.
+define('DB_CHARSET', 'utf8mb4');
+define('DB_COLLATE', 'utf8mb4_general_ci');
 
-define("GOOGLE_ANALYTICS_ID", "");
 
-// Steam Web API Key
-define("STEAM_API", '');
+// ── Bans (optional) ──────────────────────────────────────────────────────────────────────────────────
 
-// Steam Admin - Admin link will be removed.
-// Accepts a single SteamID64 string '76561197012345678'
-// or an array of them, e.g. ['76561197012345678', '76561197876543210']
-define("STEAM_ADMIN", '');
+// The bans pages read SourceBans (Source and CS2 servers), AMXBans (GoldSrc servers) or both. Their databases
+// must be on the same server as HLstatsZ's, and DB_USER must be allowed to read and change them.
+// An empty name turns one off.
 
+// SourceBans or SourceBans++: its database, and its table prefix, DB_PREFIX in its config.php ('sb': sb_bans...).
+define('DB_SBNAME', '');
+define('DB_SBPREFIX', 'sb');
+
+// AMXBans: its database, and its table prefix, db_prefix in its include/db.config.inc.php ('amx': amx_bans...).
+define('DB_AMXNAME', '');
+define('DB_AMXPREFIX', 'amx');
+
+
+// ── Steam sign-in ────────────────────────────────────────────────────────────────────────────────────
+
+// Steam Web API key, 32 characters (https://steamcommunity.com/dev/apikey). It turns on "Sign in with Steam"
+// and the Steam admins below; empty, there is no sign-in.
+define('STEAM_API', '');
+
+// The admins who open the admin panel by signing in with Steam: one SteamID64, '76561197960287930',
+// or a list of them, ['76561197960287930', '76561197960287931'].
+// With these and a Steam API key, the username/password login (Admin Users) is off; '' brings it back.
+define('STEAM_ADMIN', '');
+
+// Signs the Steam sign-in cookie and the map download links. Keep it secret: whoever knows it can sign in as
+// any Steam account, the admins included. 64 random letters and digits, from a password generator or from
+// php -r "echo bin2hex(random_bytes(32));". A new key signs everyone out.
 // Secret key for secure cookie signing (required)
 // https://passwords-generator.org/
 // Password Length: 64
 // Lowercase Characters: ✅ 
 // Uppercase Characters: ✅ 
 // Numbers:              ✅ 
-define("SECRET_KEY", 'GdXtjLW6A8eIgoeYMbnRFhf366e111SAQMomkeYqDVGMOwjxY4WOd4y7t5er7F2b');
-?>
+define('SECRET_KEY', 'GdXtjLW6A8eIgoeYMbnRFhf366e111SAQMomkeYqDVGMOwjxY4WOd4y7t5er7F2b');
+
+
+// ── Other ────────────────────────────────────────────────────────────────────────────────────────────
+
+// How long forum signatures, graphs and charts are kept before they are drawn again, in seconds.
+define('IMAGE_UPDATE_INTERVAL', 300);
+
+// Google Analytics measurement ID ('G-XXXXXXXXXX'); empty for none.
+define('GOOGLE_ANALYTICS_ID', '');
+
+// true: PHP warnings and errors are written to _error.txt next to this file (web.config and .htaccess keep it
+// private), never shown on the pages. false: php.ini decides.
+define('DEBUG', false);
+
+// Folders, relative to hlstats.php: leave them as they are. The web server must be able to write to
+// hlstatsimg/progress (signatures, graphs) and to cache/.
+define('INCLUDE_PATH', './includes');
+define('PAGE_PATH', './pages');
+define('IMAGE_PATH', './hlstatsimg');

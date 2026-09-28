@@ -22,6 +22,7 @@
   /* Inputs */
   --input-border: 1px solid #d6d3cd;
   --input-bg: #ffffff;
+  --input-color-scheme: light;
   --input-border-color-focus: #2563eb;
   --select-option-bg: #ffffff;
   --input-placeholder-color: rgba(71,85,105,.65);

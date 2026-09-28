@@ -25,7 +25,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	}
 ?>
 <div class="panel">
-<form method="post" action="<?php echo $g_options['scripturl'] . "?mode=admin&amp;task=$selTask&amp;id=$id&amp;" . strip_tags(session_id()); ?>">
+<form method="post" action="<?php echo $g_options['scripturl'] . "?mode=admin&amp;task=$selTask&amp;id=$id"; ?>">
 <?php
 
   // get available country flag files
@@ -101,8 +101,8 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 		}
 	}
 
-	printSectionTitle('<span>'.$data['lastName'].'</span>'.
-                      '<em><a href="' . $g_options['scripturl'] . "?mode=playerinfo&amp;player=$id&amp;" . strip_tags(session_id()) . '">'.
+	printSectionTitle('<span>'.htmlspecialchars(html_entity_decode($data['lastName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</span>'.
+                      '<em><a href="' . $g_options['scripturl'] . "?mode=playerinfo&amp;player=$id" . '">'.
                       ' (view player details)</a></em>');
 
 		$proppage->draw($data);
@@ -181,28 +181,6 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
     $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 10 : 0;
 
-
-	$tblIps = new Table
-	(
-		array
-		(
-			new TableColumn
-			(
-				'ipAddress',
-				'IP Address',
-				'width=40'
-			),
-			new TableColumn
-			(
-				'eventTime',
-				'Last Used',
-				'width=60'
-			)
-		),
-		'ipAddress',
-		'eventTime',
-		'eventTime'
-	);
 	$result = $db->query
 	("
 		SELECT

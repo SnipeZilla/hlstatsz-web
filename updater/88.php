@@ -129,6 +129,10 @@ foreach ($tables as $table => $indexes) {
 // Add Ribbons
 // ---------------------------------------------
 echo "<h3>Adding Ribbons for L4D2</h3>";
+// Only while L4D2 has none: a forced update runs this again, after update 91 lowered them
+$db->query("SELECT COUNT(*) FROM hlstats_Ribbons WHERE game = 'l4d2'");
+list($l4d2Ribbons) = $db->fetch_row();
+if (!$l4d2Ribbons) {
     $db->query("
         INSERT IGNORE INTO hlstats_Ribbons (game, awardCode, awardCount, special, image, ribbonName)
         SELECT 'l4d2', awardCode, awardCount, special, image, ribbonName FROM hlstats_Ribbons WHERE game='l4d';
@@ -139,7 +143,10 @@ echo "<h3>Adding Ribbons for L4D2</h3>";
     $db->query("UPDATE IGNORE hlstats_Ribbons SET awardCode = 'killed_smoker'  WHERE game = 'l4d2' AND awardCode = 'killed_gas';");
     $db->query("UPDATE IGNORE hlstats_Ribbons SET awardCode = 'killed_boomer'  WHERE game = 'l4d2' AND awardCode = 'killed_exploding';");
 
-echo "  &rarr; <b>L4D2 Ribbons added...</b><br />";
+    echo "  &rarr; <b>L4D2 Ribbons added...</b><br />";
+} else {
+    echo "  &rarr; <b>L4D2 already has ribbons: skipped</b><br />";
+}
 ob_flush();
 flush();
 

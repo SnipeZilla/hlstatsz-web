@@ -17,14 +17,11 @@ define('IN_HLSTATS', true);
 require('config.php');
 
 if (defined('DEBUG') && DEBUG === true) {
-    ini_set('display_errors', '1');
     ini_set('log_errors', '1');
+    ini_set('error_log', __DIR__ . '/_error.txt');
     error_reporting(-1);
-    ini_set('error_log', '_error.txt');
-} else {
-    error_reporting(0);
+    ini_set('display_errors', '0');
 }
-
 session_set_cookie_params([
     'lifetime' => 0,
     'path'     => rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\') . '/',
@@ -93,17 +90,15 @@ if (!empty($_GET['logout']) && $_GET['logout'] == '1') {
 	die;
 }
 
-$db_classname = 'DB_' . DB_TYPE;
-if ( class_exists($db_classname) )
-{
-	$db = new $db_classname(DB_ADDR, DB_USER, DB_PASS, DB_NAME, DB_PCONNECT);
-}
-else
-{
-	error('Database class does not exist.  Please check your config.php file for DB_TYPE');
-}
+$db = new DB_mysql(DB_ADDR, DB_USER, DB_PASS, DB_NAME, false);
 
-$g_options = getOptions();
+// No options: HLstatsZ is not installed yet (no database, no tables), or its database does not answer. The installer
+// says which, and installs it.
+$g_options = $db->db_name !== null ? getOptions(false) : false;
+if ($g_options === false) {
+	include PAGE_PATH . '/install.php';
+	exit;
+}
 
 if (!isset($g_options['scripturl'])) {
 	$g_options['scripturl'] = isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : getenv('PHP_SELF');
@@ -150,6 +145,7 @@ $valid_modes = array(
 	'dailyawardinfo',
 	'countryclans',
 	'countryclansinfo',
+	'sourcebans',
 	'teamspeak',
 	'discord',
 	'steamcommunity',
@@ -214,23 +210,16 @@ if ($game) {
 	}
 }
 
-if ($game && (empty($_SESSION['game']) || $_SESSION['game'] !== $game)) {
-	$realgame = null;
-	$realname = null;
-} else {
-	$realgame = $_SESSION['realgame'] ?? null;
-	$realname = $_SESSION['realname'] ?? null;
-}
-
+// Looked up whenever the game is known: the realgame kept in the session can be stale (a restored database,
+// or another site on the same host sharing the session cookie)
 if ( $game ) {
 	$_SESSION['game'] = $game;
-}
-
-if ((!$realgame || !$realname) && $game)
-{
 	list($realgame, $realname) = getRealGame($game);
 	$_SESSION['realgame'] = $realgame;
 	$_SESSION['realname'] = $realname;
+} else {
+	$realgame = $_SESSION['realgame'] ?? null;
+	$realname = $_SESSION['realname'] ?? null;
 }
 
 if ($mode == 'contents' || $mode == 'teamspeak' || $mode == 'discord' || $mode == 'steamcommunity' || $mode == 'mumble') {

@@ -48,21 +48,14 @@ For current support and updates:
 	require (INCLUDE_PATH . '/functions.php');
 	require (INCLUDE_PATH . '/functions_graph.php');
 
-    if (defined('DEBUG') && DEBUG === true) {
-        ini_set('display_errors', '1');
-        ini_set('log_errors', '1');
-        error_reporting(-1);
-        ini_set('error_log', '_error.txt');
-    } else {
-        error_reporting(0);
-    }
-
-	$db_classname = 'DB_' . DB_TYPE;
-	if (class_exists($db_classname)) {
-		$db = new $db_classname(DB_ADDR, DB_USER, DB_PASS, DB_NAME, DB_PCONNECT);
-	} else {
-		error('Database class does not exist.  Please check your config.php file for DB_TYPE');
+	if (defined('DEBUG') && DEBUG === true) {
+		ini_set('log_errors', '1');
+		ini_set('error_log', __DIR__ . '/_error.txt');
+		error_reporting(-1);
+		ini_set('display_errors', '0');
 	}
+
+	$db = new DB_mysql(DB_ADDR, DB_USER, DB_PASS, DB_NAME);
 
 	$g_options = getOptions();
 

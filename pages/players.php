@@ -278,8 +278,8 @@ echo '<div class="responsive-table">
                 <td class="nowrap hide-2">'.($res['acc']*100).'%</td>
                 <td class="meter-ratio nowrap hide-3">
                     <div class="meter-container">
-                      <meter min="0" max="100" low="25" high="50" optimum="75" value="'.$res['activity'].'" data-tooltip="'.htmlspecialchars(formatDate($res['last_event']), ENT_QUOTES).'"></meter>
-                      <div class="meter-value" id="meterText">'.$res['activity'].'%</div>
+                      <meter min="0" max="100" low="25" high="50" optimum="75" value="'.max(0, (int) $res['activity']).'" data-tooltip="'.htmlspecialchars(formatDate($res['last_event']), ENT_QUOTES).'"></meter>
+                      <div class="meter-value" id="meterText">'.max(0, (int) $res['activity']).'%</div>
                     </div>
                 </td>
                 <td class="nowrap hide-1">'.$time.'</td>

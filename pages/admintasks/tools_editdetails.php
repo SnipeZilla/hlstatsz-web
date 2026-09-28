@@ -125,7 +125,7 @@ or you can search for a player or clan if you don't know the ID.</p>
     $replace_pattern = array("", "", "");
     $sr_query = preg_replace($search_pattern, $replace_pattern, $sr_query);
 
-	$sr_type = valid_request(isset($_GET["st"])? $_GET["st"] : '', false) or "player";
+	$sr_type = valid_request(isset($_GET["st"])? $_GET["st"] : '', false) ?: "player";
 	$sr_game = valid_request($_GET["game"] ?? '', false);
 	
 	$search = new Search($sr_query, $sr_type, $sr_game);
@@ -138,8 +138,8 @@ or you can search for a player or clan if you don't know the ID.</p>
 	if ($sr_query)
 	{
 		$search->drawResults(
-			"mode=admin&task=tools_editdetails_player&id=%k",
-			"mode=admin&task=tools_editdetails_clan&id=%k"
+			"mode=admin&amp;task=tools_editdetails_player&amp;id=%k",
+			"mode=admin&amp;task=tools_editdetails_clan&amp;id=%k"
 		);
 	}
 ?>

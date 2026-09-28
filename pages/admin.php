@@ -919,21 +919,19 @@ function checkVersion() {
 
     global $db, $g_options;
     $needsupdate = false;
-    $webversion = '1.19.'.$g_options['dbversion'];
+    $web = '2.00';
+    $webversion = $web.'.'.$g_options['dbversion'];
     if (isset($g_options['webversion']) && ($g_options['webversion'] != $webversion)) {
         $db->query("UPDATE hlstats_Options SET `value` = '$webversion' WHERE `keyname` = 'webversion'");
     }
+    // An update is due when updater/ holds one above the database's version (updater/<number>.php)
+    $updates = array_map(fn($file) => (int) basename($file), glob('./updater/[0-9]*.php') ?: array());
+    $needsupdate = $updates && max($updates) > (int) $g_options['dbversion'];
     echo '<div class="panel">';
-    if (file_exists("./updater/" . ((int)$g_options['dbversion'] + 1) . ".php")) {
+    if ($needsupdate) {
         message('warning','Your database needs an upgrade. To perform a Database Update, please go to the Updater page.');
-        $needsupdate= true;
     } else {
-        if (file_exists("./updater/" . ((int)$g_options['dbversion']) . ".php")) {
-            message('success','Great. Your database is the latest version.');
-    } else {
-            message('warning','Your database needs an upgrade. To perform a Database Update, please go to the Updater page.');
-            $needsupdate= true;
-       }
+        message('success','Great. Your database is the latest version.');
     }
 
     if (empty($_SESSION['HLZ'])) {
@@ -950,9 +948,25 @@ function checkVersion() {
                         &rarr;
                         <a href="https://github.com/SnipeZilla/HLSTATS-2/releases/tag/'.$latestVersion.'" target="_blank">'.$latestVersion.'</a></div>';
     }
-    $WEB_version = file_exists("./updater/" . ((int)$g_options['dbversion'] + 1) . ".php") ? '❌ ' : '✔️ ';
+    // The installed web release: the web part and the database version (updater/ holds a higher one until the update runs)
+    if (empty($_SESSION['HLZWEB'])) {
+        $fetched = getHLVersion('SnipeZilla', 'hlstatsz-web');
+        if ($fetched) {
+            $_SESSION['HLZWEB'] = $fetched;
+        }
+    }
+    $latestWeb = $_SESSION['HLZWEB'] ?? null;
+
+    $HLZ_web = '<div><span class="hlstats-name">✔️ Current Web Version:</span> <span>'. $webversion .'</span></div>';
+    if ($latestWeb && version_compare($webversion, $latestWeb, '<')) {
+        $HLZ_web = '<div><span class="hlstats-name">⚠️Current Web Version:</span> <span>'. $webversion .'</span>
+                        &rarr;
+                        <a href="https://github.com/SnipeZilla/hlstatsz-web/releases/tag/'.htmlspecialchars($latestWeb).'" target="_blank">'.htmlspecialchars($latestWeb).'</a></div>';
+    }
+    $WEB_version = $needsupdate ? '❌ ' : '✔️ ';
 
     echo $HLZ_version;
+    echo $HLZ_web;
     echo '<div><span class="hlstats-name">'.$WEB_version.'Current DB version:</span> <span>'. $g_options['dbversion'] .'</span></div>';
     $version=phpversion();
     echo '<div style="margin:15px 0;">';
@@ -992,7 +1006,7 @@ function checkVersion() {
             <form method="post" action="?mode=admin&task=updater" name="updater" class="hlstats-updater">
                 <input type="hidden" name="force" value="1">
                 <div class="hlstats-admin-apply">
-                    <button type="submit" class="submit">Force Update</button>
+                    <button type="submit" class="submit hlstats-btn">Force Update</button>
                 </div>
             </form>
         </div>';
@@ -1082,18 +1096,19 @@ $adminTaskTitles = array(
 	'ribbons' => 'Ribbons',
 	'tools_updater' => 'DB Updater',
 	'tools_perlcontrol' => 'Daemon Control',
+	'tools_rcon' => 'RCON console',
+	'tools_amxadmins' => 'AMXBans',
+	'bans_settings' => 'Bans Settings',
 	'tools_editdetails' => 'Edit Player or Clan Details',
 	'tools_editdetails_player' => 'Edit Player Details',
 	'tools_editdetails_clan' => 'Edit Clan Details',
 	'tools_adminevents' => 'Admin Event History',
-	'tools_ipstats' => 'Host Statistics',
 	'tools_optimize' => 'Optimize Database',
 	'tools_reset' => 'Full / Partial Reset',
 	'tools_reset_2' => 'Clean up Player Statistics',
 	'tools_resetdbcollations' => 'Reset DB Collations',
+	'tools_fixencoding' => 'Repair Double-Encoded Text',
 	'tools_settings_copy' => 'Duplicate Game Settings',
-	'tools_hostgroups' => 'Host Groups',
-	'hostgroups' => 'Host Groups',
 );
 $task = (object) array(
 	'title' => isset($adminTaskTitles[$selTask]) ? $adminTaskTitles[$selTask] : ucwords(str_replace('_', ' ', $selTask))
@@ -1146,7 +1161,7 @@ $result = $db->query("
   <button class="hlstats-admin-back" id="admin-back">&#8592; Back to menu</button>
 
   <!-- Nav sidebar -->
-  <div class="hlstats-admin-nav" id="admin-nav">
+  <div class="hlstats-admin-nav hlstats-scrollbar" id="admin-nav">
     <ul class="hlstats-task">
 
       <li>
@@ -1189,16 +1204,28 @@ $result = $db->query("
       </li>
 
       <li>
+        <a href="#bans" class="hlstats-admin-task" data-url="">Bans</a>
+        <ul class="hlstats-sub-task">
+          <li><a href="#" class="hlstats-admin-task" data-url="bans_settings">Bans Settings</a></li>
+          <?php if (defined('DB_AMXNAME') && DB_AMXNAME !== ''): ?>
+          <li><a href="#" class="hlstats-admin-task" data-url="tools_amxadmins">AMXBans</a></li>
+          <?php endif; ?>
+        </ul>
+      </li>
+
+      <li>
         <a href="#tools" class="hlstats-admin-task" data-url="">Tools</a>
         <ul class="hlstats-sub-task">
           <li><a href="#" class="hlstats-admin-task" data-url="updater">Updater</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_perlcontrol">Daemon Control</a></li>
+          <li><a href="#" class="hlstats-admin-task" data-url="tools_rcon">RCON console</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_editdetails">Edit Player/Clan</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_adminevents">Admin Event History</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_optimize">Optimize Database</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_reset">Full / Partial Reset</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_reset_2">Clean up Player Statistics</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_resetdbcollations">Reset DB Collations</a></li>
+          <li><a href="#" class="hlstats-admin-task" data-url="tools_fixencoding">Repair Double-Encoded Text</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_settings_copy">Duplicate Game Settings</a></li>
         </ul>
       </li>
@@ -1270,12 +1297,12 @@ checkVersion();
         if (push) history.pushState({}, '', scriptUrl + '?mode=admin');
     }
 
-    /** Build an AJAX fetch URL from params. Always includes mode=admin. */
+    /** Build an AJAX fetch URL from params. Always includes mode=admin; an empty game (all games) is kept. */
     function buildFetchUrl(params) {
         const u = new URL(scriptUrl, window.location.href);
         u.searchParams.set('mode', 'admin');
         for (const [k, v] of Object.entries(params)) {
-            if (k !== 'mode' && v) u.searchParams.set(k, v);
+            if (k !== 'mode' && (v || (k === 'game' && v === ''))) u.searchParams.set(k, v);
         }
         return u.toString();
     }
@@ -1285,7 +1312,7 @@ checkVersion();
         const u = new URLSearchParams();
         u.set('mode', 'admin');
         for (const [k, v] of Object.entries(params)) {
-            if (k !== 'mode' && v) u.set(k, v);
+            if (k !== 'mode' && (v || (k === 'game' && v === ''))) u.set(k, v);
         }
         return scriptUrl + '?' + u.toString();
     }
@@ -1376,6 +1403,8 @@ checkVersion();
             form.dataset.bound = '1';
 
             form.addEventListener('submit', async (e) => {
+                // An onsubmit that returned false (e.g. a declined confirm()) cancels the post
+                if (e.defaultPrevented) return;
                 e.preventDefault();
                 panel.classList.add('is-loading');
 
@@ -1469,7 +1498,8 @@ checkVersion();
                 for (const [k, v] of p.entries()) {
                     if (k !== 'mode') params[k] = v;
                 }
-                if (!params.game) params.game = currentGame;
+                // An empty game (a search in all games) stays empty
+                if (!p.has('game')) params.game = currentGame;
 
                 const title = titles[params.task] || a.textContent.trim() || params.task;
                 loadTask(params, title, true);
@@ -1576,7 +1606,7 @@ checkVersion();
         for (const [k, v] of urlParams.entries()) {
             if (k !== 'mode') params[k] = v;
         }
-        if (!params.game) params.game = baseGame;
+        if (!urlParams.has('game')) params.game = baseGame;
 
         const title = titles[initTask] || initTask;
 

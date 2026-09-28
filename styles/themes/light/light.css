@@ -1,7 +1,7 @@
 :root{
   /* logo */
   --logo-color: #1f2328;
-  --logo-color-z: #FF0000; /*#2563eb;*/
+  --logo-color-z: #2563eb;
 
   /* Base */
   --body-bg: #ffffff;
@@ -17,6 +17,7 @@
   /* Inputs */
   --input-border: 1px solid #d1d5db;
   --input-bg: #ffffff;
+  --input-color-scheme: light;
   --input-border-color-focus: #2563eb;
   --select-option-bg: #ffffff;
   --input-placeholder-color: rgba(75,85,99,.65);

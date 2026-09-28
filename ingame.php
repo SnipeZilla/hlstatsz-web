@@ -59,22 +59,13 @@ require(INCLUDE_PATH . "/class_db.php");
 require(INCLUDE_PATH . "/functions.php");
 
 if (defined('DEBUG') && DEBUG === true) {
-    ini_set('log_errors', 'On');
+    ini_set('log_errors', '1');
+    ini_set('error_log', __DIR__ . '/_error.txt');
     error_reporting(-1);
-    ini_set('error_log', '_error.txt');
-} else {
-    error_reporting(0);
+    ini_set('display_errors', '0');
 }
 
-$db_classname = "DB_" . DB_TYPE;
-if ( class_exists($db_classname) )
-{
-	$db = new $db_classname(DB_ADDR, DB_USER, DB_PASS, DB_NAME, DB_PCONNECT);
-}
-else
-{
-	error('Database class does not exist.  Please check your config.php file for DB_TYPE');
-}
+$db = new DB_mysql(DB_ADDR, DB_USER, DB_PASS, DB_NAME);
 
 $g_options = getOptions();
 
@@ -87,21 +78,17 @@ if (!isset($g_options['scripturl']))
 ////
 
 $game = valid_request(isset($_GET['game']) ? $_GET['game'] : '', false);
-if ($game && (empty($_SESSION['game']) || $_SESSION['game'] !== $game)) {
-	$realgame = null;
-	$realname = null;
-} else {
-	$realgame = $_SESSION['realgame'] ?? null;
-	$realname = $_SESSION['realname'] ?? null;
-}
-
 if ( !$game ) {
 	$game = isset($_SESSION['game'])?$_SESSION['game']:'';
 } else {
 	$_SESSION['game'] = $game;
 }
 
-if ((!$realgame || !$realname) && $game)
+// Looked up whenever the game is known: the realgame kept in the session can be stale (a restored database,
+// or another site on the same host sharing the session cookie)
+$realgame = $_SESSION['realgame'] ?? null;
+$realname = $_SESSION['realname'] ?? null;
+if ($game)
 {
 	list($realgame, $realname) = getRealGame($game);
 	$_SESSION['realgame'] = $realgame;

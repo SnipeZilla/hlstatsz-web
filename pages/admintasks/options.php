@@ -20,7 +20,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	}
 
 ?>
-	<div class="hlstats-admin-table-wrap panel">
+	<div class="hlstats-admin-table-wrap hlstats-scrollbar panel">
 <?php
 message("warning","Options with an asterisk (*) beside them require a restart of the perl daemon to fully take effect.");
 	class OptionGroup
@@ -182,15 +182,15 @@ message("warning","Options with an asterisk (*) beside them require a restart of
 
 	$optiongroups = array();
 
+	// The SourceBans / AMXBans pages have their own settings (Bans > Bans Settings, bans_settings.php)
 	$optiongroups[0] = new OptionGroup('⚙️ Site Settings');
 	$optiongroups[0]->options[] = new Option('sitename', '🌐 Site Name', 'text');
 	$optiongroups[0]->options[] = new Option('siteurl', '🌐 Site URL', 'text');
 	$optiongroups[0]->options[] = new Option('nav_globalchat', '🔗 Show Chat nav-link', 'select');
 	$optiongroups[0]->options[] = new Option('nav_cheaters', '🔗 Show Banned Players nav-link', 'select');
-	$optiongroups[0]->options[] = new Option('sourcebans_address', '🔗 SourceBans URL<br />Enter the relative or full path to your SourceBans web site, if you have one. Ex: http://www.yoursite.com/sourcebans/ or /sourcebans/', 'text');
 	$optiongroups[0]->options[] = new Option('forum_address', '🔗 Forum URL<br />Enter the relative or full path to your forum/message board, if you have one. Ex: http://www.yoursite.com/forum/ or /forum/', 'text');
 	$optiongroups[0]->options[] = new Option('map_dlurl', '🔗 Map Download URL<br /><span class="hlstats-name">%GAME%</span> = gamecode (optional sub folder).<br>https://yoursite.com/fastdl/%GAME%/ &rarr; https://yoursite.com/fastdl/tf2/<br> Leave blank to suppress download link.', 'text');
-	$optiongroups[0]->options[] = new Option('sigbackground', '🏛️ Default background for forum signature(Numbers 1-11 or random)<br />Look in sig folder to see background choices', 'text');
+	$optiongroups[0]->options[] = new Option('sigbackground', '🏛️ Default accent color of the forum signature (numbers 1-11, or random)<br />The card shows the banner art of the game; the number picks the color of the rank', 'text');
 	
 	$optiongroups[30] = new OptionGroup('🤩 Visual style settings');
     if (isset($g_options['Language']))

@@ -592,6 +592,34 @@ const Tooltip = (() => {
     return { show, hide };
 })();
 
+/* Copy buttons: <button data-copy="text"> copies its text, then shows a check and "Copied" for a moment */
+document.addEventListener('click', async e => {
+    const button = e.target instanceof Element ? e.target.closest('[data-copy]') : null;
+    if (!button) return;
+    try {
+        await navigator.clipboard.writeText(button.dataset.copy);
+    } catch {
+        // the Clipboard API needs HTTPS (or localhost)
+        const area = document.createElement('textarea');
+        area.value = button.dataset.copy;
+        area.style.cssText = 'position:fixed;top:0;opacity:0';
+        document.body.append(area);
+        area.select();
+        document.execCommand('copy');
+        area.remove();
+    }
+    button.dataset.tip ??= button.dataset.tooltip ?? '';
+    button.dataset.tooltip = t('copied');
+    button.classList.add('is-copied');
+    Tooltip.show(button);
+    clearTimeout(button.copyTimer);
+    button.copyTimer = setTimeout(() => {
+        button.classList.remove('is-copied');
+        button.dataset.tooltip = button.dataset.tip;
+        Tooltip.hide();
+    }, 1500);
+});
+
 function formatNum(num) {
 
     if (typeof num !== 'number' || isNaN(num)) return num; // Validate input

@@ -31,22 +31,13 @@ For current support and updates:
 	require (INCLUDE_PATH . '/functions.php');
 
 	if (defined('DEBUG') && DEBUG === true) {
-		ini_set('display_errors', '1');
 		ini_set('log_errors', '1');
+		ini_set('error_log', __DIR__ . '/_error.txt');
 		error_reporting(-1);
-		ini_set('error_log', '_error.txt');
-	} else {
-		error_reporting(0);
+		ini_set('display_errors', '0');
 	}
 
-	$db_classname = 'DB_' . DB_TYPE;
-	if (class_exists($db_classname)) {
-		$db = new $db_classname(DB_ADDR, DB_USER, DB_PASS, DB_NAME, DB_PCONNECT);
-	} else {
-		http_response_code(500);
-		echo json_encode(['error' => 'db class missing']);
-		exit;
-	}
+	$db = new DB_mysql(DB_ADDR, DB_USER, DB_PASS, DB_NAME);
 
 	$g_options = getOptions();
 

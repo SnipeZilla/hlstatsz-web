@@ -19,7 +19,7 @@ $name = $playerdata['lastName'];
 $status = 'Unknown';
 $avatarFull = IMAGE_PATH . '/unknown.jpg';
 $memberSince = 'Private';
-$vacBanned = '';
+$vacBanned = false;
 $profileUrl = 'https://steamcommunity.com/profiles/' . $coid;
 $xml = '';
 
@@ -40,8 +40,7 @@ if ($xmlDoc) {
     $steamID  = (string) ($xmlDoc->steamID ?? '');
     if (!empty($steamID)) $name = $steamID;
     $status = (string) ($xmlDoc->onlineState ?? $status);
-    $vacBanned = (string) ($xmlDoc->vacBanned ?? '');
-    if (!empty($vacBanned)) $vacBanned = ' ('.htmlspecialchars($vacBanned, ENT_COMPAT).' vacBanned)';
+    $vacBanned = (string) ($xmlDoc->vacBanned ?? '') === '1';
     $avatarFull = (string) ($xmlDoc->avatarFull ?? $avatarFull);
     $memberSince = (string) ($xmlDoc->memberSince ?? $memberSince);
 }
@@ -57,50 +56,10 @@ if ($name !== $playerdata['lastName']) {
     ");
 }
 
-$prefix = ($g_options['Mode'] == 'Normal') ? 'STEAM_0:' : '';
-$steam = '<a href="' . htmlspecialchars($profileUrl, ENT_QUOTES) . '" target="_blank">' . $prefix . htmlspecialchars($uqid, ENT_COMPAT) . '</a>';
-$location = '(Unknown)';
-
-if (preg_match('/^BOT/i', (string) $uqid)) {
-    $playerdata['flag'] = 'bot';
-    $steam = htmlspecialchars($uqid, ENT_COMPAT);
-    $location = '(Server)';
-} else {
-    $location = Location($playerdata['city'], $playerdata['state'], $playerdata['country'], $g_options['countrydata']);
-}
-
-$statusClass = $status == 'offline'? ' red' : ($status == 'Unknown'? ' orange': ' green');
-?>
-<div class="hlstats-profile-head">
-  <div class="hlstats-avatar">
-    <img src="<?= htmlspecialchars($avatarFull, ENT_QUOTES) ?>"
-         class="hlstats-avatar-img"
-         alt="Steam Community Avatar" />
-  </div>
-
-  <div class="hlstats-identity">
-    <div class="hlstats-pname">
-<?php if ($g_options['countrydata']) { ?>
-      <span class="hlstats-flag">
-        <img src="<?= getFlag($playerdata['flag']) ?>"
-             alt="<?= htmlspecialchars($playerdata['country'] ?? '', ENT_QUOTES) ?>"
-            data-tooltip="<?= htmlspecialchars($playerdata['country'] ?? '', ENT_QUOTES) ?>" />
-      </span>
-<?php } ?>
-      <span><?= htmlspecialchars(html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT) ?></span>
-    </div>
-
-    <div class="hlstats-meta">
-<?php if ($g_options['countrydata']) { ?>
-      <span><strong><?= t('location') ?></strong> <?= htmlspecialchars($location, ENT_COMPAT) ?></span>
-<?php } ?>
-      <span><strong>Steam:</strong> <?= $steam ?></span>
-      <span><strong><?= t('status') ?></strong><strong class="hlstats-status<?= $statusClass ?>"> <?= ucfirst(htmlspecialchars($status, ENT_COMPAT)) ?></strong><?php if (!empty($vacBanned)) echo '<strong class="red"> '.$vacBanned.'</strong>'; ?></span>
-      <span><strong><?= t('member.since') ?></strong> <?= $memberSinceTs ? formatDate($memberSinceTs,IntlDateFormatter::LONG, IntlDateFormatter::NONE) : htmlspecialchars($memberSince, ENT_COMPAT) ?></span>
-    </div>
-  </div>
-</div>
-<?php $memberSinceFormatted = $memberSinceTs ? formatDate($memberSinceTs) : htmlspecialchars($memberSince, ENT_COMPAT); ?>
-<span id="steam-member-since-value-<?= (int) $player ?>"
-      data-member-since="<?= htmlspecialchars($memberSinceFormatted, ENT_QUOTES) ?>"
-      hidden><?= $memberSinceFormatted ?></span>
+// The header's identity part again, now with Steam's avatar, status and join date (see playerIdentity() in playerinfo.php)
+playerIdentity($playerdata, (string) $uqid, (string) $coid, array(
+    'avatar'       => $avatarFull,
+    'status'       => $status,
+    'member_since' => $memberSinceTs ? formatDate($memberSinceTs, IntlDateFormatter::LONG, IntlDateFormatter::NONE) : $memberSince,
+    'vac'          => $vacBanned,
+));

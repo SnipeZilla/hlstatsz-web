@@ -76,12 +76,12 @@ For current support and updates:
 				?>
 				  <div class="hlstats-search-row" style="margin-bottom:10px;">
 					<label for="hlzSearchIn"><?= t('search.in') ?></label>
-					<?php echo getSelect('st', $searchtypes, $this->type); ?>
+					<?php echo getSelect('st', $searchtypes, $this->type, 'hlzSearchIn'); ?>
 				  </div>
 			
 				  <div class="hlstats-search-row">
 					<label for="hlzSearchGame"><?= t('search.game') ?></label>
-					<?php echo getSelect('game', $games, $this->game); ?>
+					<?php echo getSelect('game', $games, $this->game, 'hlzSearchGame'); ?>
 				  </div>
 
 				<?php
@@ -95,7 +95,10 @@ For current support and updates:
 			if ($link_player == -1) $link_player = "mode=playerinfo&amp;player=%k";
 			if ($link_clan == -1) $link_clan = "mode=claninfo&amp;clan=%k";
             $from_admin = (is_ajax() && isset($_GET['task']) && $_GET['task'] == 'tools_editdetails');
-            
+            // A result's link ($link_player / $link_clan with %k = its ID), and a name as players.php shows it
+            $resultUrl  = fn($link, $key) => $g_options['scripturl'] . '?' . str_replace('%k', urlencode((string) $key), $link);
+            $resultName = fn($name) => htmlspecialchars(html_entity_decode((string) $name, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT);
+
     if (!is_ajax() || (!empty($_GET['ajax']) && $_GET['ajax']=='search')) {
 	printSectionTitle(t('title.search.results'));
     }
@@ -202,7 +205,7 @@ if (!is_ajax() || (!empty($_GET['ajax']) && $_GET['ajax']=='search') || $from_ad
                   if ($g_options['countrydata']) {
                     echo '<span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>';
                   }
-                  echo '<a href="'.$g_options['scripturl'].'?mode=playerinfo&amp;player='.$res['player_id'].'&amp;game='.$res['code'].'"><span class="hlstats-name">'.$res['name'].'&nbsp;</span></a>
+                  echo '<a href="'.$resultUrl($link_player, $res['player_id']).'&amp;game='.urlencode((string) $res['code']).'"><span class="hlstats-name">'.$resultName($res['name']).'&nbsp;</span></a>
                    </td>
                   <td class="left">'.$res['gamename'].'</td>
                   </tr>';
@@ -285,8 +288,13 @@ if (!is_ajax() || (!empty($_GET['ajax']) && $_GET['ajax']=='search') || $from_ad
 						hlstats_Players
 					ON
 						hlstats_Players.playerId = hlstats_PlayerUniqueIds.playerId
+					LEFT JOIN
+						hlstats_Games
+					ON
+						hlstats_Games.code = hlstats_PlayerUniqueIds.game
 					WHERE
 						hlstats_Players.hideranking <> '1' AND
+						hlstats_Games.hidden = '0' AND
 						hlstats_PlayerUniqueIds.uniqueId LIKE '%$sr_query%'
 						$andgame
 				");
@@ -315,7 +323,7 @@ if (!is_ajax() || (!empty($_GET['ajax']) && $_GET['ajax']=='search') || $from_ad
                   if ($g_options['countrydata']) {
                     echo '<span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>';
                   }
-                  echo '<a href="'.$g_options['scripturl'].'?mode=playerinfo&amp;player='.$res['playerId'].'"><span class="hlstats-name">'.$res['lastName'].'&nbsp;</span></a>
+                  echo '<a href="'.$resultUrl($link_player, $res['playerId']).'"><span class="hlstats-name">'.$resultName($res['lastName']).'&nbsp;</span></a>
                    </td>
                   <td class="left">'.$res['gamename'].'</td>
                   <td class="nowrap left">'.$res['playerId'].'</td>
@@ -454,7 +462,7 @@ if (!is_ajax() || (!empty($_GET['ajax']) && $_GET['ajax']=='search') || $from_ad
                   if ($g_options['countrydata']) {
                    echo '<span class="hlstats-flag"><img src="'.getFlag($res['flag']).'" alt="'.$res['flag'].'"></span>';
                   }
-                  echo '<a href="'.$g_options['scripturl'].'?mode=playerinfo&amp;player='.$res['player_id'].'"><span class="hlstats-name">'.$res['name'].'&nbsp;</span></a>
+                  echo '<a href="'.$resultUrl($link_player, $res['player_id']).'"><span class="hlstats-name">'.$resultName($res['name']).'&nbsp;</span></a>
                    </td>
                   <td class="left">'.$res['gamename'].'</td>
                   </tr>';
@@ -523,9 +531,14 @@ if (!is_ajax() || (!empty($_GET['ajax']) && $_GET['ajax']=='search') || $from_ad
 						COUNT(*)
 					FROM
 						hlstats_Clans
+					LEFT JOIN hlstats_Games ON
+						hlstats_Games.code = hlstats_Clans.game
 					WHERE
-						LOWER(hlstats_Clans.tag) LIKE LOWER('%$sr_query%')
-						OR LOWER(hlstats_Clans.name) LIKE LOWER('%$sr_query%')
+						hlstats_Games.hidden = '0'
+						AND (
+							LOWER(hlstats_Clans.tag) LIKE LOWER('%$sr_query%')
+							OR LOWER(hlstats_Clans.name) LIKE LOWER('%$sr_query%')
+						)
 						$andgame
 				");
 list($numitems) = $db->fetch_row($resultCount);
@@ -547,9 +560,9 @@ if (!is_ajax() || (!empty($_GET['ajax']) && $_GET['ajax']=='search') || $from_ad
         while ($res = $db->fetch_array($result))
         {
             echo '<tr>
-                  <td class="nowrap left">'.$res['tag'].'</td>
+                  <td class="nowrap left">'.$resultName($res['tag']).'</td>
                   <td class="left">
-                       <a href="'.$g_options['scripturl'].'?mode=claninfo&amp;clan='.$res['clanId'].'"><span class="hlstats-name">⚔️ '.$res['name'].'</span></a>
+                       <a href="'.$resultUrl($link_clan, $res['clanId']).'"><span class="hlstats-name">⚔️ '.$resultName($res['name']).'</span></a>
                    </td>
                   <td class="left">'.$res['gamename'].'</td>
                   <td class="left">'.$res['clanId'].'</td>
@@ -559,8 +572,8 @@ if (!is_ajax() || (!empty($_GET['ajax']) && $_GET['ajax']=='search') || $from_ad
    </table>
    </div>
    <?php
-       echo Pagination($numitems, $_GET['page'] ?? 1, 30, 'page', true, 'searchsteam', $mode !== 'admin');
-      if (is_ajax() && !empty($_GET['ajax']) && $_GET['ajax'] == 'searchsteam') exit
+       echo Pagination($numitems, $_GET['page'] ?? 1, 30, 'page', true, 'searchclan', $mode !== 'admin');
+      if (is_ajax() && !empty($_GET['ajax']) && $_GET['ajax'] == 'searchclan') exit
   ?>
 </div>
 <?php

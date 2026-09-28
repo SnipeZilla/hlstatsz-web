@@ -32,7 +32,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	$mapselect.=";";   
 ?>
 
-<form method="post" action="<?php echo $g_options['scripturl'] . "?mode=admin&amp;task=$selTask&amp;id=$id&" . strip_tags(session_id()); ?>">
+<form method="post" action="<?php echo $g_options['scripturl'] . "?mode=admin&amp;task=$selTask&amp;id=$id"; ?>">
 <?php
 	$proppage = new PropertyPage("hlstats_Clans", "clanId", $id, array(
 		new PropertyPage_Group("Profile", array(
@@ -69,12 +69,8 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	
 	$data = $db->fetch_array($result);
 	
-	echo "<span class='fTitle'>";
-	echo $data['tag'];
-	echo "</span>";
-	
-	printSectionTitle('<span>'.$data['tag'].'</span><span>'.
-						'<a href="' . $g_options['scripturl'] . "?mode=claninfo&amp;clan=$id&amp;" . strip_tags(session_id()) . '">'.
+	printSectionTitle('<span>'.htmlspecialchars($data['tag']).'</span><span>'.
+						'<a href="' . $g_options['scripturl'] . "?mode=claninfo&amp;clan=$id" . '">'.
 						'(View Clan Details)</a></span>');
 
 

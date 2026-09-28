@@ -43,18 +43,23 @@ function myCookie($name, $value, $lifetime)
 /**
  * getOptions()
  * 
+ * @param bool $exit false: without options (no table, an empty one), return false instead of an error page
  * @return Array All the options from the options/perlconfig table
  */
-function getOptions()
+function getOptions($exit = true)
 {
 	global $db;
-	$result = $db->query("SELECT `keyname`,`value` FROM hlstats_Options WHERE opttype >= 1");
-	while ($rowdata = $db->fetch_row($result))
+	$options = array();
+	$result  = $db->query("SELECT `keyname`,`value` FROM hlstats_Options WHERE opttype >= 1", $exit);
+	while ($result && ($rowdata = $db->fetch_row($result)))
 	{
 		$options[$rowdata[0]] = $rowdata[1];
 	}
 	if ( !count($options) )
 	{
+		if (!$exit) {
+			return false;
+		}
 		error('Warning: Could not find any options in table <b>hlstats_Options</b>, database <b>' .
 			DB_NAME . '</b>. Check HLstats configuration.');
 	}
@@ -353,11 +358,12 @@ function pageFooter()
  * @param mixed $name
  * @param mixed $values
  * @param string $currentvalue
+ * @param string $id  the id of the SELECT, for a <label for>
  * @return The 'currentvalue' will be given the SELECTED attribute.
  */
-function getSelect($name, $values, $currentvalue = '')
+function getSelect($name, $values, $currentvalue = '', $id = '')
 {
-	$select = "<select name=\"$name\">\n";
+	$select = "<select name=\"$name\"" . ($id !== '' ? " id=\"$id\"" : '') . ">\n";
 
 	$gotcval = false;
 
@@ -376,7 +382,9 @@ function getSelect($name, $values, $currentvalue = '')
 
 	if ($currentvalue && !$gotcval)
 	{
-		$select .= "\t<option value=\"$currentvalue\" selected=\"selected\">$currentvalue</option>\n";
+		// a value that is not in the list can come from the URL: escaped
+		$current = htmlspecialchars((string) $currentvalue, ENT_QUOTES);
+		$select .= "\t<option value=\"$current\" selected=\"selected\">$current</option>\n";
 	}
 
 	$select .= '</select>';
@@ -455,15 +463,18 @@ function getImage($filename)
 	$url = IMAGE_PATH . $relpath . rawurlencode($realfilename);
 
 	// check if image exists
-    if (file_exists($path . '.png'))
+    if (file_exists($path . '.svg'))
+	{
+		$ext = 'svg';
+	} elseif (file_exists($path . '.png'))
 	{
 		$ext = 'png';
-	} elseif (file_exists($path . '.gif'))
-	{
-		$ext = 'gif';
 	} elseif (file_exists($path . '.jpg'))
 	{
 		$ext = 'jpg';
+	} elseif (file_exists($path . '.gif'))
+	{
+		$ext = 'gif';
 	}
 	else
 	{
@@ -472,7 +483,8 @@ function getImage($filename)
 
 	if ($ext)
 	{
-		$size = getImageSize("$path.$ext");
+		// PHP before 8.5 reads no size from an SVG
+		$size = @getImageSize("$path.$ext") ?: array(0, 0, 0, '');
 
 		return array('url' => "$url.$ext", 'path' => "$path.$ext", 'width' => $size[0], 'height' => $size[1],
 			'size' => $size[3]);
@@ -777,6 +789,118 @@ function Location($city='', $state='', $country='', $opt=0): string
     }
 
     return !empty($location) ? implode(', ', $location) : '(Unknown)';
+}
+
+/**
+ * A translated form label without its colon ("Kills:" -> "Kills", "Localisation :" -> "Localisation"),
+ * for headings, tiles and tooltips.
+ */
+function tLabel(string $key, array $vars = []): string
+{
+    return preg_replace('/\s*:\s*$/u', '', t($key, $vars));
+}
+
+/**
+ * Headline tiles: a grid of small cards, each [label, value, note] (the note may be ''); $class adds to the grid.
+ */
+function kpiTiles(array $tiles, string $class = ''): void
+{
+    echo '<div class="hlstats-cards-grid hlstats-kpis' . ($class !== '' ? ' ' . $class : '') . '">' . "\n";
+    foreach ($tiles as list($label, $value, $note)) {
+        echo '    <div class="hlstats-card hlstats-kpi">'
+           . '<div class="hlstats-kpi-label">' . $label . '</div>'
+           . '<div class="hlstats-kpi-value">' . $value . '</div>'
+           . ($note !== '' ? '<div class="hlstats-kpi-note">' . $note . '</div>' : '')
+           . "</div>\n";
+    }
+    echo "</div>\n";
+}
+
+/**
+ * The Favorites card of a player or a clan: its most played server and map, and its most used weapon.
+ * $fav: 'server_id', 'server_name', 'map', 'weapon' (code), 'weapon_name' (each may be empty);
+ * $days: the days of events HLstatsZ keeps (DeleteDays), which the favorites come from.
+ */
+function profileFavorites(string $game, string $realgame, array $fav, int $days): void
+{
+    $rows = array();
+    if (!empty($fav['server_id'])) {
+        $rows[] = array('server', t('th.server'), 'hlstats.php?game=' . urlencode($game) . '&amp;mode=servers&amp;server_id=' . (int) $fav['server_id'],
+            htmlspecialchars(html_entity_decode($fav['server_name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT), '');
+    }
+    if (!empty($fav['map'])) {
+        $rows[] = array('map', t('th.map'), 'hlstats.php?game=' . urlencode($game) . '&amp;mode=mapinfo&amp;map=' . urlencode($fav['map']),
+            htmlspecialchars($fav['map'], ENT_COMPAT), '');
+    }
+    if (!empty($fav['weapon'])) {
+        $image  = getImage('/games/' . $game . '/weapons/' . $fav['weapon']);
+        if (empty($image)) {
+            $image = getImage('/games/' . $realgame . '/weapons/' . $fav['weapon']);
+        }
+        $rows[] = array('target', t('th.weapon'), 'hlstats.php?mode=weaponinfo&amp;weapon=' . urlencode($fav['weapon']) . '&amp;game=' . urlencode($game),
+            htmlspecialchars($fav['weapon_name'] ?: $fav['weapon'], ENT_COMPAT), $image ? $image['url'] : '');
+    }
+?>
+<section class="hlstats-section hlstats-card">
+    <div class="hlstats-card-head">
+        <div class="hlstats-card-title"><?= t('favorites') ?></div>
+<?php if ($days) { ?>
+        <span class="hlstats-card-note"><?= t('last.activity.days', ['{activity}' => $days]) ?></span>
+<?php } ?>
+    </div>
+<?php if (!$rows) { ?>
+    <p class="hlstats-no-data center"><em><?= t('not.enough.data') ?></em></p>
+<?php } else { ?>
+    <div class="hlstats-profile-favs">
+<?php foreach ($rows as list($icon, $label, $url, $name, $image)) { ?>
+        <div class="hlstats-profile-fav">
+            <span class="hlstats-profile-fav-icon"><?= svgIcon($icon, 20) ?></span>
+            <span class="hlstats-profile-fav-text">
+                <span class="hlstats-profile-fav-label"><?= $label ?></span>
+                <a class="hlstats-profile-fav-value" href="<?= $url ?>"><?= $name ?></a>
+            </span>
+<?php if ($image) { ?>
+            <img class="hlstats-profile-fav-image" src="<?= $image ?>" alt="" />
+<?php } ?>
+        </div>
+<?php } ?>
+    </div>
+<?php } ?>
+</section>
+<?php
+}
+
+/**
+ * Inline stroke icon drawn in the text color (24 px grid), for buttons and labels.
+ */
+function svgIcon(string $name, int $size = 16): string
+{
+    static $paths = [
+        'pin'      => '<path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+        'calendar' => '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+        'clock'    => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+        'copy'     => '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+        'check'    => '<path d="m5 12 5 5 9-10"/>',
+        'users'    => '<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 11a3 3 0 1 0 0-6M21 20a6 6 0 0 0-4-5.6"/>',
+        'shield'   => '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+        'list'     => '<path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+        'history'  => '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',
+        'medal'    => '<circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/>',
+        'chat'     => '<path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/>',
+        'search'   => '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+        'server'   => '<rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/>',
+        'map'      => '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',
+        'target'   => '<circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',
+        'pencil'   => '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+        'globe'    => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+        'x'        => '<path d="M6 6l12 12M18 6 6 18"/>',
+        'alert'    => '<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/>',
+        'database' => '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+        'lock'     => '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+        'user'     => '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    ];
+    return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"'
+         . ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' . ($paths[$name] ?? '') . '</svg>';
 }
 
 ?>

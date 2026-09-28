@@ -66,15 +66,7 @@ require(INCLUDE_PATH . "/functions.php");
 //// Initialisation
 ////
 
-$db_classname = 'DB_' . DB_TYPE;
-if ( class_exists($db_classname) )
-{
-	$db = new $db_classname(DB_ADDR, DB_USER, DB_PASS, DB_NAME, DB_PCONNECT);
-}
-else
-{
-	error('Database class does not exist.  Please check your config.php file for DB_TYPE');
-}
+$db = new DB_mysql(DB_ADDR, DB_USER, DB_PASS, DB_NAME);
 
 $g_options = getOptions();
 

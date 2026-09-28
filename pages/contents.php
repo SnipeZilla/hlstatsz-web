@@ -32,21 +32,88 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
       if ($num_games) {
         unset($_SESSION['game']);
 
+        // Load all visible games up front: the stats section (rendered first) needs the full game list
+        $games = [];
+        $gamecodes = [];
+        while ($gamedata = $db->fetch_row($resultGames)) {
+            $games[] = $gamedata;
+            $gamecodes[] = "'" . $db->escape($gamedata[0]) . "'";
+        }
+        $nonhiddengamestring = '(' . implode(',', $gamecodes) . ')';
+
+        // Per-game online/slots + global server, kill and online totals in a single query
+        $serverstats = [];
+        $num_servers = 0;
+        $num_kills   = 0;
+        $num_online  = 0;
+        $num_busy    = 0;
+        $result = $db->query("
+            SELECT
+                game,
+                COUNT(serverId) AS servers,
+                SUM(kills) AS kills,
+                SUM(act_players) AS act_players,
+                SUM(max_players) AS max_players,
+                SUM(act_players > 0) AS busy
+            FROM
+                hlstats_Servers
+            WHERE
+                game IN $nonhiddengamestring
+            GROUP BY
+                game
+        ");
+        while ($row = $db->fetch_array($result)) {
+            $serverstats[$row['game']] = $row;
+            $num_servers += (int)$row['servers'];
+            $num_kills   += (int)$row['kills'];
+            $num_online  += (int)$row['act_players'];
+            $num_busy    += (int)$row['busy'];
+        }
+
+        $result = $db->query("
+            SELECT
+                (SELECT COUNT(playerId) FROM hlstats_Players WHERE game IN $nonhiddengamestring),
+                (SELECT COUNT(clanId) FROM hlstats_Clans WHERE game IN $nonhiddengamestring),
+                (SELECT eventTime FROM hlstats_Events_Frags ORDER BY id DESC LIMIT 1)
+        ");
+        list($num_players, $num_clans, $lastevent) = $db->fetch_row($result);
+
+        printSectionTitle(t('title.stats'));
+
+        // Headline tiles, as the Ban Statistics ones: label, number, note
+        $tiles = [
+            [t('players'), $num_players, t('contents.kpi.online', ['{n}' => nf($num_online)])],
+            [t('clans'), $num_clans, t('contents.kpi.games', ['{n}' => nf($num_games)])],
+            [t('contents.kpi.servers'), $num_servers, t('contents.kpi.busy', ['{n}' => nf($num_busy)])],
+            [t('th.kills'), $num_kills, $lastevent ? t('contents.last_kill', ['{date}' => formatDate(strtotime($lastevent), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT)]) : ''],
+        ];
+?>
+        <div class="hlstats-cards-grid hlstats-kpis">
+            <?php foreach ($tiles as [$label, $value, $note]) { ?>
+            <div class="hlstats-card hlstats-kpi">
+                <div class="hlstats-kpi-label"><?= $label ?></div>
+                <div class="hlstats-kpi-value"><?= nf($value) ?></div>
+                <div class="hlstats-kpi-note"><?= $note ?></div>
+            </div>
+            <?php } ?>
+        </div>
+
+<?php
         printSectionTitle(t('title.games'));
-    
+
 if ($g_options['show_google_map'] == 1) {
 ?>
     <table class="hlstats-map">
         <tr>
             <td><div id="map"></div></td>
-        </tr>  
+        </tr>
 </table>
 <?php
 }
 ?>
             <table>
                 <tr>
-                    <th class="hlstats-main-description left responsive"><?= t('game') ?></th>
+                    <th class="hlstats-main-description left responsive"><?= t('game.servers') ?></th>
                     <th class="hide-2"></th>
                     <th class="hide-2"></th>
                     <th><?= t('players') ?></th>
@@ -54,10 +121,9 @@ if ($g_options['show_google_map'] == 1) {
                     <th class="hide-2"><?= t('top.clan') ?></th>
                 </tr>
 <?php
-        $nonhiddengamestring = "(";
-        while ($gamedata = $db->fetch_row($resultGames))
+        foreach ($games as $gamedata)
         {
-            $nonhiddengamestring .= "'$gamedata[0]',";
+            $gamecode = $db->escape($gamedata[0]);
             $result = $db->query("
                 SELECT
                     playerId,
@@ -66,7 +132,7 @@ if ($g_options['show_google_map'] == 1) {
                 FROM
                     hlstats_Players
                 WHERE
-                    game='$gamedata[0]'
+                    game='$gamecode'
                     AND hideranking=0
                     AND lastAddress <> ''
                 ORDER BY
@@ -74,7 +140,7 @@ if ($g_options['show_google_map'] == 1) {
                     (kills/IF(deaths=0,1,deaths)) DESC
                 LIMIT 1
             ");
-        
+
             if ($db->num_rows($result) == 1)
             {
                 $topplayer = $db->fetch_row($result);
@@ -99,7 +165,7 @@ if ($g_options['show_google_map'] == 1) {
                     AND p.game = c.game
                     AND p.hideranking = 0
             WHERE
-                c.game = '".$gamedata[0]."'
+                c.game = '$gamecode'
                 AND c.hidden = 0
             GROUP BY
                 c.clanId
@@ -119,32 +185,22 @@ if ($g_options['show_google_map'] == 1) {
                 $topclan = false;
             }
 
-            $result= $db->query("
-                SELECT
-                    SUM(act_players) AS `act_players`,
-                    SUM(max_players) AS `max_players`
-                FROM
-                    hlstats_Servers
-                WHERE
-                    hlstats_Servers.game='$gamedata[0]'
-            ");
-                            
-            $numplayers = $db->fetch_array($result);
-        if ($numplayers['act_players'] == 0 and $numplayers['max_players'] == 0) {
-                $numplayers = false;
-        } else {
-                $player_string = $numplayers['act_players'].'/'.$numplayers['max_players'];
-        }
+            $numplayers = $serverstats[$gamedata[0]] ?? null;
+            if ($numplayers && ($numplayers['act_players'] > 0 || $numplayers['max_players'] > 0)) {
+                $player_string = (int)$numplayers['act_players'].'/'.(int)$numplayers['max_players'];
+            } else {
+                $player_string = '-';
+            }
 ?>
                 <tr>
                     <td class="hlstats-main-column left">
                 <a href="<?= $g_options['scripturl'] . "?game=$gamedata[0]" ?>">
-                
-            <?php $image = getImage("/games/$gamedata[0]/game"); 
+
+            <?php $image = getImage("/games/$gamedata[0]/game");
                   if (!$image) $image = getImage("/games/$gamedata[2]/game"); ?>
 
                 <span class="hlstats-icon"><img src="<?php echo ($image ? $image['url'] : IMAGE_PATH . '/game.png' ); ?>" alt="Game" /></span>
-                <span class="hlstats-name"><?= $gamedata[1] ?><span></a>
+                <span class="hlstats-name"><?= $gamedata[1] ?></span></a>
                 </td>
                         <td class="hide-2">
                 <a href="<?= $g_options['scripturl'] . "?mode=players&amp;game=$gamedata[0]" ?>">🎮 <?= t('players') ?></a>
@@ -152,7 +208,7 @@ if ($g_options['show_google_map'] == 1) {
                         <td class="hide-2">
                 <a href="<?= $g_options['scripturl'] . "?mode=clans&amp;game=$gamedata[0]" ?>">⚔️ <?= t('clans') ?></a>
                         </td>
-                <td><?php echo ($numplayers ? $player_string : '-'); ?></td>
+                <td><?= $player_string ?></td>
                 <td class="hide">
             <?php if ($topplayer) { ?>
                     <a href="<?= $g_options['scripturl'] . "?mode=playerinfo&amp;player=" . $topplayer[0] . "&amp;game=" . $gamedata[0] ?>"><?= htmlspecialchars(html_entity_decode($topplayer[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT) ?></a>
@@ -170,7 +226,7 @@ if ($g_options['show_google_map'] == 1) {
             </table>
 
 <?php
-}
+      }
         if ($num_voices) {
             $voicecomm_url = htmlspecialchars($_SERVER['PHP_SELF'] . '?mode=contents&ajax=voicecomm');
             echo '<div id="voicecomm-container" data-fetch-url="' . $voicecomm_url . '"></div>';
@@ -191,59 +247,14 @@ if ($g_options['show_google_map'] == 1) {
             </script>
 <?php
         }
-
-        if (!empty($nonhiddengamestring)) {
-        printSectionTitle(t('title.stats'));
-        
-        $nonhiddengamestring = preg_replace('/,$/', ')', $nonhiddengamestring);
-        
-        $result = $db->query("SELECT COUNT(playerId) FROM hlstats_Players WHERE game IN $nonhiddengamestring");
-        list($num_players) = $db->fetch_row($result);
-        $num_players = nf($num_players);
-
-        $result = $db->query("SELECT COUNT(clanId) FROM hlstats_Clans WHERE game IN $nonhiddengamestring");
-        list($num_clans) = $db->fetch_row($result);
-        $num_clans = nf($num_clans );
-
-        $result = $db->query("SELECT COUNT(serverId) FROM hlstats_Servers WHERE game IN $nonhiddengamestring");
-        list($num_servers) = $db->fetch_row($result);
-        $num_servers = nf($num_servers);
-        
-        $result = $db->query("SELECT SUM(kills) FROM hlstats_Servers WHERE game IN $nonhiddengamestring");
-        list($num_kills) = $db->fetch_row($result);
-        $num_kills = nf($num_kills);
-
-        $result = $db->query("
-            SELECT 
-                eventTime
-            FROM
-                hlstats_Events_Frags
-            ORDER BY
-                id DESC
-            LIMIT 1
-        ");
-        list($lastevent) = $db->fetch_row($result);
 ?>
-        <div>
-            <ul>
-                <li><?= t('contents.stats', [
-                    '{players}' => '<strong>'.$num_players.'</strong>',
-                    '{clans}'   => '<strong>'.$num_clans.'</strong>',
-                    '{games}'   => '<strong>'.$num_games.'</strong>',
-                    '{servers}' => '<strong>'.$num_servers.'</strong>',
-                    '{kills}'   => '<strong>'.$num_kills.'</strong>',
-                ]) ?></li>
-                <?php if ($lastevent) { ?>
-                <li><?= t('contents.last_kill', ['{date}' => '<strong>'.formatDate(strtotime($lastevent)).'</strong>']) ?></li>
-                <?php } ?>
-                <li><?= t('contents.realtime') ?>
-                   <?php if ($g_options['DeleteDays']) { ?>
-                   <?= t('contents.history', ['{days}' => '<strong>'.$g_options['DeleteDays'].'</strong>']) ?>
-                   <?php } ?>
-                </li>
-            </ul>
-        </div>
+<div class="hlstats-note">
+    <p><?= t('contents.realtime') ?>
+        <?php if ($g_options['DeleteDays']) { ?>
+        <?= t('contents.history', ['{days}' => '<strong>'.$g_options['DeleteDays'].'</strong>']) ?>
+        <?php } ?>
+    </p>
+</div>
 <?php
-      }
     }
 ?>

@@ -103,28 +103,36 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	$db->query($query);
 	$servers = $db->fetch_row_set();
 	$db->free_result();
-    
+
+printSectionTitle(t('title.stats'));
+
+		// Headline tiles, as on the contents page: label, number, note
+		$hs_share = $total_kills > 0 ? $total_headshots / $total_kills * 100 : 0;
+		$busy     = count(array_filter($servers ?: [], function ($server) { return $server['act_players'] > 0; }));
+		$tiles    = [
+			[t('players'), $total_players, t('game.kpi.new', ['{n}' => nf(max(0, $players_last_day))])],
+			[t('th.kills'), $total_kills, t('game.kpi.day', ['{n}' => nf(max(0, $kills_last_day))])],
+			[t('th.headshots'), $total_headshots, t('game.kpi.hs', ['{n}' => nf($hs_share, 1)])],
+			[t('contents.kpi.servers'), $total_servers, t('contents.kpi.busy', ['{n}' => nf($busy)])],
+		];
+?>
+		<div class="hlstats-cards-grid hlstats-kpis">
+			<?php foreach ($tiles as [$label, $value, $note]) { ?>
+			<div class="hlstats-card hlstats-kpi">
+				<div class="hlstats-kpi-label"><?= $label ?></div>
+				<div class="hlstats-kpi-value"><?= nf($value) ?></div>
+				<div class="hlstats-kpi-note"><?= $note ?></div>
+			</div>
+			<?php } ?>
+		</div>
+<?php
+
     
 printSectionTitle(t('title.servers'));
 ?>
 
 <table class="hlstats-map">
-    <tr class="hlstats-stats"><th class="left" style="white-space:normal"><?php
-		if ($total_kills > 0)
-			$hpk = sprintf("%.2f", ($total_headshots / $total_kills) * 100);
-		else
-			$hpk = sprintf("%.2f", 0);
 
-		echo t("server.tracking.stats",["{total_pl}"   => '<strong>'.nf($total_players).'</strong>',
-										"{new_pl}"     => '<strong>'.nf($players_last_day).'</strong>',
-										"{total_k}"    => '<strong>'.nf($total_kills).'</strong>',
-										"{new_k}"      => '<strong>'.nf($kills_last_day).'</strong>',
-										"{total_hs}"   => '<strong>'.nf($total_headshots).'</strong>',
-										"{percent_hs}" => '<strong>'.$hpk.'</strong>',
-										"{servers}"    => '<strong>'.nf($total_servers).'</strong>']);
-
-?></th>
-		</tr>	
 <?php
 
 		if ($g_options['show_google_map'] == 1) {

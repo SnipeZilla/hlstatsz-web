@@ -71,7 +71,7 @@ $result = $db->query("
     while ($r = $db->fetch_array())
     {
   
-        $image = getImage('/ranks/'.$r['image'].'_small');
+        $image = getImage('/ranks/'.$r['image']);
         $link = '<a href="hlstats.php?mode=rankinfo&amp;rank='.$r['rankId']."&amp;game=$game\">";
         if ($image)
         {

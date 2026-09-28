@@ -18,158 +18,103 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	if ($auth->userdata["acclevel"] < 100) {
         die ("Access denied!");
 	}
+
+	// Connects by host group, or by host within one group. "Unresolved" is its own flag rather than an empty
+	// host group: the admin panel drops empty parameters from its links.
+	$unresolved = !empty($_GET['unresolved']);
+	$hostgroup  = $unresolved ? '' : (isset($_GET['hostgroup']) && $_GET['hostgroup'] !== '' ? (string) $_GET['hostgroup'] : null);
+	$scope      = $unresolved ? array('unresolved' => 1) : ($hostgroup !== null ? array('hostgroup' => $hostgroup) : array());
+	$groupLabel = fn($group) => $group === '' ? '(Unresolved IP Addresses)' : $group;
+	$taskUrl    = fn(array $params) => htmlspecialchars($g_options['scripturl'] . '?' . http_build_query(array('mode' => 'admin', 'task' => 'tools_ipstats') + $params));
+
+    $sortorder = $_GET['sortorder'] ?? '';
+    $sort      = $_GET['sort'] ?? '';
+    if (!in_array($sort, array('host', 'freq'))) {
+        $sort      = 'freq';
+        $sortorder = 'DESC';
+    }
+    $sortorder = strtoupper($sortorder) === 'ASC' ? 'ASC' : 'DESC';
+    $sortUrl   = fn($col) => $taskUrl($scope + array('sort' => $col, 'sortorder' => ($col === $sort && $sortorder === 'DESC') ? 'asc' : 'desc'));
+
+    $start = isset($_GET['page']) ? max(0, ((int) $_GET['page'] - 1) * 50) : 0;
+
+	if ($hostgroup === null) {
+		$hostExpr = 'hostgroup';
+		$where    = '';
+	} else {
+		$hostExpr = "IF(hostname = '', ipAddress, hostname)";
+		$where    = "WHERE hostgroup = '" . $db->escape($hostgroup) . "'";
+	}
+
+	$db->query("SELECT COUNT(*), COUNT(DISTINCT $hostExpr) FROM hlstats_Events_Connects $where");
+	list($totalconnects, $numitems) = $db->fetch_row();
+
+	$result = $db->query("
+		SELECT
+			$hostExpr AS host,
+			COUNT(*) AS freq
+		FROM
+			hlstats_Events_Connects
+		$where
+		GROUP BY
+			host
+		ORDER BY
+			$sort $sortorder,
+			host ASC
+		LIMIT
+			50 OFFSET $start
+	");
 ?>
+<div class="panel">
+<div class="hlstats-admin-note">
+<p>
+<?php if ($hostgroup === null): ?>
+	Player connects by host group<?= $g_options['DeleteDays'] > 0 ? ', over the last ' . (int) $g_options['DeleteDays'] . ' days' : '' ?>.
+	Host names come from the daemon's DNS lookups: without them, every connect is unresolved.
+<?php else: ?>
+	<a href="<?= $taskUrl(array()) ?>">All host groups</a> &rsaquo; <b><?= htmlspecialchars($groupLabel($hostgroup)) ?></b>
+<?php endif; ?>
+</p>
+</div>
 
-&nbsp;&nbsp;&nbsp;&nbsp;<img src="<?php echo IMAGE_PATH; ?>/downarrow.gif" width=9 height=6 class="imageformat"><b>&nbsp;<?php
-	if (isset($_GET['hostgroup'])) {
-        $hostgroup = $_GET['hostgroup'];
-        
-?><a href="<?php echo $g_options["scripturl"]; ?>?mode=admin&task=<?php echo $selTask; ?>"><?php
-	}
-	echo $task->title;
-    if (isset($_GET['hostgroup'])) {
-		echo "</a>";
-	}
-
-?></b> (Last <?php echo $g_options["DeleteDays"]; ?> Days)<?php
-    if (isset($_GET['hostgroup']))
-	{
-?><br>
-<img src="<?php echo IMAGE_PATH; ?>/spacer.gif" width=1 height=8 border=0><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="<?php echo IMAGE_PATH; ?>/downarrow.gif" width=9 height=6 class="imageformat"><b>&nbsp;<?php echo $hostgroup; ?></b><p>
+<div class="responsive-table">
+  <table class="responsive-task">
+    <thead>
+      <tr>
+        <th class="hlstats-ranking nowrap">#</th>
+        <th class="hlstats-main-column left<?= isSorted('host', $sort, $sortorder) ?>"><a href="<?= $sortUrl('host') ?>">Host</a></th>
+        <th class="<?= isSorted('freq', $sort, $sortorder) ?>"><a href="<?= $sortUrl('freq') ?>">Connects</a></th>
+        <th class="nowrap">Percentage of Connects</th>
+      </tr>
+    </thead>
+    <tbody>
+    <?php
+        $rank = $start;
+        while ($res = $db->fetch_array($result))
+        {
+            $rank++;
+            $percent = $totalconnects > 0 ? round($res['freq'] / $totalconnects * 100, 1) : 0;
+            $host    = htmlspecialchars($hostgroup === null ? $groupLabel($res['host']) : $res['host']);
+            if ($hostgroup === null) {
+                $host = '<a href="' . $taskUrl($res['host'] === '' ? array('unresolved' => 1) : array('hostgroup' => $res['host'])) . '">' . $host . '</a>';
+            }
+            echo '<tr>
+                  <td class="nowrap right" data-label="#">' . $rank . '</td>
+                  <td class="left" data-label="Host"><span class="hlstats-name">' . $host . '</span></td>
+                  <td class="nowrap" data-label="Connects">' . nf($res['freq']) . '</td>
+                  <td class="nowrap" data-label="Percentage of Connects">
+                    <div class="meter-container">
+                      <meter min="0" max="100" value="' . $percent . '"></meter>
+                      <div class="meter-value">' . $percent . '%</div>
+                    </div>
+                  </td>
+                  </tr>';
+        }
+   ?>
+    </tbody>
+  </table>
+</div>
 <?php
-	}
-	else
-	{
-		echo "<p>";
-	}
+    echo Pagination($numitems, $_GET['page'] ?? 1, 50, 'page', false);
 ?>
-
-<?php
-    if (isset($_GET['hostgroup'])) {
-		$table = new Table(
-			array(
-				new TableColumn(
-					"host",
-					"Host",
-					"width=41"
-				),
-				new TableColumn(
-					"freq",
-					"Connects",
-					"width=12&align=right"
-				),
-				new TableColumn(
-					"percent",
-					"Percentage of Connects",
-					"width=30&sort=no&type=bargraph"
-				),
-				new TableColumn(
-					"percent",
-					"%",
-					"width=12&sort=no&align=right&append=" . urlencode("%")
-				)
-			),
-			"host",			// keycol
-			"freq",			// sort
-			"host",			// sort2
-			true,			// showranking
-			50				// numperpage
-		);
-		
-		if ($hostgroup == "(Unresolved IP Addresses)")
-			$hostgroup = "";
-		
-		$result = $db->query("
-			SELECT
-				COUNT(*),
-				COUNT(DISTINCT ipAddress)
-			FROM
-				hlstats_Events_Connects
-			WHERE
-				hostgroup='".$db->escape($hostgroup)."'
-		");
-		
-		list($totalconnects, $numitems) = $db->fetch_row($result);
-		
-		$result = $db->query("
-			SELECT
-				IF(hostname='', ipAddress, hostname) AS host,
-				COUNT(hostname) AS freq,
-				(COUNT(hostname) / $totalconnects) * 100 AS percent
-			FROM
-				hlstats_Events_Connects
-			WHERE
-				hostgroup='".$db->escape($hostgroup)."'
-			GROUP BY
-				host
-			ORDER BY
-				$table->sort $table->sortorder,
-				$table->sort2 $table->sortorder
-			LIMIT
-				$table->startitem,$table->numperpage
-		");
-		
-		$table->draw($result, $numitems, 95, "center");
-	}
-	else
-	{
-		$table = new Table(
-			array(
-				new TableColumn(
-					"hostgroup",
-					"Host",
-					"width=41&icon=server&link=" . urlencode("mode=admin&task=tools_ipstats&hostgroup=%k")
-				),
-				new TableColumn(
-					"freq",
-					"Connects",
-					"width=12&align=right"
-				),
-				new TableColumn(
-					"percent",
-					"Percentage of Connects",
-					"width=30&sort=no&type=bargraph"
-				),
-				new TableColumn(
-					"percent",
-					"%",
-					"width=12&sort=no&align=right&append=" . urlencode("%")
-				)
-			),
-			"hostgroup",	// keycol
-			"freq",			// sort
-			"hostgroup",	// sort2
-			true,			// showranking
-			50				// numperpage
-		);
-		
-		$result = $db->query("
-			SELECT
-				COUNT(*),
-				COUNT(DISTINCT hostgroup)
-			FROM
-				hlstats_Events_Connects
-		");
-		
-		list($totalconnects, $numitems) = $db->fetch_row($result);
-		
-		$result = $db->query("
-			SELECT
-				IF(hostgroup='', '(Unresolved IP Addresses)', hostgroup) AS hostgroup,
-				COUNT(hostgroup) AS freq,
-				(COUNT(hostgroup) / $totalconnects) * 100 AS percent
-			FROM
-				hlstats_Events_Connects
-			GROUP BY
-				hostgroup
-			ORDER BY
-				$table->sort $table->sortorder,
-				$table->sort2 $table->sortorder
-			LIMIT
-				$table->startitem,$table->numperpage
-		");
-		
-		$table->draw($result, $numitems, 95, "center");
-	}
-?>
+</div>

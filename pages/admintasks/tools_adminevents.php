@@ -149,9 +149,13 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
     </thead>
     <tbody>
     <?php
+        // Descriptions hold player names, chat and RCON commands: all escaped. The only link is the one the Rcon
+        // query writes around the sender's IP ("%A%…?mode=search&q=<ip>&st=ip&game=%<ip>%/A%"), rebuilt here as
+        // a search in Edit Player/Clan, so text shaped like a marker can never produce any other link.
+        $ipSearch = fn($m) => '<a href="' . htmlspecialchars($g_options['scripturl'] . '?mode=admin&task=tools_editdetails&q=' . urlencode($m[1]) . '&st=ip&game=') . '">' . $m[1] . '</a>';
         while ($res = $db->fetch_array($result))
         {
-            $description = preg_replace(array('/%A%([^ %]+)%/','/%\/A%/'), array("<a href=\"$1\">", '</a>'),$res['eventDesc']);
+            $description = preg_replace_callback('/%A%[^ %]*\?mode=search&amp;q=([0-9A-Fa-f.:]+)&amp;st=ip&amp;game=%\1%\/A%/', $ipSearch, htmlspecialchars($res['eventDesc']));
             $html = '<tr>
                      <td class="nowrap left" data-label="Date">'.str_replace(" ","<br>@",$res['eventTime']).'</td>
                      <td class="left" data-label="Type">
