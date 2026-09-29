@@ -443,7 +443,7 @@ if (!$canRun && $inst['errno']) {
 <div class="hlstats-header">
   <div class="hlstats-top hlstats-install-bar">
     <div class="hlstats-inner">
-      <a class="hlstats-install-brand" href="hlstats.php"><img src="hlstatsz-favicon.svg" width="40" height="40" alt=""><span>HLstats<span class="z">Z</span></span></a>
+      <a class="hlstats-install-brand" href="hlstats.php"><img src="<?= IMAGE_PATH.'/z.svg' ?>" width="40" height="40" alt=""><span>HLstats<span class="z">Z</span></span></a>
     </div>
   </div>
 </div>
