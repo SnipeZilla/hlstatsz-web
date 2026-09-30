@@ -19,7 +19,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 // set up) and their comm blocks, as "type" asks (all, bans or comms). The lists are the Bans and Comm Blocks pages,
 // which filter on q (sbPlayerMatch); a page or a sort of one list comes back for that list only.
 $search = sbSearch();
-$type   = in_array($_GET['type'] ?? '', array('bans', 'comms'), true) ? $_GET['type'] : 'all';
+$type   = in_array($_GET['type'] ?? '', array('bans', 'comms'), true) && sbComms() ? $_GET['type'] : 'all';   // no comm blocks: bans
 $part   = is_ajax() && is_string($_GET['ajax'] ?? null) ? $_GET['ajax'] : '';
 
 if (!is_ajax()) {

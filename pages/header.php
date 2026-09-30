@@ -204,6 +204,8 @@ $currentMode = $mode ?? $game ?? '';
         }
     }
     if ($mode == 'sourcebans') {
+        // sbComms(): whether SourceBans is there with its comm blocks on (none with AMXBans alone)
+        require_once PAGE_PATH . '/sourcebans/sourcebans_functions.php';
 ?>
       <nav class="hlstats-subnav">
       <?php $sbTask = $_GET['task'] ?? ''; ?>
@@ -212,7 +214,7 @@ $currentMode = $mode ?? $game ?? '';
         </div>
         <a href="?mode=sourcebans&amp;task=sourcebans_servers" class="hlstats-sublink<?= active(['sourcebans_servers'], $sbTask) ?>"><?= t('sb.nav.servers') ?></a>
         <a href="?mode=sourcebans&amp;task=sourcebans_bans" class="hlstats-sublink<?= active(['sourcebans_bans'], $sbTask) ?>"><?= t('sb.nav.bans') ?></a>
-<?php if (defined('DB_SBNAME') && DB_SBNAME !== ''): // comm blocks are SourceBans' alone, AMXBans has none ?>
+<?php if (sbComms()): // comm blocks are SourceBans' alone, AMXBans has none ?>
         <a href="?mode=sourcebans&amp;task=sourcebans_comms" class="hlstats-sublink<?= active(['sourcebans_comms'], $sbTask) ?>"><?= t('sb.nav.comms') ?></a>
 <?php endif; ?>
         <!-- <a href="?mode=sourcebans&amp;task=sourcebans_blocked" class="hlstats-sublink<?= active(['sourcebans_blocked'], $sbTask) ?>"><?= t('sb.nav.blocked') ?></a> -->
@@ -303,10 +305,12 @@ $currentMode = $mode ?? $game ?? '';
       
           <div id="hlstatsSearchPanel" class="hlstats-search-panel">
 <?php if ($sbSearch) { ?>
+<?php if (sbComms()) { // without comm blocks, only bans to find ?>
             <div class="hlstats-search-row">
               <label for="sbSearchType"><?= t('sb.search.show') ?></label>
               <?= getSelect('type', array('all' => t('sb.search.all'), 'bans' => t('sb.search.bans'), 'comms' => t('sb.search.comms')), in_array($_GET['type'] ?? '', array('bans', 'comms'), true) ? $_GET['type'] : 'all', 'sbSearchType') ?>
             </div>
+<?php } ?>
             <p class="sb-search-hint"><?= t('sb.search.hint') ?></p>
 <?php } else { ?>
             <?php

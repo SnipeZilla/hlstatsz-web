@@ -39,20 +39,45 @@ const SB_PER_PAGE = 30;
 const SB_STATUS_TTL = 30;
 
 /**
- * Whether the SourceBans database is there (sourcebans.php selects it). Without it the pages show what AMXBans
- * has: its bans and GoldSrc servers, and no comm blocks.
+ * Full name of a SourceBans table, e.g. `sourcebans`.`sb_bans`: it reaches the SourceBans database whichever one the
+ * page uses, as the header asks before sourcebans.php makes it the page's database.
  */
-function sbOn()
+function sbTable($name)
 {
-	return defined('SB_ON') && SB_ON;
+	return '`' . str_replace('`', '', DB_SBNAME) . '`.`' . str_replace('`', '', defined('DB_SBPREFIX') ? DB_SBPREFIX : 'sb') . '_' . $name . '`';
 }
 
 /**
- * Whether comm blocks are shown: SourceBans is there and its panel has them on.
+ * Whether SourceBans is there: DB_SBNAME is set and the tables its pages read answer. A wrong name or prefix, or
+ * tables not created yet, turns it off, not the page. Without it the pages show what AMXBans has: its bans and
+ * GoldSrc servers, and no comm blocks.
+ */
+function sbOn()
+{
+	global $db;
+	static $on = null;
+
+	if ($on === null) {
+		$on = defined('DB_SBNAME') && DB_SBNAME !== ''
+			&& $db->query("SELECT 1 FROM " . implode(', ', array_map('sbTable', array('bans', 'banlog', 'admins', 'groups', 'srvgroups', 'servers', 'mods', 'settings')))
+				. " LIMIT 0", false) !== false;
+	}
+	return $on;
+}
+
+/**
+ * Whether comm blocks are shown: SourceBans is there with its comms table, and its panel has them on.
  */
 function sbComms()
 {
-	return sbOn() && (sbSettings()['config.enablecomms'] ?? '1') === '1';
+	global $db;
+	static $comms = null;
+
+	if ($comms === null) {
+		$comms = sbOn() && $db->query("SELECT 1 FROM " . sbTable('comms') . " LIMIT 0", false) !== false
+			&& (sbSettings()['config.enablecomms'] ?? '1') === '1';
+	}
+	return $comms;
 }
 
 /**
@@ -66,7 +91,7 @@ function sbSettings()
 	if ($settings === null) {
 		$settings = array();
 		if (sbOn()) {
-			$result = $db->query("SELECT setting, value FROM " . DB_SBPREFIX . "_settings");
+			$result = $db->query("SELECT setting, value FROM " . sbTable('settings'));
 			while ($row = $db->fetch_row($result)) {
 				$settings[$row[0]] = $row[1];
 			}
@@ -947,7 +972,7 @@ function sbDetails($type, $id, $page = false)
 	$comm      = $type === 'comm';
 	$showAdmin = sbShowAdminNames();
 
-	if (!sbOn()) {
+	if (!sbOn() || ($comm && !sbComms())) {
 		echo '<p class="sb-empty">' . t('sb.details.missing') . '</p>';
 		return;
 	}

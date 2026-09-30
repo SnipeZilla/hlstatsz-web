@@ -26,21 +26,16 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 	require_once __DIR__ . '/../vendor/autoload.php';
 }
 
-// The lists come from SourceBans and AMXBans (GoldSrc servers), merged; either one is enough (sbOn(), sbAmx()).
-// Without both, a notice, not errors.
-$sbReady = false;
-if (defined('DB_SBNAME') && DB_SBNAME !== '') {
-    try {
-        $sbReady = $db->select_db(DB_SBNAME);
-    } catch (Throwable $e) {
-        error_log('SourceBans: ' . $e->getMessage());
-    }
-}
-define('SB_ON', $sbReady);
-
 require_once PAGE_PATH . '/sourcebans/sourcebans_functions.php';
 require_once PAGE_PATH . '/sourcebans/sourcebans_admin.php';
 require_once PAGE_PATH . '/sourcebans/sourcebans_amx.php';   // AMXBans (GoldSrc), when DB_AMXNAME is set
+
+// The lists come from SourceBans and AMXBans (GoldSrc servers), merged; either one is enough (sbOn(), sbAmx()).
+// Without both, a notice, not errors. SourceBans' queries name its tables without their database: while the page
+// runs, it is the page's database.
+if (sbOn()) {
+    $db->select_db(DB_SBNAME);
+}
 
 if (!sbOn() && !sbAmx()) {
     printSectionTitle('SourceBans');
@@ -87,9 +82,13 @@ $valid_modes = array(
 	'sourcebans_search',
 	'admin_api',
 );
+// Comm blocks and the log of blocked joins are SourceBans' alone: without them (AMXBans alone, comm blocks turned
+// off in SourceBans) those pages show the dashboard instead
+if (!sbComms()) {
+	$valid_modes = array_diff($valid_modes, array('sourcebans_comms'));
+}
 if (!sbOn()) {
-	// Comm blocks and the log of blocked joins are SourceBans' alone: AMXBans alone shows the dashboard instead
-	$valid_modes = array_diff($valid_modes, array('sourcebans_comms', 'sourcebans_blocked'));
+	$valid_modes = array_diff($valid_modes, array('sourcebans_blocked'));
 }
 
 if (isset(SB_ADMIN_PAGES[$task])) {
