@@ -382,7 +382,7 @@ function sbGame($sid, $modfolder, $modname)
 }
 
 /**
- * Icon of the first HLstatsZ game code that has one, else the generic game icon.
+ * Icon of the first HLstatsZ game code that has one, else the generic Z icon.
  */
 function sbGameIcon(array $codes)
 {
@@ -401,7 +401,7 @@ function sbGameIcon(array $codes)
 			return $icons[$code];
 		}
 	}
-	return IMAGE_PATH . '/game.png';
+	return IMAGE_PATH . '/z.svg';
 }
 
 /**
@@ -738,7 +738,9 @@ function sbPlayerMatch($search, $name, $authid, $ip = '')
 
 /**
  * Country flag of a ban. The IP decides whenever GeoLite2 knows it, and a SourceBans ban whose stored
- * country is missing or different gets that one (AMXBans is only read).
+ * country is missing or different gets that one (AMXBans is only read). A ban whose IP tells nothing (none kept,
+ * as for a ban by Steam ID of a player who was not there; a LAN address) shows the country HLstatsZ has for the
+ * player's Steam ID, without storing it.
  */
 function sbFlag($row)
 {
@@ -753,6 +755,9 @@ function sbFlag($row)
 			}
 			$code = $found;
 		}
+	}
+	if ($code === '' || $code === 'zz') {
+		$code = sbPlayerCountry($row['authid'] ?? '') ?: $code;
 	}
 	$known = $code !== '' && $code !== 'zz';
 	$label = $known ? htmlspecialchars(strtoupper($code)) : '';
@@ -832,6 +837,41 @@ function sbProfiles($authid)
 			g.name
 	");
 	return $db->fetch_row_set($result) ?: array();
+}
+
+/**
+ * The country HLstatsZ has for the player of a Steam ID in any form (their latest player with one), as a lowercase
+ * code, or ''. Kept for the page: a list can show the same player more than once.
+ */
+function sbPlayerCountry($authid)
+{
+	global $db;
+	static $countries = array();
+
+	$ids = function_exists('sbSteamIds') ? sbSteamIds((string) $authid) : null;
+	if (!$ids) {
+		return '';
+	}
+	$unique = substr($ids['steam2'], strlen('STEAM_0:'));   // HLstatsZ stores STEAM_X:Y:Z as "Y:Z"
+	if (!isset($countries[$unique])) {
+		$db->query("
+			SELECT
+				p.flag
+			FROM
+				`" . DB_NAME . "`.hlstats_PlayerUniqueIds AS u
+				JOIN `" . DB_NAME . "`.hlstats_Players AS p ON p.playerId = u.playerId
+			WHERE
+				u.uniqueId = '$unique'
+				AND p.flag <> ''
+				AND p.flag <> 'zz'
+			ORDER BY
+				p.last_event DESC
+			LIMIT 1
+		", false);
+		$row = $db->fetch_row();
+		$countries[$unique] = $row ? strtolower((string) $row[0]) : '';
+	}
+	return $countries[$unique];
 }
 
 /**

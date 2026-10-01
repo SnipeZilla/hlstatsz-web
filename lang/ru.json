@@ -200,6 +200,8 @@
     "karma":                       "Карма:",
     "karma.good":                  "Хорошая репутация",
     "karma.banned":                "Заблокирован",
+    "karma.until":                 "Заблокирован до {date}",
+    "karma.permanent":             "Заблокирован навсегда",
     "member.clan":                 "Участник клана:",
     "homepage":                    "Домашняя страница:",
     "first.connect":               "Первое подключение:",

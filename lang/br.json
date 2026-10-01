@@ -200,6 +200,8 @@
     "karma":                       "Karma:",
     "karma.good":                  "Em boa situação",
     "karma.banned":                "Banido",
+    "karma.until":                 "Banido até {date}",
+    "karma.permanent":             "Banido permanentemente",
     "member.clan":                 "Membro do Clã:",
     "homepage":                    "Página Inicial:",
     "first.connect":               "Primeira Conexão:",

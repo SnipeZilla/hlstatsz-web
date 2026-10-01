@@ -30,6 +30,56 @@ function makeClanTag(string $name): array{
     return [$tag , $name];
 }
 
+/**
+ * An active ban of SourceBans or AMXBans on their Steam ID
+ * A permanent one first, else the one that ends last), linked to its details; else the ban HLstatsZ keeps itself (hideranking 2);
+ */
+function playerStanding(array $playerdata, string $coid): array
+{
+    global $db;
+
+    $ban = null;
+    if (preg_match('/\A7656119\d{10}\z/', $coid)
+        && ((defined('DB_SBNAME') && DB_SBNAME !== '') || (defined('DB_AMXNAME') && DB_AMXNAME !== ''))) {
+        require_once PAGE_PATH . '/sourcebans/sourcebans_functions.php';
+        require_once PAGE_PATH . '/sourcebans/sourcebans_admin.php';
+        require_once PAGE_PATH . '/sourcebans/sourcebans_amx.php';
+        // A real account only: bots get the base SteamID64 (account 0)
+        $ids = sbSteamIds($coid);
+        if ($ids && (sbOn() || sbAmx())) {
+            // Active as on the bans pages: not lifted, and permanent or not over yet. SourceBans' part of the list
+            // names its tables without their database: it is the page's database meanwhile.
+            $now = time();
+            if (sbOn()) {
+                $db->select_db(DB_SBNAME);
+            }
+            $db->query("
+                SELECT src, bid, ends, length, reason
+                FROM " . sbAllBans() . "
+                WHERE authid IN (" . sbSteamMatch($ids) . ") AND RemoveType IS NULL AND (length = 0 OR ends > $now)
+                ORDER BY length = 0 DESC, ends DESC
+                LIMIT 1
+            ", false);
+            $ban = $db->fetch_array() ?: null;
+            if (sbOn()) {
+                $db->select_db(DB_NAME);
+            }
+        }
+    }
+    if ($ban) {
+        $permanent = (int) $ban['length'] === 0;
+        $reason    = trim((string) $ban['reason']);
+        return array(
+            'class' => $permanent ? 'red' : 'orange',
+            'label' => $permanent ? t('karma.permanent') : t('karma.until', array('{date}' => sbDay($ban['ends']))),
+            'tip'   => $reason !== '' ? $reason : t('sb.no.reason'),
+            'url'   => sbDetailsUrl(sbBanType($ban), $ban['bid']),
+        );
+    }
+    $banned = $playerdata['hideranking'] == 2;
+    return array('class' => $banned ? 'red' : 'green', 'label' => t($banned ? 'karma.banned' : 'karma.good'), 'tip' => tLabel('karma'), 'url' => '');
+}
+
 function playerIdentity(array $playerdata, string $uqid, string $coid, array $steam): void
 {
     global $g_options;
@@ -82,7 +132,12 @@ function playerIdentity(array $playerdata, string $uqid, string $coid, array $st
 <?php if ($playerdata['clan']) { ?>
         <a class="hlstats-chip" href="?mode=claninfo&amp;clan=<?= (int) $playerdata['clan'] ?>"<?= $tip('member.clan') ?>><?= svgIcon('users', 14) . htmlspecialchars($playerdata['clan_name'] ?? '', ENT_COMPAT) ?></a>
 <?php } ?>
-        <span class="hlstats-chip <?= $playerdata['hideranking'] == 2 ? 'red' : 'green' ?>"<?= $tip('karma') ?>><?= svgIcon('shield', 14) . t($playerdata['hideranking'] == 2 ? 'karma.banned' : 'karma.good') ?></span>
+<?php $standing = playerStanding($playerdata, $coid); ?>
+<?php if ($standing['url'] !== '') { ?>
+        <a class="hlstats-chip <?= $standing['class'] ?>" href="<?= htmlspecialchars($standing['url'], ENT_QUOTES) ?>" data-tooltip="<?= htmlspecialchars($standing['tip'], ENT_QUOTES) ?>"><?= svgIcon('shield', 14) . htmlspecialchars($standing['label'], ENT_COMPAT) ?></a>
+<?php } else { ?>
+        <span class="hlstats-chip <?= $standing['class'] ?>" data-tooltip="<?= htmlspecialchars($standing['tip'], ENT_QUOTES) ?>"><?= svgIcon('shield', 14) . htmlspecialchars($standing['label'], ENT_COMPAT) ?></span>
+<?php } ?>
     </div>
 </div>
 <?php

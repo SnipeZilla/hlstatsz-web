@@ -359,7 +359,6 @@ printSectionTitle(t('title.misc.stats')); ?>
         $pageUrl = $script_path . '/hlstats.php?mode=playerinfo&player=' . $player;
 
         // Discord has no signatures: a message where the image line shows as a preview, then the page as a link
-        // (<...> keeps that link from a preview of its own, backslashes keep the name's markdown characters as text)
         $discordName = preg_replace('/([\\\\`*_~|\[\]()<>])/', '\\\\$1', html_entity_decode($playerdata['lastName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 
         // name => [code, hint]

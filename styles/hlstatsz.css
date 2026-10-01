@@ -427,7 +427,7 @@ appearance: textfield;
   background: currentColor;
 }
 
-/* Chip: Steam ID, clan, karma; .green and .red tint it with their color */
+/* Chip: Steam ID, clan, karma; .green, .orange and .red tint it with their color, kept when it is a link */
 .hlstats-chip{
   display: inline-flex;
   align-items: center;
@@ -442,16 +442,16 @@ appearance: textfield;
   white-space: nowrap;
   text-decoration: none;
 }
-a.hlstats-chip,
+a.hlstats-chip:not(.green, .orange, .red),
 .hlstats-chip a{ color: inherit; }
-a.hlstats-chip:hover,
+a.hlstats-chip:not(.green, .orange, .red):hover,
 .hlstats-chip a:hover{ color: var(--a-color-hover); }
 .hlstats-chip.is-mono{
   padding-right: 3px;
   font: 12px ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
-.hlstats-chip.green,
-.hlstats-chip.red{ background: color-mix(in srgb, currentColor 14%, transparent); }
+.hlstats-chip:is(.green, .orange, .red){ background: color-mix(in srgb, currentColor 14%, transparent); }
+a.hlstats-chip:is(.green, .orange, .red):hover{ background: color-mix(in srgb, currentColor 26%, transparent); }
 
 .hlstats-copy{
   display: inline-flex;
