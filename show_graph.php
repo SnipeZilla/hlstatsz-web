@@ -85,13 +85,11 @@ For current support and updates:
 		$bar_type = valid_request($_GET['type'], true);
 	}
 		
-	$selectedStyle = (isset($_COOKIE['style']) && $_COOKIE['style']) ? $_COOKIE['style'] : $g_options['style'];
+	// The colors of the visitor's theme (header.php)
+	$theme_name = themeCurrent();
+	$theme_file = './' . themePath($theme_name) . "/{$theme_name}.php";
 
-    $theme_name = preg_replace('/\.css$/', '', $selectedStyle);
-
-$theme_file = "./styles/themes/{$theme_name}/{$theme_name}.php";
-
-if ($theme_name == "default" || !file_exists($theme_file)) {
+if (themePath($theme_name) === '' || !file_exists($theme_file)) {
     $theme_name = "hlstatsz";
     $theme_file = "./styles/{$theme_name}.php";
 }

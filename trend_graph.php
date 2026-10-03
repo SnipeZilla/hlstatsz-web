@@ -28,14 +28,11 @@ For current support and updates:
 
 	$g_options = getOptions();
 
-	$selectedStyle = (isset($_COOKIE['style']) && $_COOKIE['style']) ? $_COOKIE['style'] : $g_options['style'];
+	// The colors of the visitor's theme (header.php), or of ?theme=
+	$theme_name = !empty($_GET['theme']) ? themeName($_GET['theme']) : themeCurrent();
+	$theme_file = './' . themePath($theme_name) . "/{$theme_name}.php";
 
-$theme_name = !empty($_GET['theme'])? $_GET['theme'] : strtolower($selectedStyle);
-$theme_name = preg_replace('/\.css$/', '', $theme_name);
-
-$theme_file = "./styles/themes/{$theme_name}/{$theme_name}.php";
-
-if ($theme_name == "default" || !file_exists($theme_file)) {
+if (themePath($theme_name) === '' || !file_exists($theme_file)) {
     $theme_name = "hlstatsz";
     $theme_file = "./styles/hlstatsz.php";
 }

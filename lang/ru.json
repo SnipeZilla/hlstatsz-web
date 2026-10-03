@@ -27,6 +27,10 @@
     "search.game":       "Игра:",
     "search.all":        "Все",
 
+    "theme.seasonal":     "Сезонная тема",
+    "theme.seasonal.on":  "Включить сезонную тему",
+    "theme.seasonal.off": "Вернуться к обычной теме",
+
     "title.search.results":        "Результаты поиска",
     "title.games":                 "Игры",
     "title.commservers":           "Голосовые / Общественные серверы",

@@ -28,6 +28,7 @@ Modern yet familiar: a clean, responsive, AJAX-first layout that keeps the origi
 
 **Look**
 - 10 themes: Default (Steam blue), Dark, Light, Dark OLED, Matrix, Dust2 and Strike (CS2), Fortress (TF2), and the seasonal Halloween and Noel
+- Pick the themes visitors can choose from, and switch a seasonal theme on for everybody: visitors can switch it off from the footer
 - A simplified theme for the in-game MOTD
 - Multi languages, included: English (US), French, German, Spanish (Mexico), Portuguese (Brazil), Russian, Albanian
 - Plain CSS, JS and PHP, easy to customize
@@ -126,7 +127,7 @@ HLstatsZ uses the same database.
 With `DEBUG` set to `true` in `config.php`, into `_error.txt` next to it.
 
 **How do I turn on a seasonal theme (Halloween, Noel)?**  
-Move its folder from `styles/themes/disabled/` up to `styles/themes/`, e.g. `styles/themes/disabled/halloween` to `styles/themes/halloween`. To show it to every visitor, make it the default theme in *HLstats Settings*. Move it back when the season is over.
+In *Admin › HLstats Settings › Visual style settings*, switch it on under *Seasonal theme*, and off when the season is over. Every visitor sees it, with a *Seasonal theme* switch in the footer to go back to their own theme. Seasonal themes live in `styles/themes/seasonal/`; the ones in `styles/themes/` are the themes of the style selector, each switched on or off just above.
 
 **Do I need the SourceBans or AMXBans website?**  
 No. HLstatsZ shows and manages bans, admins and servers itself. You need their database, which HLstatsZ creates (*Admin › Bans › Bans Settings*), and their plugin on your game servers.

@@ -66,6 +66,93 @@ function getOptions($exit = true)
 	return $options;
 }
 
+/**
+ * Themes: styles/themes/<name>/<name>.css on top of hlstatsz.css, with <name>.php (the colors of the graphs) and an
+ * optional <name>.js; 'default' is hlstatsz.css alone. Seasonal themes (Halloween, Noel...) are in
+ * styles/themes/seasonal/<name>/: the admin switches one on for everybody (option style_seasonal), and each visitor
+ * can switch it off from the footer (cookie seasonal_off). Option styles_hidden lists the themes the style selector
+ * leaves out.
+ */
+
+// A theme's name from an option, a cookie or the address ('dark', or 'dark.css' as old options have it); '' when it
+// cannot be one
+function themeName($value)
+{
+	$name = preg_replace('/\.css$/', '', (string) $value);
+	return preg_match('/^[A-Za-z0-9_-]{1,32}$/', $name) ? $name : '';
+}
+
+// The themes installed, name => label: Default and the others in styles/themes, or with $seasonal the seasonal ones
+function themeList($seasonal = false)
+{
+	static $lists = array();
+	if (!isset($lists[$seasonal])) {
+		$dir = $seasonal ? 'styles/themes/seasonal' : 'styles/themes';
+		$themes = array();
+		foreach (glob("$dir/*", GLOB_ONLYDIR) ?: array() as $path) {
+			$name = basename($path);
+			if (themeName($name) === $name && $name !== 'default' && is_file("$path/$name.css")) {
+				$themes[$name] = ucwords(strtolower(str_replace('_', ' ', $name)));
+			}
+		}
+		asort($themes);
+		$lists[$seasonal] = $seasonal ? $themes : array('default' => 'Default') + $themes;
+	}
+	return $lists[$seasonal];
+}
+
+// The folder of an installed theme, '' for Default and for a theme that is not there
+function themePath($name)
+{
+	$name = themeName($name);
+	foreach (array(false, true) as $seasonal) {
+		if ($name !== 'default' && isset(themeList($seasonal)[$name])) {
+			return $seasonal ? "styles/themes/seasonal/$name" : "styles/themes/$name";
+		}
+	}
+	return '';
+}
+
+// The site's theme (option style), Default when it is not installed
+function themeSite()
+{
+	global $g_options;
+	$name = themeName($g_options['style'] ?? '');
+	return isset(themeList()[$name]) ? $name : 'default';
+}
+
+// The themes the style selector offers, name => label: the site's theme always
+function themeAllowed()
+{
+	global $g_options;
+	$hidden = array_diff(explode(';', $g_options['styles_hidden'] ?? ''), array(themeSite()));
+	return array_diff_key(themeList(), array_flip($hidden));
+}
+
+// The seasonal theme the admin switched on, '' for none
+function themeSeasonal()
+{
+	global $g_options;
+	$name = themeName($g_options['style_seasonal'] ?? '');
+	return isset(themeList(true)[$name]) ? $name : '';
+}
+
+// The theme of this visitor: the seasonal theme while one is on (unless they switched it off), else their pick in
+// the style selector while the site shows the selector and offers that theme, else the site's theme
+function themeCurrent()
+{
+	global $g_options;
+	$seasonal = themeSeasonal();
+	if ($seasonal !== '' && ($_COOKIE['seasonal_off'] ?? '') !== $seasonal) {
+		return $seasonal;
+	}
+	$pick = themeName($_COOKIE['style'] ?? '');
+	if (($g_options['display_style_selector'] ?? 0) == 1 && isset(themeAllowed()[$pick])) {
+		return $pick;
+	}
+	return themeSite();
+}
+
 // Test if flags exists
 /**
  * getFlag()

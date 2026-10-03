@@ -27,6 +27,10 @@
     "search.game":       "Juego:",
     "search.all":        "Todos",
 
+    "theme.seasonal":     "Tema de temporada",
+    "theme.seasonal.on":  "Cambiar al tema de temporada",
+    "theme.seasonal.off": "Regresar a tu tema habitual",
+
     "title.search.results":        "Resultados de Búsqueda",
     "title.games":                 "Juegos",
     "title.commservers":           "Servidores de Voz / Comunidad",

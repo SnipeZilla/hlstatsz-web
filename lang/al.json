@@ -27,6 +27,10 @@
     "search.game":       "Loja:",
     "search.all":        "Të gjitha",
 
+    "theme.seasonal":     "Tema sezonale",
+    "theme.seasonal.on":  "Kalo te tema sezonale",
+    "theme.seasonal.off": "Kthehu te tema jote e zakonshme",
+
     "title.search.results":        "Rezultatet e Kërkimit",
     "title.games":                 "Lojërat",
     "title.commservers":           "Serverat Zanorë / të Komunitetit",

@@ -27,6 +27,10 @@
     "search.game":       "Jeu :",
     "search.all":        "Tous",
 
+    "theme.seasonal":     "Thème saisonnier",
+    "theme.seasonal.on":  "Passer au thème saisonnier",
+    "theme.seasonal.off": "Revenir à votre thème habituel",
+
     "title.search.results":        "Résultats de recherche",
     "title.games":                 "Jeux",
     "title.commservers":           "Serveurs vocaux / communautaires",

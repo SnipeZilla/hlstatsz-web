@@ -27,6 +27,10 @@
     "search.game":       "Game:",
     "search.all":        "All",
 
+    "theme.seasonal":     "Seasonal theme",
+    "theme.seasonal.on":  "Switch to the seasonal theme",
+    "theme.seasonal.off": "Switch back to your usual theme",
+
     "title.search.results":        "Search Results",
     "title.games":                 "Games",
     "title.commservers":           "Voice / Community Servers",

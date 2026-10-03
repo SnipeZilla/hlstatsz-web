@@ -210,6 +210,20 @@
 .hlstats-admin-table-wrap input[type="checkbox"] {
   height: auto;
 }
+/* A list of switches (HLstats Settings: themes); .is-off while the setting they depend on is off */
+.hlstats-switch-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 120px);
+  justify-content: end;
+  gap: 10px 12px;
+  width: 400px;
+  max-width: 100%;
+  margin-left: auto;
+  text-align: left;
+}
+.hlstats-switch-list.is-off {
+  opacity: .5;
+}
 /* Links — never wrap */
 .hlstats-admin-table-wrap td a {
   white-space: nowrap;

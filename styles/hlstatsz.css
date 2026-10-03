@@ -453,6 +453,45 @@ a.hlstats-chip:not(.green, .orange, .red):hover,
 .hlstats-chip:is(.green, .orange, .red){ background: color-mix(in srgb, currentColor 14%, transparent); }
 a.hlstats-chip:is(.green, .orange, .red):hover{ background: color-mix(in srgb, currentColor 26%, transparent); }
 
+/* Switch: a checkbox drawn as a track and a knob (admin settings), or a link that flips a setting, .is-on when on
+   (the footer's Seasonal theme). Off, it is drawn in its text color */
+.hlstats-switch{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+.hlstats-switch input{ position: absolute; opacity: 0; pointer-events: none; }
+.hlstats-switch-ui{
+  position: relative;
+  flex: none;
+  width: 30px;
+  height: 16px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  opacity: .8;
+  transition: background .15s, border-color .15s;
+}
+.hlstats-switch-ui::after{
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  transition: transform .15s;
+}
+.hlstats-switch.is-on .hlstats-switch-ui,
+.hlstats-switch input:checked + .hlstats-switch-ui{ border-color: transparent; background: var(--button-bg); opacity: 1; }
+.hlstats-switch.is-on .hlstats-switch-ui::after,
+.hlstats-switch input:checked + .hlstats-switch-ui::after{ transform: translateX(14px); background: var(--button-color); }
+.hlstats-switch input:focus-visible + .hlstats-switch-ui{ outline: 2px solid var(--input-border-color-focus); outline-offset: 2px; }
+.hlstats-switch:has(input:is(:disabled, [aria-disabled])){ opacity: .6; cursor: default; }
+
 .hlstats-copy{
   display: inline-flex;
   align-items: center;
@@ -861,6 +900,8 @@ button.svg:hover svg{
   font-size: 12px;
 }
 .hlstats-footer-links a:hover{ color: var(--footer-color-a-hover); }
+/* the Seasonal theme switch, on the right */
+.hlstats-footer-links .hlstats-footer-season{ margin-left: auto; }
 
 /* ────────────── Global ────────────── */
 .hlstats-contents table.hlstats-map td{
@@ -1989,10 +2030,16 @@ th:hover::after{
   z-index:9999;
 }
 
-.theme-menu a{
+.theme-menu a,
+.theme-menu span{
   display: block;
   padding: 6px 10px;
   text-align: right;
+}
+/* the seasonal theme, above the others */
+.theme-menu .is-seasonal{
+  margin-bottom: 4px;
+  border-bottom: var(--header-dropmenu-border);
 }
 
 /* Menu links (themes, games) */

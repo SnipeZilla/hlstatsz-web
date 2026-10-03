@@ -27,6 +27,10 @@
     "search.game":       "Spiel:",
     "search.all":        "Alle",
 
+    "theme.seasonal":     "Saisonales Design",
+    "theme.seasonal.on":  "Zum saisonalen Design wechseln",
+    "theme.seasonal.off": "Zurück zu deinem gewohnten Design",
+
     "title.search.results":        "Suchergebnisse",
     "title.games":                 "Spiele",
     "title.commservers":           "Voice / Community Server",

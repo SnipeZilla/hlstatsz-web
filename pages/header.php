@@ -17,29 +17,38 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 	global $signin,$game,$mode,$selectedStyle,$theme,$realname;
 
-	// see if they have a defined style or a new style they'd like
-	$style = (isset($_COOKIE['style']) && $_COOKIE['style'] && $g_options['display_style_selector'] == 1) ? $_COOKIE['style'] : $g_options['style'];
-	$style = !empty($_GET['stylesheet']) ? $_GET['stylesheet'] : $style; 
-	// if they don't have one defined or the defined was is invalid use the default	
-    $selectedStyle = $style;
-	if ($selectedStyle !== 'default' && !file_exists('styles/themes/'.$style.'/'.$style.'.css'))
-        $selectedStyle = 'default';
-
-
-	// if they had one, or tried to have one, set it to whatever we resolved it to
-	if (!empty($_GET['stylesheet']) || isset($_COOKIE['style']))
+	// The theme (themeCurrent()): a pick in the style selector (?stylesheet=) and the footer's Seasonal theme switch
+	// (?seasonal=1|0) are kept in cookies
+	$seasonal = themeSeasonal();
+	if (!empty($_GET['stylesheet']) || isset($_GET['seasonal']))
 	{
-		myCookie('style', $selectedStyle, time()+60*60*24*30);
+		$pick = themeName($_GET['stylesheet'] ?? '');
+		$picked = $g_options['display_style_selector'] == 1 && isset(themeAllowed()[$pick]);
+		if ($picked) {
+			myCookie('style', $pick, time()+60*60*24*30);
+		}
+		if ($seasonal !== '') {
+			if (!empty($_GET['seasonal'])) {
+				myCookie('seasonal_off', '', time()-3600);
+			} elseif (isset($_GET['seasonal']) || $picked) {
+				// switched off, or another theme picked: for this seasonal theme only, the next one shows again
+				myCookie('seasonal_off', $seasonal, time()+60*60*24*60);
+			}
+		}
 
-        if (!empty($_GET['stylesheet'])) {
-            $query = updateQueryKey(["stylesheet" => '']);
-            $q = $query ? '?' : '';
-            header('Location: ' . $_SERVER['PHP_SELF'] . $q . $query);
-            exit();
-        }
+		$query = updateQueryKey(["stylesheet" => '', "seasonal" => '']);
+		$q = $query ? '?' : '';
+		header('Location: ' . $_SERVER['PHP_SELF'] . $q . $query);
+		exit();
+	}
+	// a pick is kept 30 days from the last visit
+	if (isset($_COOKIE['style']) && isset(themeAllowed()[themeName($_COOKIE['style'])])) {
+		myCookie('style', themeName($_COOKIE['style']), time()+60*60*24*30);
 	}
 
-    $theme  = $selectedStyle;
+	$selectedStyle = themeCurrent();
+	$theme     = $selectedStyle;
+	$themePath = themePath($theme);
     $search = new Search('','',$game ?? '');
 
     // Language selection
@@ -75,8 +84,8 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
     <?php if ($mode == "admin") { ?>
     <link rel="stylesheet" type="text/css" href="styles/admin.css?<?= filemtime('styles/admin.css') ?>" />
     <?php } ?>
-    <?php if ($selectedStyle !== "default") { ?>
-    <link rel="stylesheet" type="text/css" href="styles/themes/<?= htmlspecialchars($selectedStyle) ?>/<?= htmlspecialchars($selectedStyle) ?>.css?<?= filemtime('styles/themes/'.$selectedStyle.'/'.$selectedStyle.'.css') ?>" />
+    <?php if ($themePath !== '') { ?>
+    <link rel="stylesheet" type="text/css" href="<?= htmlspecialchars("$themePath/$theme.css") ?>?<?= filemtime("$themePath/$theme.css") ?>" />
     <?php } ?>
     <script>
     const Lang = <?= json_encode(loadLangStrings(), JSON_HEX_TAG | JSON_HEX_AMP) ?>;
@@ -91,8 +100,8 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
     <script type="text/javascript" src="<?= INCLUDE_PATH ?>/js/chart.umd.min.js?<?= filemtime(INCLUDE_PATH.'/js/chart.umd.min.js') ?>"></script>
     <script type="text/javascript" src="<?= INCLUDE_PATH ?>/js/hlstatsz-charts.js?<?= filemtime(INCLUDE_PATH.'/js/hlstatsz-charts.js') ?>"></script>
     <?php } ?>
-    <?php if (file_exists('styles/themes/'.$theme.'/'.$theme.'.js')) { ?>
-    <script src="<?= 'styles/themes/'.htmlspecialchars($theme).'/'.htmlspecialchars($theme).'.js?'.filemtime('styles/themes/'.$theme.'/'.$theme.'.js')?>" defer></script>
+    <?php if ($themePath !== '' && file_exists("$themePath/$theme.js")) { ?>
+    <script src="<?= htmlspecialchars("$themePath/$theme.js") ?>?<?= filemtime("$themePath/$theme.js") ?>" defer></script>
     <?php } ?>
     <link rel="icon" type="image/svg+xml" href="hlstatsz-favicon.svg?<?= filemtime('hlstatsz-favicon.svg') ?>">
     <link rel="icon" type="image/png" sizes="256x256" href="hlstatsz-favicon-256.png?<?= filemtime('hlstatsz-favicon-256.png') ?>">
@@ -328,7 +337,26 @@ $currentMode = $mode ?? $game ?? '';
 <path d="M16.65 3.85938H7.35C3.25 3.85938 2 5.10938 2 9.20938V14.7894C2 18.8894 3.25 20.1394 7.35 20.1394H16.65C20.75 20.1394 22 18.8894 22 14.7894V9.20938C22 5.10938 20.75 3.85938 16.65 3.85938ZM14.09 13.1194C14.09 15.3694 13.04 16.4194 10.79 16.4194H8.56C6.31 16.4194 5.26 15.3694 5.26 13.1194V10.8894C5.26 8.63938 6.31 7.58938 8.56 7.58938H10.79C13.04 7.58938 14.09 8.63938 14.09 10.8894V13.1194Z" fill="currentColor"/>
 </svg>
   </button>
-  <div class="theme-menu" id="theme-menu"></div>
+  <div class="theme-menu" id="theme-menu">
+<?php
+    // The seasonal theme first while one is on, then the themes the site offers; picking one of them switches the
+    // seasonal theme off
+    $themeItems = array();
+    if ($seasonal !== '') {
+        $themeItems[] = array(themeList(true)[$seasonal], updateQueryKey(["seasonal" => '1']), $theme === $seasonal, ' class="is-seasonal"');
+    }
+    foreach (themeAllowed() as $e => $ename) {
+        $themeItems[] = array($ename, updateQueryKey(["stylesheet" => $e]), $theme === $e, '');
+    }
+    foreach ($themeItems as list($ename, $query, $current, $class)) {
+        if ($current) {
+            echo "    <span$class>" . htmlspecialchars($ename) . " ✓</span>\n";
+        } else {
+            echo "    <a$class href=\"?" . htmlspecialchars($query) . '" rel="nofollow">' . htmlspecialchars($ename) . "</a>\n";
+        }
+    }
+?>
+  </div>
       </div>
 <?php } 
 $baseUrl = $_SERVER['PHP_SELF'];

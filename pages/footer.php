@@ -65,6 +65,13 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
               echo '<a href="' . htmlspecialchars($url, ENT_QUOTES) . '" target="_blank">' . htmlspecialchars($label, ENT_QUOTES) . '</a>';
           }
       }
+      // While the admin has a seasonal theme on, each visitor can switch it off (header.php keeps it in a cookie)
+      if (($seasonal = themeSeasonal()) !== '') {
+          $on = themeCurrent() === $seasonal;
+          echo '<a class="hlstats-switch hlstats-footer-season' . ($on ? ' is-on' : '') . '" href="?' . htmlspecialchars(updateQueryKey(["seasonal" => $on ? '0' : '1'])) . '"'
+             . ' rel="nofollow" role="switch" aria-checked="' . ($on ? 'true' : 'false') . '" data-tooltip="' . htmlspecialchars(t($on ? 'theme.seasonal.off' : 'theme.seasonal.on'), ENT_QUOTES) . '">'
+             . '<span class="hlstats-switch-ui"></span>' . htmlspecialchars(t('theme.seasonal')) . '</a>';
+      }
       ?>
     </div>
 
@@ -119,34 +126,6 @@ if (($g_options["show_google_map"] == 1) && ($mode == "contents" || $mode == "se
         ?.addEventListener('fetch:loaded', setupMap);
     </script>
 <?php
-}
-if ($g_options['display_style_selector'] == 1) {
-  global $selectedStyle;
-  $d = dir('styles/themes');
-  while (false !== ($e = $d->read())) {
-      if ($e === '.' || $e === '..' || $e === 'disabled') continue;
-      if (is_dir("styles/themes/$e") && is_file("styles/themes/$e/$e.css")) {
-          $ename = ucwords(strtolower(str_replace('_', ' ', $e)));
-          $styles[$e] = $ename;
-      }
-  }
-  $d->close(); 
-  asort($styles); 
-  if ( "default" == $selectedStyle ) {
-      $stylesheets = '<span>Default ✓</span>';
-  } else {
-      $query = updateQueryKey(["stylesheet" => 'default']);
-      $stylesheets = '<a href=\"?'.$query.'\">Default</a>';
-  }
-  foreach ($styles as $e => $ename) {
-     if ( $e == $selectedStyle ) {
-        $stylesheets .= '<span>'. $ename . ' ✓</span>';
-     } else {
-         $query = updateQueryKey(["stylesheet" => $e]);
-        $stylesheets .= '<a href=\"?'.$query.'\">'.$ename.'</a>';
-     }  
-  }
-  echo '<script>document.getElementById("theme-menu").innerHTML = "'.$stylesheets.'"</script>';
 }
 ?>
 </body>

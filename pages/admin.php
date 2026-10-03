@@ -919,7 +919,7 @@ function checkVersion() {
 
     global $db, $g_options;
     $needsupdate = false;
-    $web = '2.03';
+    $web = '2.04';
     $webversion = $web.'.'.$g_options['dbversion'];
     if (isset($g_options['webversion']) && ($g_options['webversion'] != $webversion)) {
         $db->query("UPDATE hlstats_Options SET `value` = '$webversion' WHERE `keyname` = 'webversion'");
