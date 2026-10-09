@@ -114,4 +114,7 @@
 
   --ajax-bg: #5199eb;
 
+  /* Map */
+  --map-tile-filter: invert(1) hue-rotate(200deg) brightness(.7) contrast(1) saturate(.2);
+  --map-bg: #000;
 }

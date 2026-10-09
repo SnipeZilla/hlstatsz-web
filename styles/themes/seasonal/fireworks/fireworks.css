@@ -1,0 +1,193 @@
+/* HLstatsZ theme: Fireworks (summer: July 4th, and July 14th too) */
+:root{
+  /* logo */
+  --logo-color: #f4f7ff;
+  --logo-color-z: #ff4d5a;
+
+    --body-bg: 
+    radial-gradient(1000px 400px at 18% -8%, rgba(255,77,90,.10), rgba(255,77,90,0) 65%),
+    radial-gradient(900px 380px at 82% -6%, rgba(77,141,255,.16), rgba(77,141,255,0) 62%),
+    linear-gradient(to bottom, #0d1730 0%, #0a1226 50%, #070d1f 100%);
+  --main-color: #d6def1;
+
+    --a-color: #4a92ff;
+  --a-color-hover: #8ab9ff;
+
+    --h-tag-bg: linear-gradient(-60deg, rgba(26,118,255,.20) 5%, rgba(60,95,210,.22) 95%);
+
+  /* Inputs */
+  --input-border: 1px solid rgba(170,190,255,.16);
+  --input-bg: rgba(3,6,15,.5);
+  --input-border-color-focus: rgba(42,127,255,.85);
+  --select-option-bg: #0d1530;
+  --input-placeholder-color: rgba(214,222,241,.5);
+
+    --button-bg: #d9303e;
+  --button-color: #ffffff;
+
+    --header-top-bg: linear-gradient(to bottom, #040816 0%, #0a1430 55%, #14224a 100%);
+  --header-border-bottom: none;
+  --header-top-nav-color: #c5d0eb;
+  --header-top-nav-color-active: #4a92ff;
+
+  --header-sub-bar-bg: linear-gradient(to bottom, #050813 0%, #080f24 100%);
+  --header-dropmenu-bg: #0c132c;
+  --header-dropmenu-bg-hover: rgba(26,118,255,.16);
+  --header-dropmenu-border: 1px solid rgba(170,190,255,.14);
+  --header-dropmenu-border-color: rgba(170,190,255,.14);
+  --header-dropmenu-color: #c5d0eb;
+  --header-dropmenu-color-hover: #ffffff;
+  --header-dropmenu-shadow: 0 14px 34px rgba(0,0,0,.6);
+
+  /* Search panel */
+  --search-panel-bg: linear-gradient(#121d43, #091028);
+  --search-panel-border: 1px solid rgba(0,0,0,.55);
+  --search-panel-shadow: 0 14px 34px rgba(0,0,0,.6);
+
+    --footer-color: #98a2c0;
+  --footer-color-small: rgba(182,192,223,.6);
+  --footer-color-a: #4a92ff;
+  --footer-color-meta-a: #c5d0eb;
+  --footer-color-a-hover: #ffffff;
+
+  /* Tabs */
+  --tabs-bg: linear-gradient(#121d43, #0b132c);
+  --tab-border: 1px solid rgba(0,0,0,.4);
+  --tab-color: #d0d7f0;
+  --tab-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 -1px 0 rgba(0,0,0,.35) inset;
+  --tab-color-hover: #ffffff;
+  --tab-bg-hover: linear-gradient(#192756, #0f193b);
+  --tab-color-active: #ffffff;
+  --tab-bg-active: linear-gradient(#e5404d, #b82733);
+
+  /* Tables */
+  --table-bg: rgba(5,9,21,.45);
+  --table-border: 1px solid rgba(170,190,255,.10);
+  --table-th-bg: linear-gradient(to bottom, rgba(24,39,88,.95) 65%, rgba(13,24,59,.95));
+  --table-th-color: #d6e0f7;
+  --table-th-border-bottom: 1px solid rgba(170,190,255,.10);
+  --table-td-color: rgba(214,224,247,.86);
+  --table-td-border-bottom: 1px solid rgba(170,190,255,.06);
+  --table-td-bg-odd: rgba(0,0,0,.12);
+  --table-td-bg-even: rgba(255,255,255,.02);
+  --table-td-bg-hover: rgba(26,118,255,.10);
+  --table-a-color: #d6e0f7;
+  --table-a-color-hover: #4a92ff;
+  --table-shadow: 0 10px 28px rgba(0,0,0,.35);
+
+    --card-bg: linear-gradient(180deg, rgba(21,32,69,.70), rgba(10,17,40,.72));
+  --card-section-bg: rgba(0,0,0,.14);
+  --card-section-border: 1px solid rgba(170,190,255,.08);
+  --card-section-shadow: 0 10px 30px rgba(0,0,0,.4);
+  --card-border: 1px solid rgba(170,190,255,.12);
+  --card-border-color-hover: rgba(26,118,255,.50);
+  --card-title-color: #c3cee9;
+
+    --card-award-bg: radial-gradient(circle at 30% 25%, rgba(120,174,255,.14), rgba(0,0,0,.2));
+  --card-award-border: 1px solid rgba(170,190,255,.10);
+  --card-award-winner-color: rgba(214,222,241,.88);
+  --card-award-winner-count-bg: rgba(0,0,0,.3);
+  --card-award-winner-count-color: #4791ff;
+  --card-award-winner-count-border: 1px solid rgba(71,145,255,.22);
+  --card-award-has-winner-border: rgba(26,118,255,.40);
+  --card-scrollbar-color: rgba(74,146,255,.45) transparent;
+  --card-award-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 12px 24px rgba(0,0,0,.15);
+  --card-award-has-winner-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 16px 32px rgba(0,0,0,.5);
+  --card-award-rank-has-winner-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 2px 4px rgba(0,0,0,.5);
+
+  /* Pagination */
+  --pagination-hover-bg: rgba(26,118,255,.25);
+  --pagination-hover-border: 1px solid rgba(170,190,255,.14);
+
+  /* Ajax loader */
+  --ajax-bg: #ff4d5a;
+
+  /* Hitbox */
+  --hitbox-model-bg:
+    radial-gradient(ellipse at 50% 35%, rgba(26,118,255,.10) 0%, rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(21,32,69,.40), rgba(0,0,0,.55));
+
+  /* Map */
+  --map-tile-filter: invert(1) hue-rotate(215deg) brightness(.75) contrast(.95) saturate(1.3);
+  --map-bg: #0d1730;
+}
+
+.z{ color: #ff4d5a; }
+
+/* Night sky: stars, and from 1000 px the skyline and the fireworks. The contents are a centred column,
+   so the fireworks are placed from the centre line (50% centres the image; half its width, 280 px, moves its left edge) */
+.hlstats-top{
+  position: relative;
+  background:
+    url('fireworks-stars.svg') 0 0 / 520px 104px repeat-x,
+    var(--header-top-bg);
+}
+@media (min-width: 1000px){
+  .hlstats-top{
+    background:
+      url('fireworks-skyline.svg') right 18px bottom 0 / 420px 64px no-repeat,
+      url('fireworks-bursts.svg') left calc(50% + 300px) top 0 / 520px 104px no-repeat,
+      url('fireworks-stars.svg') 0 0 / 520px 104px repeat-x,
+      var(--header-top-bg);
+  }
+}
+
+/* Bunting strung under the header */
+.hlstats-top::after{
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% - 2px);
+  height: 20px;
+  background: url('fireworks-bunting.svg') 0 0 / 96px 20px repeat-x;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Room for the bunting above the game bar */
+.hlstats-sub .hlstats-inner{ padding-top: 8px; }
+
+/* Three stars at the end of the section titles */
+.hlstats-contents h1{ position: relative; }
+.hlstats-contents h1::after{
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 58px;
+  height: 20px;
+  margin-top: -10px;
+  background: url('fireworks-stars3.svg') center / contain no-repeat;
+  opacity: .9;
+  pointer-events: none;
+}
+
+/* Red, white and blue line along the top of the footer */
+.hlstats-footer{
+  position: relative;
+  background: linear-gradient(to bottom, #060b1c 0%, #04070f 100%);
+  border-top: 0;
+}
+.hlstats-footer::before{
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff4d5a 0%, #ff4d5a 33.3%, #f4f7ff 33.3%, #f4f7ff 66.6%, #4d8dff 66.6%, #4d8dff 100%);
+  pointer-events: none;
+}
+
+/* The admin menu shows its current item in the text colour of the active tab, without the tab */
+.hlstats-sub-task li.active > a,
+.hlstats-admin-active{ color: var(--a-color) !important; }

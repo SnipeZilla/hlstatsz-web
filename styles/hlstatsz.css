@@ -130,6 +130,19 @@
   --hitbox-label-red:     #ff8b8b;
   --hitbox-marker-border: rgba(255,255,255,.85);
   --hitbox-label-shadow:  0 1px 2px rgba(0,0,0,.85), 0 0 4px rgba(0,0,0,.6);
+
+  /* Map */
+  --map-tile-filter: invert(1) hue-rotate(200deg) brightness(.9) contrast(.9) saturate(.6);
+  --map-bg: #1b2838;
+
+  /* Team colors */
+  --team-blue:   #3584d6;
+  --team-red:    #dc4640;
+  --team-gold:   #b98a14;
+  --team-green:  #35994d;
+  --team-purple: #a35fd0;
+  --team-orange: #d46f1a;
+  --team-grey:   #858a93;
 }
 
 * {
@@ -246,7 +259,7 @@ meter {
   border-radius: 3px;
   background: rgba(255,255,255,0.1);
 }
-/* Chrome, Safari, Edge (kept apart from ::-moz-meter-bar: an unknown pseudo-element drops the whole rule) */
+
 meter::-webkit-meter-bar,
 meter::-webkit-meter-optimum-value,
 meter::-webkit-meter-suboptimum-value,
@@ -331,6 +344,26 @@ appearance: textfield;
   max-width:100%;
 }
 
+#map .leaflet-top.leaflet-right{ display:none; }
+#map .leaflet-tile-pane { filter: var(--map-tile-filter); }
+#map.leaflet-container  { background: var(--map-bg); }
+#map .marker-cluster { background: transparent; }
+#map .marker-cluster div { font-weight: 700; }
+
+/* servers: solid accent */
+#map .marker-cluster-servers div {
+  background: var(--button-bg);
+  color: var(--button-color);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--a-color) 35%, transparent);
+}
+
+/* players: dark fill, accent outline */
+#map .marker-cluster-players div {
+  background: var(--header-dropmenu-bg);
+  color: var(--main-color);
+  box-shadow: 0 0 0 2px var(--a-color);
+}
+
 /* ────────────── Scrollbars ────────────── */
 .hlstats-scrollbar,
 .responsive-table{
@@ -338,7 +371,6 @@ appearance: textfield;
   scrollbar-color: var(--card-scrollbar-color);
 }
 
-/* Safari: Chrome and Firefox draw the scrollbar from the two properties above and ignore these */
 :is(.hlstats-scrollbar, .responsive-table)::-webkit-scrollbar{
   width: 8px;
   height: 8px;
@@ -392,8 +424,6 @@ appearance: textfield;
   font-size: 11px;
 }
 
-/* Pill: a status in an outline of its text color (.red, .orange, .green, .neutral); .is-status adds a dot.
-   .hlstats-sb.sb-pill is the SourceBans one, of a fixed width */
 .hlstats-pill,
 .hlstats-sb.sb-pill{
   display: inline-flex;
@@ -427,7 +457,6 @@ appearance: textfield;
   background: currentColor;
 }
 
-/* Chip: Steam ID, clan, karma; .green, .orange and .red tint it with their color, kept when it is a link */
 .hlstats-chip{
   display: inline-flex;
   align-items: center;
@@ -453,8 +482,6 @@ a.hlstats-chip:not(.green, .orange, .red):hover,
 .hlstats-chip:is(.green, .orange, .red){ background: color-mix(in srgb, currentColor 14%, transparent); }
 a.hlstats-chip:is(.green, .orange, .red):hover{ background: color-mix(in srgb, currentColor 26%, transparent); }
 
-/* Switch: a checkbox drawn as a track and a knob (admin settings), or a link that flips a setting, .is-on when on
-   (the footer's Seasonal theme). Off, it is drawn in its text color */
 .hlstats-switch{
   display: inline-flex;
   align-items: center;
@@ -539,12 +566,13 @@ a.hlstats-chip:is(.green, .orange, .red):hover{ background: color-mix(in srgb, c
   display: inline-flex;
   align-items: center;
   text-decoration: none;
+  margin-right: 20px;
 }
 
 .hlstats-topnav{
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 20px;
   align-items: center;
   flex: 1;
   font-family: "Motiva Sans", "Twemoji", "Noto Sans", Helvetica, sans-serif;
@@ -1287,47 +1315,28 @@ th:hover::after{
   z-index: 0;
 }
 
+/* A row is tinted with its --team color: set by the classes below, or inline by the page
+   (style="--team:#3584d6", the value of BgColor()), which wins over the classes */
+.hlstats-contents table tr[class*="team_"] td::before,
+.hlstats-contents table tr[style*="--team"] td::before {
+  background-color: color-mix(in srgb, var(--team, transparent) 40%, transparent);
+}
+
 /* ──────────── team generics ─────────── */
+.hlstats-contents table tr.team_0 { --team: var(--team-blue); }
+.hlstats-contents table tr.team_1 { --team: var(--team-red); }
+.hlstats-contents table tr.team_2 { --team: var(--team-green); }
+.hlstats-contents table tr.team_3 { --team: var(--team-purple); }
 
-
-.hlstats-contents table tr.team_0 td::before {
-  background-color:rgba(70,150,255,.4);
-}
-
-.hlstats-contents table tr.team_1 td::before {
-  background-color:rgba(255,0,0,.4);
-}
-
-.hlstats-contents table tr.team_2 td::before {
-  background-color:rgba(0,255,0,.4);
-}
-
-.hlstats-contents table tr.team_3 td::before {
-  background-color:rgba(192,77,196,.4);
-}
-/* ── team specifics Counter-Strike ── */
-
-.hlstats-contents table tr.team_terrorist td::before {
-  background-color:rgba(255,215,0,.4);
-}
-
-.hlstats-contents table tr.team_ct td::before {
-  background-color:rgba(70,150,255,.4);
-}
-/* ── team specifics TF2 ── */
-
-.hlstats-contents table tr.team_red td::before {
-  background-color:rgba(255,0,0,.4);
-}
-
-.hlstats-contents table tr.team_blue td::before {
-  background-color:rgba(70,150,255,.4);
-}
-/* ── team specifics lobby ── */
-
-.hlstats-contents table tr.team_spectator td::before {
-  background-color:rgba(128,128,128,.4);
-}
+/* ── team specifics (after the generics: a row has both classes, the later rule wins) ── */
+/* Counter-Strike */
+.hlstats-contents table tr.team_terrorist { --team: var(--team-gold); }
+.hlstats-contents table tr.team_ct        { --team: var(--team-blue); }
+/* TF2 */
+.hlstats-contents table tr.team_red       { --team: var(--team-red); }
+.hlstats-contents table tr.team_blue      { --team: var(--team-blue); }
+/* lobby */
+.hlstats-contents table tr.team_spectator { --team: var(--team-grey); }
 
 
 /* =======================
@@ -1359,7 +1368,7 @@ th:hover::after{
 .hlstats-kpis{ --card-min: 160px; }
 .hlstats-kpi{ padding: 14px 16px; }
 .hlstats-kpi-label{
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   opacity: .8;
 }
@@ -1378,7 +1387,7 @@ th:hover::after{
   font-variant-numeric: proportional-nums;
 }
 .hlstats-kpi-note{
-  font-size: 12px;
+  font-size: 13px;
   opacity: .7;
 }
 @media (max-width: 600px){
@@ -2482,7 +2491,7 @@ th:hover::after{
 }
 
 @media (max-width: 900px){
-  .hlstats-topnav{ gap: 10px; }
+  .hlstats-topnav{ gap: 15px; }
 
   #map { height: 280px; }
 
@@ -2582,6 +2591,7 @@ th:hover::after{
   .hlstats-game-dropdown .hlstats-dropbtn.hlstats-game-btn .hlstats-game-hamburger{ display: inline; }
   .hlstats-game-dropdown.has-games .hlstats-dropbtn.hlstats-game-btn .hlstats-server,
   .hlstats-game-dropdown.has-games .hlstats-dropbtn.hlstats-game-btn .caret{ display: none; }
+  .hlstats-topnav a{font-size: 13px;}
 
   #map { height: 240px; }
   .hlstats-map-row{ padding: 2px 0; }

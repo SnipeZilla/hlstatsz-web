@@ -121,6 +121,10 @@
   --hitbox-label-red:    #dc2626;
   --hitbox-marker-border: rgba(0,0,0,.30);
   --hitbox-label-shadow: 0 1px 1px rgba(255,255,255,.5);
+
+  /* Map */
+  --map-tile-filter: none;
+  --map-bg: #ddd;
 }
 
 body {

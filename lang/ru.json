@@ -1,7 +1,7 @@
 {
     "locale":            "ru_RU",
-    "nav.contents":      "ГЛАВНАЯ",
-    "nav.sourcebans":    "SOURCEBANS",
+    "nav.contents":      "СТАТИСТИКА",
+    "nav.sourcebans":    "БАНЫ",
     "nav.forum":         "ФОРУМ",
     "nav.help":          "ПОМОЩЬ",
 
@@ -124,7 +124,6 @@
     "goto.daily.awards":           "Ежедневные награды",
     "goto.country.stats":          "Статистика стран",
 
-    "server.tracking.stats":       "Отслеживается {total_pl} игроков (+{new_pl} новых за последние 24ч) с {total_k} убийствами (+{new_k} за последние 24ч) и {total_hs} хедшотами ({percent_hs}%) на {servers} серверах",
     "game.kpi.new":                "+{n} новых за последние 24ч",
     "game.kpi.day":                "+{n} за последние 24ч",
     "game.kpi.hs":                 "{n}% убийств",
@@ -142,7 +141,6 @@
     "player.tab4":                 "Карты и серверы",
     "player.tab5":                 "Статистика убийств",
 
-    "player.profile":              "Профиль игрока",
     "statistics.summary":          "Сводка статистики",
     "player.location":             "Местоположение игроков",
     "current.rank":                "Текущий ранг",
@@ -166,7 +164,6 @@
     "awards.tab3":                 "Ранги",
     "awards.tab4":                 "Ленты",
 
-    "contents.stats":              "{players} игроков и {clans} кланов в рейтинге по {games} играм на {servers} серверах с {kills} убийствами.",
     "contents.last_kill":          "Последнее убийство {date}",
     "contents.realtime":           "Вся статистика генерируется в <strong>реальном времени</strong>.",
     "contents.history":            "История событий хранится за последние <strong>{days}</strong> дней активности каждого игрока.",
@@ -180,7 +177,6 @@
     "not.enough.data":             "Недостаточно данных",
     "unknown":                     "(Неизвестно)",
     "none":                        "(Нет)",
-    "not.specified":               "(Не указано)",
     "loading":                     "Загрузка...",
 
     "pagination":                  "Показано {from}–{limit} из {total} записей",
@@ -212,9 +208,6 @@
     "last.connect":                "Последнее подключение:",
     "last.ping":                   "Последний пинг:",
     "last.ping.value":             "{ping} мс (Задержка: {latency} мс)",
-    "favorite.server":             "Любимый сервер:",
-    "favorite.map":                "Любимая карта:",
-    "favorite.weapon":             "Любимое оружие:",
     "favorites":                   "Любимое",
     "player.recent":               "{value} за последние {days} дн.",
     "copy.steamid":                "Копировать Steam ID",
@@ -238,7 +231,6 @@
     "suicides":                    "Самоубийства:",
     "teammate.kills":              "Убийства союзников:",
     "weapon.accuracy":             "Точность оружия:",
-    "player.history":              "История {name}:",
     "events":                      "События",
     "sessions":                    "Сессии",
     "awards":                      "Награды",
@@ -386,7 +378,6 @@
     "chart.headshots":           "HEADSHOTS",
     "chart.act_slots":           "СЛОТОВ_АКТ",
     "chart.max_slots":           "МАКС_СЛОТОВ",
-    "chart.kills_hs":            "KILLS_HS",
     "chart.skill":               "SKILL",
     "chart.deaths":              "DEATHS",
     "chart.time_min":            "ВРЕМЯ",
@@ -395,7 +386,6 @@
     "chart.new_players_24h":     "Новых игроков за посл. 24ч:",
     "chart.fps":                 "FPS",
     "chart.players_kills_hs":    "Kills / Headshots",
-    "chart.kills_deaths_hs":     "Kills / Deaths / HS",
     "chart.slots":               "Slots",
 
     "sb.nav.dashboard":           "Панель",
@@ -412,7 +402,7 @@
     "sb.me.past":                 "Прошлые баны: {n}",
     "sb.me.banned":               "Активные баны: {n}",
     "sb.me.blocked":              "Активные муты и гэги: {n}",
-    "sb.title.stats":             "Общая статистика",
+    "sb.title.stats":             "Статистика запретов",
     "sb.title.latest":            "Последняя активность",
     "sb.title.bans":              "Баны",
     "sb.title.comms":             "Муты и гэги",

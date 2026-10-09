@@ -15,6 +15,8 @@ For current support and updates:
 */
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
+require_once __DIR__ . '/../includes/team_colors.php';
+
 function printserverstats($server_id, $server)
 {
     global $db, $g_options, $game;
@@ -192,6 +194,9 @@ function printserverstats($server_id, $server)
 
 			$teamcolor         = empty($thisteam['team']) ? 'team_'.$curteam.' team_spectator' : 
                                                             'team_'.$curteam.' team_'.strtolower($thisteam['team']);
+			// the team's own color (the map marker's), inline: it wins over the team_N class; none for a team that is not listed
+			$teamhex           = TeamColor($thisteam['team']);
+			$teamstyle         = $teamhex === null ? '' : ' style="--team:'.$teamhex.'"';
 			$team_display_name = $thisteam['name'] ? htmlspecialchars($thisteam['name']) : htmlspecialchars(ucfirst(strtolower($thisteam['name'] ?? '')));
 			if ($team_display_name == '') {
 				// Team is not in hlstats_Teams, but is present in the game log, e.g. player<123><STEAM_0:0:xxxxxxx><SPECTATOR> and hence in Livestats table as (in cs1.6: SPECTATOR, UNASSIGNED) (in csgo: Spectator, Unassigned).
@@ -207,7 +212,7 @@ function printserverstats($server_id, $server)
 				$thisplayer = $playerdata[$curteam][$j];
 
 ?>
-	<tr class="<?= $teamcolor ?>">
+	<tr class="<?= $teamcolor ?>"<?= $teamstyle ?>>
 		<td class="right nowrap"><?php
 				if (isset($thisplayer) && $team_display_name)
 				{
@@ -347,7 +352,7 @@ function printserverstats($server_id, $server)
 			if ($team_display_name)
 			{
     ?>
-	<tr class="<?= $teamcolor ?>">
+	<tr class="<?= $teamcolor ?>"<?= $teamstyle ?>>
 		<td>&nbsp;</td>
 		<td class="left"><?php
 				echo "<strong>$team_display_name</strong>";

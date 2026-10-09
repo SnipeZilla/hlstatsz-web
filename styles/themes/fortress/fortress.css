@@ -113,6 +113,10 @@
   --hitbox-model-bg:
     radial-gradient(ellipse at 50% 35%, rgba(196,90,42,.14) 0%, rgba(0,0,0,0) 60%),
     linear-gradient(180deg, rgba(47,44,42,.65), rgba(27,25,24,.80));
+
+  /* Map */
+  --map-tile-filter: invert(1) hue-rotate(0deg) brightness(.9) contrast(.9) saturate(.5);
+  --map-bg: #2f2c2a;
 }
 
 .hlstats-top .hlstats-inner{

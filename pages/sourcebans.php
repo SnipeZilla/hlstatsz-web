@@ -30,9 +30,7 @@ require_once PAGE_PATH . '/sourcebans/sourcebans_functions.php';
 require_once PAGE_PATH . '/sourcebans/sourcebans_admin.php';
 require_once PAGE_PATH . '/sourcebans/sourcebans_amx.php';   // AMXBans (GoldSrc), when DB_AMXNAME is set
 
-// The lists come from SourceBans and AMXBans (GoldSrc servers), merged; either one is enough (sbOn(), sbAmx()).
-// Without both, a notice, not errors. SourceBans' queries name its tables without their database: while the page
-// runs, it is the page's database.
+// The lists come from SourceBans and AMXBans (GoldSrc servers)
 if (sbOn()) {
     $db->select_db(DB_SBNAME);
 }

@@ -1,0 +1,201 @@
+/* HLstatsZ theme: Easter (spring) */
+:root{
+  /* logo */
+  --logo-color: #f7faf5;
+  --logo-color-z: #ff7eb6;
+
+    --body-bg: 
+    radial-gradient(1000px 400px at 18% -8%, rgba(255,126,182,.10), rgba(255,126,182,0) 65%),
+    radial-gradient(900px 380px at 82% -6%, rgba(255,224,138,.08), rgba(255,224,138,0) 62%),
+    linear-gradient(to bottom, #12262a 0%, #0f2023 50%, #0c1a1c 100%);
+  --main-color: #dfe8df;
+
+    --a-color: #6cdd9b;
+  --a-color-hover: #a0e9be;
+
+    --h-tag-bg: linear-gradient(-60deg, rgba(70,211,129,.20) 5%, rgba(86,174,184,.22) 95%);
+
+  /* Inputs */
+  --input-border: 1px solid rgba(181,238,244,.16);
+  --input-bg: rgba(5,12,13,.5);
+  --input-border-color-focus: rgba(82,215,137,.85);
+  --select-option-bg: #13282a;
+  --input-placeholder-color: rgba(223,232,223,.5);
+
+    --button-bg: #46d381;
+  --button-color: #1a0d0a;
+
+    --header-top-bg: linear-gradient(to bottom, #0e1630 0%, #2a2f5e 45%, #6a4378 80%, #b0607e 100%);
+  --header-border-bottom: none;
+  --header-top-nav-color: #d2ded2;
+  --header-top-nav-color-active: #ff9ecb;
+
+  --header-sub-bar-bg: linear-gradient(to bottom, #081010 0%, #0d1d1f 100%);
+  --header-dropmenu-bg: #122426;
+  --header-dropmenu-bg-hover: rgba(70,211,129,.16);
+  --header-dropmenu-border: 1px solid rgba(181,238,244,.14);
+  --header-dropmenu-border-color: rgba(181,238,244,.14);
+  --header-dropmenu-color: #d2ded2;
+  --header-dropmenu-color-hover: #ffffff;
+  --header-dropmenu-shadow: 0 14px 34px rgba(0,0,0,.6);
+
+  /* Search panel */
+  --search-panel-bg: linear-gradient(#1a373b, #0e2123);
+  --search-panel-border: 1px solid rgba(0,0,0,.55);
+  --search-panel-shadow: 0 14px 34px rgba(0,0,0,.6);
+
+    --footer-color: #9fb6b9;
+  --footer-color-small: rgba(189,213,216,.6);
+  --footer-color-a: #6cdd9b;
+  --footer-color-meta-a: #d2ded2;
+  --footer-color-a-hover: #ffffff;
+
+  /* Tabs */
+  --tabs-bg: linear-gradient(#1a373b, #112426);
+  --tab-border: 1px solid rgba(0,0,0,.4);
+  --tab-color: #d5e8eb;
+  --tab-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 -1px 0 rgba(0,0,0,.35) inset;
+  --tab-color-hover: #ffffff;
+  --tab-bg-hover: linear-gradient(#24474b, #173033);
+  --tab-color-active: #1a0d0a;
+  --tab-bg-active: linear-gradient(#53d78a, #35b36a);
+
+  /* Tables */
+  --table-bg: rgba(8,17,18,.45);
+  --table-border: 1px solid rgba(181,238,244,.10);
+  --table-th-bg: linear-gradient(to bottom, rgba(35,73,77,.95) 65%, rgba(21,48,51,.95));
+  --table-th-color: #e2ebe2;
+  --table-th-border-bottom: 1px solid rgba(181,238,244,.10);
+  --table-td-color: rgba(226,235,226,.86);
+  --table-td-border-bottom: 1px solid rgba(181,238,244,.06);
+  --table-td-bg-odd: rgba(0,0,0,.12);
+  --table-td-bg-even: rgba(255,255,255,.02);
+  --table-td-bg-hover: rgba(70,211,129,.10);
+  --table-a-color: #e2ebe2;
+  --table-a-color-hover: #6cdd9b;
+  --table-shadow: 0 10px 28px rgba(0,0,0,.35);
+
+    --card-bg: linear-gradient(180deg, rgba(29,58,61,.70), rgba(15,33,35,.72));
+  --card-section-bg: rgba(0,0,0,.14);
+  --card-section-border: 1px solid rgba(181,238,244,.08);
+  --card-section-shadow: 0 10px 30px rgba(0,0,0,.4);
+  --card-border: 1px solid rgba(181,238,244,.12);
+  --card-border-color-hover: rgba(70,211,129,.50);
+  --card-title-color: #d0dcd0;
+
+    --card-award-bg: radial-gradient(circle at 30% 25%, rgba(146,229,181,.14), rgba(0,0,0,.2));
+  --card-award-border: 1px solid rgba(181,238,244,.10);
+  --card-award-winner-color: rgba(223,232,223,.88);
+  --card-award-winner-count-bg: rgba(0,0,0,.3);
+  --card-award-winner-count-color: #6adc99;
+  --card-award-winner-count-border: 1px solid rgba(106,220,153,.22);
+  --card-award-has-winner-border: rgba(70,211,129,.40);
+  --card-scrollbar-color: rgba(108,221,155,.45) transparent;
+  --card-award-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 12px 24px rgba(0,0,0,.15);
+  --card-award-has-winner-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 16px 32px rgba(0,0,0,.5);
+  --card-award-rank-has-winner-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 2px 4px rgba(0,0,0,.5);
+
+  /* Pagination */
+  --pagination-hover-bg: rgba(70,211,129,.25);
+  --pagination-hover-border: 1px solid rgba(181,238,244,.14);
+
+  /* Ajax loader */
+  --ajax-bg: #ff7eb6;
+
+  /* Hitbox */
+  --hitbox-model-bg:
+    radial-gradient(ellipse at 50% 35%, rgba(70,211,129,.10) 0%, rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(29,58,61,.40), rgba(0,0,0,.55));
+
+  /* Map */
+  --map-tile-filter: invert(1) hue-rotate(170deg) brightness(.85) contrast(.9) saturate(.55);
+  --map-bg: #12262a;
+}
+
+.z{ color: #ff7eb6; }
+
+/* Dawn sky: the last stars, the first light on the horizon and, from 1000 px, the hills */
+.hlstats-top{
+  position: relative;
+  background:
+    radial-gradient(ellipse 280px 90px at 62% 100%, rgba(255,214,150,.50), rgba(255,214,150,0)),
+    url('easter-stars.svg') 0 0 / 520px 104px repeat-x,
+    var(--header-top-bg);
+}
+@media (min-width: 1000px){
+  .hlstats-top{
+    background:
+      url('easter-hills.svg') right 18px bottom 0 / 420px 80px no-repeat,
+      radial-gradient(ellipse 280px 90px at 62% 100%, rgba(255,214,150,.50), rgba(255,214,150,0)),
+      url('easter-stars.svg') 0 0 / 520px 104px repeat-x,
+      var(--header-top-bg);
+  }
+}
+
+/* Grass along the bottom of the header */
+.hlstats-top::after{
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 14px;
+  background: url('easter-grass.svg') 0 0 / 200px 14px repeat-x;
+  pointer-events: none;
+}
+
+/* Rabbit ears on the logo */
+.hlstats-top .hlstats-brand{ position: relative; }
+.hlstats-top .hlstats-brand::before{
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: -30px;
+  width: 38px;
+  height: 40px;
+  background: url('easter-ears.svg') center / contain no-repeat;
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+
+/* An egg tucked behind each section title */
+.hlstats-contents h1{ position: relative; }
+.hlstats-contents h1::after{
+  content: '';
+  position: absolute;
+  top: -9px;
+  right: 14px;
+  width: 22px;
+  height: 28px;
+  background: url('easter-egg.svg') center / contain no-repeat;
+  pointer-events: none;
+}
+
+/* Tulips and eggs in the grass along the top of the footer */
+.hlstats-footer{
+  position: relative;
+  background: linear-gradient(to bottom, #0f2c21 0%, #0a1d16 100%);
+  border-top: 0;
+}
+.hlstats-footer::before{
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -43px;
+  height: 44px;
+  background: url('easter-footer.svg') 0 0 / 520px 44px repeat-x;
+  pointer-events: none;
+}
+
+/* The admin menu shows its current item in the text colour of the active tab, without the tab */
+.hlstats-sub-task li.active > a,
+.hlstats-admin-active{ color: var(--a-color) !important; }

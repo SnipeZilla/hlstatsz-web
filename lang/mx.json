@@ -1,7 +1,7 @@
 {
     "locale":            "es_MX",
-    "nav.contents":      "INICIO",
-    "nav.sourcebans":    "SOURCEBANS",
+    "nav.contents":      "ESTADÍSTICAS",
+    "nav.sourcebans":    "BANS",
     "nav.forum":         "FORO",
     "nav.help":          "AYUDA",
 
@@ -124,7 +124,6 @@
     "goto.daily.awards":           "Premios Diarios",
     "goto.country.stats":          "Estadísticas de Países",
 
-    "server.tracking.stats":       "Rastreando {total_pl} jugadores (+{new_pl} nuevos en las últimas 24h) con {total_k} kills (+{new_k} en las últimas 24h) y {total_hs} headshots ({percent_hs}%) en {servers} servidores",
     "game.kpi.new":                "+{n} nuevos en las últimas 24h",
     "game.kpi.day":                "+{n} en las últimas 24h",
     "game.kpi.hs":                 "{n}% de los kills",
@@ -142,7 +141,6 @@
     "player.tab4":                 "Mapas & Servidores",
     "player.tab5":                 "Stats de Kills",
 
-    "player.profile":              "Perfil del Jugador",
     "statistics.summary":          "Resumen de Estadísticas",
     "player.location":             "Ubicación de Jugadores",
     "current.rank":                "Rango Actual",
@@ -166,7 +164,6 @@
     "awards.tab3":                 "Rangos",
     "awards.tab4":                 "Cintas",
 
-    "contents.stats":              "{players} jugadores y {clans} clanes clasificados en {games} juegos en {servers} servidores con {kills} kills.",
     "contents.last_kill":          "Último Kill {date}",
     "contents.realtime":           "Todas las estadísticas se generan en <strong>Tiempo Real</strong>.",
     "contents.history":            "El historial de eventos se conserva durante los <strong>{days}</strong> días más recientes de actividad de cada jugador.",
@@ -180,7 +177,6 @@
     "not.enough.data":             "Datos insuficientes",
     "unknown":                     "(Desconocido)",
     "none":                        "(Ninguno)",
-    "not.specified":               "(No especificado)",
     "loading":                     "Cargando...",
 
     "pagination":                  "Mostrando {from} a {limit} de {total} entradas",
@@ -212,9 +208,6 @@
     "last.connect":                "Última Conexión:",
     "last.ping":                   "Último Ping:",
     "last.ping.value":             "{ping} ms (Latencia: {latency} ms)",
-    "favorite.server":             "Servidor Favorito:",
-    "favorite.map":                "Mapa Favorito:",
-    "favorite.weapon":             "Arma Favorita:",
     "favorites":                   "Favoritos",
     "player.recent":               "{value} en los últimos {days} días",
     "copy.steamid":                "Copiar Steam ID",
@@ -238,7 +231,6 @@
     "suicides":                    "Suicidios:",
     "teammate.kills":              "Kills de Compañeros:",
     "weapon.accuracy":             "Precisión del Arma:",
-    "player.history":              "Historial de {name}:",
     "events":                      "Eventos",
     "sessions":                    "Sesiones",
     "awards":                      "Premios",
@@ -386,7 +378,6 @@
     "chart.headshots":           "HEADSHOTS",
     "chart.act_slots":           "SLOTS_ACT",
     "chart.max_slots":           "MAX_SLOTS",
-    "chart.kills_hs":            "KILLS_HS",
     "chart.skill":               "SKILL",
     "chart.deaths":              "MUERTES",
     "chart.time_min":            "TIEMPO",
@@ -395,7 +386,6 @@
     "chart.new_players_24h":     "Nuevos jugadores últimas 24h:",
     "chart.fps":                 "FPS",
     "chart.players_kills_hs":    "Kills / Headshots",
-    "chart.kills_deaths_hs":     "Kills / Deaths / HS",
     "chart.slots":               "Slots",
 
     "sb.nav.dashboard":           "Panel",
@@ -412,7 +402,7 @@
     "sb.me.past":                 "Bans anteriores: {n}",
     "sb.me.banned":               "Bans activos contra ti: {n}",
     "sb.me.blocked":              "Bloqueos activos contra ti: {n}",
-    "sb.title.stats":             "Estadísticas Generales",
+    "sb.title.stats":             "Estadísticas de suspensiones",
     "sb.title.latest":            "Actividad Reciente",
     "sb.title.bans":              "Bans",
     "sb.title.comms":             "Bloqueos de Comunicación",

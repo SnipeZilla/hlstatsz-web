@@ -306,12 +306,23 @@ function iniMap() {
         OpenMap.panInsideBounds(bounds, { animate: false });
     });
 
-    markers = L.markerClusterGroup({
+    function clusterGroup(kind) {
+      return L.markerClusterGroup({
         spiderfyOnMaxZoom: true,
         showCoverageOnHover: true,
         zoomToBoundsOnClick: true,
-        maxClusterRadius: 20
-    });
+        maxClusterRadius: 20,
+        iconCreateFunction: c => L.divIcon({
+          html: '<div><span>' + c.getChildCount() + '</span></div>',
+          className: 'marker-cluster marker-cluster-' + kind,
+          iconSize: L.point(40, 40)
+        })
+      });
+    }
+    serverMarkers = clusterGroup('servers');
+    playerMarkers = clusterGroup('players');
+    OpenMap.addLayer(serverMarkers);
+    OpenMap.addLayer(playerMarkers);
 }
 
 function escHtml(s) {
@@ -469,7 +480,7 @@ function createServers(servers) {
     const marker = L.marker([server.lat, server.lng], { icon: s_icon })
       .bindPopup(serverCard(server), popupOpts());
 
-    markers.addLayer(marker);
+    serverMarkers.addLayer(marker);
   });
 }
 
@@ -480,10 +491,9 @@ function createPlayer(players) {
     const marker = L.marker([player.cli_lat, player.cli_lng], { icon: s_icon })
       .bindPopup(playerCard(player), popupOpts());
 
-    markers.addLayer(marker);
+    playerMarkers.addLayer(marker);
   });
 
-  OpenMap.addLayer(markers);
 }
 
 document.addEventListener('mousedown', function(event) {

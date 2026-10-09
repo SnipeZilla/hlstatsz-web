@@ -119,6 +119,10 @@
   --hitbox-model-bg:
     radial-gradient(ellipse at 50% 35%, rgba(255,77,109,.12) 0%, rgba(0,0,0,0) 60%),
     linear-gradient(180deg, rgba(20,8,26,.65), rgba(5,6,10,.80));
+
+  /* Map */
+  --map-tile-filter: invert(1) hue-rotate(200deg) brightness(.75) contrast(.9) saturate(.3);
+  --map-bg: #05060a;
 }
 .z{ color: #ff9f1c; }
 

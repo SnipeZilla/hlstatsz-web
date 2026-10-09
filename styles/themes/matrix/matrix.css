@@ -120,6 +120,10 @@
     linear-gradient(180deg, rgba(0,20,10,.65), rgba(0,0,0,.80));
   --hitbox-color-green:  #00ff66;
   --hitbox-label-green:  #7dffad;
+
+  /* Map */
+  --map-tile-filter: invert(1) hue-rotate(120deg) brightness(.75) contrast(.9) saturate(.6);
+  --map-bg: #020302;
 }
 
 .z{ color: #00ff66; }

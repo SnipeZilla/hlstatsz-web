@@ -715,3 +715,36 @@ top:0px;
     vertical-align: top;
   }
 }
+
+/* HLstats Settings (options.php) on a phone */
+@media (max-width: 600px) {
+  .hlstats-admin-table-wrap table:has(> tbody > tr > td.hlstats-main-task),
+  .hlstats-admin-table-wrap table:has(> tbody > tr > td.hlstats-main-task) > tbody,
+  .hlstats-admin-table-wrap tr:has(> td.hlstats-main-task) {
+    display: block;
+    width: 100%;
+  }
+  .hlstats-admin-table-wrap tr:has(> td.hlstats-main-task) {
+    padding: 6px 0 10px;
+    border-bottom: 1px solid rgba(128, 128, 128, .2);
+  }
+  .hlstats-admin-table-wrap tr:has(> td.hlstats-main-task) > td {
+    display: block;
+    width: auto;
+    box-sizing: border-box;
+    text-align: left;
+    border: 0;
+  }
+  .hlstats-admin-table-wrap tr:has(> td.hlstats-main-task) > td.right {
+    padding-top: 4px;
+  }
+  .hlstats-admin-table-wrap tr:has(> td.hlstats-main-task) :is(input[type="text"], input[type="password"], input[type="number"], select, textarea) {
+    max-width: 100%;
+  }
+  .hlstats-admin-table-wrap .hlstats-switch-list {
+    width: auto;
+    margin-left: 0;
+    justify-content: start;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}

@@ -121,11 +121,14 @@
   --hitbox-model-bg:
     radial-gradient(ellipse at 50% 35%, rgba(255,122,26,.10) 0%, rgba(0,0,0,0) 60%),
     linear-gradient(180deg, rgba(46,24,66,.40), rgba(0,0,0,.55));
+
+  /* Map */
+  --map-tile-filter: invert(1) hue-rotate(250deg) brightness(.8) contrast(.9) saturate(.6);
+  --map-bg: #14101f;
 }
 
 .z{ color: #ff7a1a; }
 
-/* Night sky: stars, and from 1000 px the harvest moon and the graveyard (the haunted house from 1600 px) */
 .hlstats-top{
   position: relative;
   background:

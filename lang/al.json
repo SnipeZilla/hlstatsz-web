@@ -1,7 +1,7 @@
 {
     "locale":            "sq_AL",
-    "nav.contents":      "PËRMBAJTJA",
-    "nav.sourcebans":    "SOURCEBANS",
+    "nav.contents":      "STATISTIKA",
+    "nav.sourcebans":    "BANE",
     "nav.forum":         "FORUM",
     "nav.help":          "NDIHMË",
 
@@ -124,7 +124,6 @@
     "goto.daily.awards":           "Çmimet Ditore",
     "goto.country.stats":          "Statistikat e Vendeve",
 
-    "server.tracking.stats":       "Duke ndjekur {total_pl} lojtarë (+{new_pl} lojtarë të rinj në 24h e fundit) me {total_k} vrasje (+{new_k} në 24h e fundit) dhe {total_hs} headshot ({percent_hs}%) në {servers} servera",
     "game.kpi.new":                "+{n} të rinj në 24h e fundit",
     "game.kpi.day":                "+{n} në 24h e fundit",
     "game.kpi.hs":                 "{n}% e vrasjeve",
@@ -142,7 +141,6 @@
     "player.tab4":                 "Harta & Servera",
     "player.tab5":                 "Statistika Vrasjesh",
 
-    "player.profile":              "Profili i Lojtarit",
     "statistics.summary":          "Përmbledhja e Statistikave",
     "player.location":             "Vendndodhjet e Lojtarëve",
     "current.rank":                "Grada aktuale",
@@ -166,7 +164,6 @@
     "awards.tab3":                 "Gradat",
     "awards.tab4":                 "Distinktivë",
 
-    "contents.stats":              "{players} lojtarë dhe {clans} klane të renditur në {games} lojëra në {servers} servera me {kills} vrasje.",
     "contents.last_kill":          "Vrasja e fundit {date}",
     "contents.realtime":           "Të gjitha statistikat gjenerohen në <strong>Kohë Reale</strong>.",
     "contents.history":            "Historia e ngjarjeve ruhet për {days} ditët e fundit të aktivitetit të çdo lojtari.",
@@ -180,7 +177,6 @@
     "not.enough.data":           "Të dhëna të pamjaftueshme",
     "unknown":                   "(E panjohur)",
     "none":                      "(Asnjë)",
-    "not.specified":             "(E paspecifikuar)",
     "loading":                   "Po ngarkohet...",
 
     "pagination":                "Duke shfaqur {from} deri {limit} nga {total} hyrje",
@@ -212,9 +208,6 @@
     "last.connect":              "Lidhja e fundit:",
     "last.ping":                 "Pingu i fundit:",
     "last.ping.value":           "{ping} ms (Vonesa: {latency} ms)",
-    "favorite.server":           "Serveri i preferuar:",
-    "favorite.map":              "Harta e preferuar:",
-    "favorite.weapon":           "Arma e preferuar:",
     "favorites":                 "Të preferuarat",
     "player.recent":             "{value} në {days} ditët e fundit",
     "copy.steamid":              "Kopjo Steam ID",
@@ -238,7 +231,6 @@
     "suicides":                  "Vetëvrasje:",
     "teammate.kills":            "Vrasje të shokëve të skuadrës:",
     "weapon.accuracy":           "Saktësia e Armës:",
-    "player.history":            "Historia e {name}:",
     "events":                    "Ngjarje",
     "sessions":                  "Sesione",
     "awards":                    "Çmime",
@@ -386,7 +378,6 @@
     "chart.headshots":           "HEADSHOTS",
     "chart.act_slots":           "SLOTS_AKT",
     "chart.max_slots":           "MAX_SLOTS",
-    "chart.kills_hs":            "KILLS_HS",
     "chart.skill":               "SKILL",
     "chart.deaths":              "DEATHS",
     "chart.time_min":            "KOHË",
@@ -395,7 +386,6 @@
     "chart.new_players_24h":     "Lojtarë të rinj 24h e fundit:",
     "chart.fps":                 "FPS",
     "chart.players_kills_hs":    "Kills / Headshots",
-    "chart.kills_deaths_hs":     "Kills / Deaths / HS",
     "chart.slots":               "Slots",
 
     "sb.nav.dashboard":           "Paneli",
@@ -412,7 +402,7 @@
     "sb.me.past":                 "Bane të mëparshme: {n}",
     "sb.me.banned":               "Bane aktive ndaj teje: {n}",
     "sb.me.blocked":              "Bllokime aktive ndaj teje: {n}",
-    "sb.title.stats":             "Statistika të Përgjithshme",
+    "sb.title.stats":             "Statistikat e ndalimeve",
     "sb.title.latest":            "Aktiviteti i Fundit",
     "sb.title.bans":              "Bane",
     "sb.title.comms":             "Bllokimet e Komunikimit",

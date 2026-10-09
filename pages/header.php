@@ -156,18 +156,17 @@ $currentMode = $mode ?? $game ?? '';
       </a>
 
       <nav class="hlstats-topnav">
-        <a class="hlstats-navlink<?= active(['contents'], $currentMode) ?>" href="<?= $g_options['scripturl'] ?>"><?= t('nav.contents') ?></a>
+        <a class="hlstats-navlink<?= in_array($currentMode, array('sourcebans', 'matches'), true) ? '' : ' active' ?>" href="<?= $g_options['scripturl'] ?>"><?= t('nav.contents') ?></a>
         <?php
         if ($g_options['Sourcebans_Site']) {
-          echo '<a class="hlstats-navlink'.active(['sourcebans'], $currentMode).'" href="?mode=sourcebans">SOURCEBANS</a></li>';
+          echo '<a class="hlstats-navlink'.active(['sourcebans'], $currentMode).'" href="?mode=sourcebans">'.t('nav.sourcebans').'</a>';
         } else if ($g_options['sourcebans_address']) {
-          echo '<a class="hlstats-navlink" href="'. $g_options['sourcebans_address'] . '" target="_blank">SOURCEBANS</a></li>';
+          echo '<a class="hlstats-navlink" href="'. $g_options['sourcebans_address'] . '" target="_blank">'.t('nav.sourcebans').'</a>';
         }
         if ($g_options['forum_address']) {
           echo '<a class="hlstats-navlink" href="' . $g_options['forum_address'] . '">' . t('nav.forum') . '</a>';
         }
         ?>
-        <a class="hlstats-navlink<?= active(['help'], $currentMode) ?>" href="<?= $g_options['scripturl'] ?>?mode=help"><?= t('nav.help') ?></a>
       </nav>
       <div class="hlstats-topright">
         <?php if (count($langOptions) > 1) { ?>

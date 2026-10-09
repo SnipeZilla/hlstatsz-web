@@ -1,7 +1,7 @@
 {
     "locale":            "de_DE",
-    "nav.contents":      "INHALT",
-    "nav.sourcebans":    "SOURCEBANS",
+    "nav.contents":      "STATS",
+    "nav.sourcebans":    "BANS",
     "nav.forum":         "FORUM",
     "nav.help":          "HILFE",
 
@@ -124,7 +124,6 @@
     "goto.daily.awards":           "Tägliche Auszeichnungen",
     "goto.country.stats":          "Länderstatistiken",
 
-    "server.tracking.stats":       "Verfolgt {total_pl} Spieler (+{new_pl} neue Spieler in den letzten 24h) mit {total_k} Kills (+{new_k} in den letzten 24h) und {total_hs} Headshots ({percent_hs}%) auf {servers} Servern",
     "game.kpi.new":                "+{n} neue in den letzten 24h",
     "game.kpi.day":                "+{n} in den letzten 24h",
     "game.kpi.hs":                 "{n}% der Kills",
@@ -142,7 +141,6 @@
     "player.tab4":                 "Maps & Server",
     "player.tab5":                 "Kill-Stats",
 
-    "player.profile":              "Spielerprofil",
     "statistics.summary":          "Statistikübersicht",
     "player.location":             "Spielerstandorte",
     "current.rank":                "Aktueller Rang",
@@ -166,7 +164,6 @@
     "awards.tab3":                 "Ränge",
     "awards.tab4":                 "Abzeichen",
 
-    "contents.stats":              "{players} Spieler und {clans} Clans in {games} Spielen auf {servers} Servern mit {kills} Kills.",
     "contents.last_kill":          "Letzter Kill {date}",
     "contents.realtime":           "Alle Statistiken werden in <strong>Echtzeit</strong> generiert.",
     "contents.history":            "Der Ereignisverlauf wird für die letzten {days} Aktivitätstage jedes Spielers gespeichert.",
@@ -180,7 +177,6 @@
     "not.enough.data":            "Nicht genug Daten",
     "unknown":                    "(Unbekannt)",
     "none":                       "(Keine)",
-    "not.specified":              "(Nicht angegeben)",
     "loading":                    "Wird geladen...",
 
     "pagination":                 "Zeige {from} bis {limit} von {total} Einträgen",
@@ -212,9 +208,6 @@
     "last.connect":               "Letzte Verbindung:",
     "last.ping":                  "Letzter Ping:",
     "last.ping.value":            "{ping} ms (Latenz: {latency} ms)",
-    "favorite.server":            "Lieblingsserver:",
-    "favorite.map":               "Lieblingsmap:",
-    "favorite.weapon":            "Lieblingswaffe:",
     "favorites":                  "Favoriten",
     "player.recent":              "{value} in den letzten {days} Tagen",
     "copy.steamid":               "Steam-ID kopieren",
@@ -238,7 +231,6 @@
     "suicides":                   "Suizide:",
     "teammate.kills":             "Teamkills:",
     "weapon.accuracy":            "Waffengenauigkeit:",
-    "player.history":             "Verlauf von {name}:",
     "events":                     "Ereignisse",
     "sessions":                   "Sitzungen",
     "awards":                     "Auszeichnungen",
@@ -386,7 +378,6 @@
     "chart.headshots":            "HEADSHOTS",
     "chart.act_slots":            "SLOTS_AKT",
     "chart.max_slots":            "SLOTS_MAX",
-    "chart.kills_hs":             "KILLS_HS",
     "chart.skill":                "SKILL",
     "chart.deaths":               "TODE",
     "chart.time_min":             "ZEIT",
@@ -395,7 +386,6 @@
     "chart.new_players_24h":      "Neue Spieler letzte 24h:",
     "chart.fps":                  "FPS",
     "chart.players_kills_hs":     "Kills / Headshots",
-    "chart.kills_deaths_hs":      "Kills / Tode / HS",
     "chart.slots":                "Slots",
 
     "sb.nav.dashboard":           "Übersicht",
@@ -412,7 +402,7 @@
     "sb.me.past":                 "Frühere Bans: {n}",
     "sb.me.banned":               "Aktive Bans gegen dich: {n}",
     "sb.me.blocked":              "Aktive Comm-Sperren gegen dich: {n}",
-    "sb.title.stats":             "Allgemeine Statistiken",
+    "sb.title.stats":             "Bannstatistik",
     "sb.title.latest":            "Letzte Aktivitäten",
     "sb.title.bans":              "Bans",
     "sb.title.comms":             "Comm-Sperren",

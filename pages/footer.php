@@ -65,6 +65,8 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
               echo '<a href="' . htmlspecialchars($url, ENT_QUOTES) . '" target="_blank">' . htmlspecialchars($label, ENT_QUOTES) . '</a>';
           }
       }
+      // Help: the last link
+      echo '<a href="' . htmlspecialchars($g_options['scripturl'], ENT_QUOTES) . '?mode=help">' . htmlspecialchars(mb_convert_case(t('nav.help'), MB_CASE_TITLE, 'UTF-8')) . '</a>';
       // While the admin has a seasonal theme on, each visitor can switch it off (header.php keeps it in a cookie)
       if (($seasonal = themeSeasonal()) !== '') {
           $on = themeCurrent() === $seasonal;

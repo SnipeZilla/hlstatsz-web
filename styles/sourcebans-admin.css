@@ -1,6 +1,5 @@
 /* =======================
    SourceBans administration (pages loaded for signed-in SourceBans admins only)
-   Colors: --sba-accent, --sba-danger, --sba-ok, --sba-warn, --sba-gold in :root (hlstatsz.css)
    ======================= */
 .sba [hidden], .sba-dialog [hidden]{ display: none !important; }
 .sba-muted{ opacity: .65; font-size: 12px; }

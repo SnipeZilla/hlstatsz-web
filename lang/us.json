@@ -1,7 +1,7 @@
 {
     "locale":            "en_US",
-    "nav.contents":      "CONTENTS",
-    "nav.sourcebans":    "SOURCEBANS",
+    "nav.contents":      "STATS",
+    "nav.sourcebans":    "BANS",
     "nav.forum":         "FORUM",
     "nav.help":          "HELP",
 
@@ -124,7 +124,6 @@
     "goto.daily.awards":           "Daily Awards",
     "goto.country.stats":          "Country Statistics",
 
-    "server.tracking.stats":       "Tracking {total_pl} players (+{new_pl} new players last 24h) with {total_k} kills (+{new_k} last 24h) and {total_hs} headshots ({percent_hs}%) on {servers} servers",
     "game.kpi.new":                "+{n} new in the last 24h",
     "game.kpi.day":                "+{n} in the last 24h",
     "game.kpi.hs":                 "{n}% of kills",
@@ -142,7 +141,6 @@
     "player.tab4":                 "Maps & Servers",
     "player.tab5":                 "Killstats",
 
-    "player.profile":              "Player Profile",
     "statistics.summary":          "Statistics Summary",
     "player.location":             "Player Locations",
     "current.rank":                "Current rank",
@@ -166,7 +164,6 @@
     "awards.tab3":                 "Ranks",
     "awards.tab4":                 "Ribbons",
 
-    "contents.stats":              "{players} players and {clans} clans ranked in {games} games on {servers} servers with {kills} kills.",
     "contents.last_kill":          "Last Kill {date}",
     "contents.realtime":           "All statistics are generated in <strong>Real-Time</strong>.",
     "contents.history":            "Event history is kept for each player's most recent {days} days of activity.",
@@ -180,7 +177,6 @@
     "not.enough.data":           "Not enough data",
     "unknown":                   "(Unknown)",
     "none":                      "(None)",
-    "not.specified":             "(Not Specified)",
     "loading":                   "Loading...",
 
     "pagination":                "Showing {from} to {limit} of {total} entries",
@@ -212,9 +208,6 @@
     "last.connect":              "Last Connect:",
     "last.ping":                 "Last Ping:",
     "last.ping.value":           "{ping} ms (Latency: {latency} ms)",
-    "favorite.server":           "Favorite Server:",
-    "favorite.map":              "Favorite Map:",
-    "favorite.weapon":           "Favorite Weapon:",
     "favorites":                 "Favorites",
     "player.recent":             "{value} in the last {days} days",
     "copy.steamid":              "Copy Steam ID",
@@ -238,7 +231,6 @@
     "suicides":                  "Suicides:",
     "teammate.kills":            "Teammate Kills:",
     "weapon.accuracy":           "Weapon Accuracy:",
-    "player.history":            "{name}'s History:",
     "events":                    "Events",
     "sessions":                  "Sessions",
     "awards":                    "Awards",
@@ -386,7 +378,6 @@
     "chart.headshots":           "HEADSHOTS",
     "chart.act_slots":           "ACT_SLOTS",
     "chart.max_slots":           "MAX_SLOTS",
-    "chart.kills_hs":            "KILLS_HS",
     "chart.skill":               "SKILL",
     "chart.deaths":              "DEATHS",
     "chart.time_min":            "TIME",
@@ -395,7 +386,6 @@
     "chart.new_players_24h":     "New Players Last 24h:",
     "chart.fps":                 "FPS",
     "chart.players_kills_hs":    "Kills / Headshots",
-    "chart.kills_deaths_hs":     "Kills / Deaths / HS",
     "chart.slots":               "Slots",
 
     "sb.nav.dashboard":           "Dashboard",
@@ -412,7 +402,7 @@
     "sb.me.past":                 "Past bans: {n}",
     "sb.me.banned":               "Active bans on you: {n}",
     "sb.me.blocked":              "Active comm blocks on you: {n}",
-    "sb.title.stats":             "General Statistics",
+    "sb.title.stats":             "Ban Statistics",
     "sb.title.latest":            "Recent Activity",
     "sb.title.bans":              "Bans",
     "sb.title.comms":             "Comm Blocks",
