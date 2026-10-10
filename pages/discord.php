@@ -38,13 +38,18 @@ include (PAGE_PATH . '/voicecomm_serverlist.php');
 	}
 	if (!is_array($widget)) {
 		$widget_url  = 'https://discord.com/api/guilds/' . urlencode($guild_id) . '/widget.json';
-		$ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true]]);
+		// The certificates HLstatsZ checks https with (hlstatsSsl()): without them PHP on Windows fails now and then
+		$ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true], 'ssl' => hlstatsSsl()]);
 		$widget_json = @file_get_contents($widget_url, false, $ctx);
 		if ($widget_json !== false) {
 			$widget = json_decode($widget_json, true);
 			if (is_array($widget)) {
 				@file_put_contents($dc_cache_file, json_encode($widget), LOCK_EX);
 			}
+		}
+		// Discord did not answer: what it said last time
+		if (!is_array($widget) && is_file($dc_cache_file)) {
+			$widget = json_decode(file_get_contents($dc_cache_file), true);
 		}
 	}
 

@@ -27,7 +27,7 @@ $game_escaped=$db->escape($game);
 
 $db->query("
     SELECT
-        for_PlayerActions,for_PlayerPlayerActions, description
+        for_PlayerActions,for_PlayerPlayerActions, description, reward_player
     FROM
         hlstats_Actions
     WHERE
@@ -171,23 +171,29 @@ if (!is_ajax() || $_GET['ajax'] == 'actioninfo') {
 			) AS combined
 		");
 		list($totalact) = $db->fetch_row($resultCount);
-        
+
+    // The rows of this page, read first: the tiles say how many players there are
+    $rows = array();
+    while ($res = $db->fetch_array($result)) {
+        $rows[] = $res;
+    }
 
     if (!is_ajax()) {
         printSectionTitle(t('title.action.details'));
-        echo '<div class="hlstats-cards-grid">
-        <section class="hlstats-section hlstats-card">
-        <div class="hlstats-card-foot">
-            <span class="hlstats-name">'.t('action.details',
-            ["{action}" =>  '<strong>'.$act_name.'</strong>',
-             "{total}" => '<strong>'.nf(intval($totalact)).'</strong>']).'
-        </div>
-        </section>
-        </div>
-        <div id="actioninfo">';
+
+        // Headline tiles, as on the General Statistics: the action, how often, by how many players, its reward
+        $reward = (int) ($actiondata['reward_player'] ?? 0);
+        // The action on a row of its own, then its numbers
+        kpiTiles(array(array(t('th.action'), htmlspecialchars($act_name), '')));
+        kpiTiles(array(
+            array(t('th.achieved'), nf(intval($totalact)), ''),
+            array(t('players'), nf($rows ? $rows[0]['total_rows'] : 0), ''),
+            array(t('th.reward'), ($reward > 0 ? '+' : '') . nf($reward), strtolower(t('th.points'))),
+        ));
+        echo '<div id="actioninfo">';
    }
 
-if ($db->num_rows($result)) {
+if ($rows) {
 
     echo '<div  class="responsive-table">
         <table class="maps-table">
@@ -198,7 +204,7 @@ if ($db->num_rows($result)) {
             <th class="hide-1'.isSorted('obj_bonus',$sort,$sortorder).'">'.headerUrl('obj_bonus',['obj_sort','obj_sortorder'],'actioninfo').t('th.skill.bonus.total').'</a></th>
         </tr>';
 
-    while ($res = $db->fetch_array($result)) {
+    foreach ($rows as $res) {
         $total = $res['total_rows'];
         echo '<tr>
             <td class="nowrap right">'.$res['rank_position'].'</td>
@@ -264,7 +270,8 @@ if (!is_ajax() || $_GET['ajax'] == 'vpage') {
             SELECT
                 *,
                 RANK() OVER (ORDER BY obj_count DESC, obj_bonus DESC) AS rank_position,
-                COUNT(*) OVER () AS total_rows
+                COUNT(*) OVER () AS total_rows,
+                SUM(obj_count) OVER () AS total_count
             FROM victim
         )
         SELECT *
@@ -277,18 +284,21 @@ if (!is_ajax() || $_GET['ajax'] == 'vpage') {
     ");
 
 
-if ($db->num_rows($result)) {
+    $rows = array();
+    while ($res = $db->fetch_array($result)) {
+        $rows[] = $res;
+    }
+
+if ($rows) {
     if (empty($_GET['ajax'])) {
         printSectionTitle(t('title.action.victim.details'));
 
-        echo '<div class="hlstats-cards-grid">
-        <section class="hlstats-section hlstats-card">
-        <div class="hlstats-card-foot">
-            <span class="hlstats-name">Victims of '.$act_name.'</span>
-        </div>
-        </section>
-        </div>
-        <div id="vpage">';
+        // Headline tiles: how many players it was done to, and how often
+        kpiTiles(array(
+            array(t('players'), nf($rows[0]['total_rows']), ''),
+            array(t('th.times.victimized'), nf($rows[0]['total_count']), ''),
+        ));
+        echo '<div id="vpage">';
     }
 
     echo '<div  class="responsive-table">
@@ -304,7 +314,7 @@ if ($db->num_rows($result)) {
                 headerUrl('obj_bonus',['vpage_sort','vpage_sortorder'],'vpage').t('th.skill.bonus.total').'</a></th>
         </tr>';
 
-    while ($res = $db->fetch_array($result)) {
+    foreach ($rows as $res) {
         $total = $res['total_rows'];
         echo '<tr>
             <td class="nowrap right">'.$res['rank_position'].'</td>

@@ -20,6 +20,13 @@ require_once __DIR__ . '/team_colors.php';
 $players = array();
 
 if ( $type ==  "main" ) {
+    $gameIcons = array();
+    $db->query("SELECT code, realgame FROM hlstats_Games");
+    foreach ($db->fetch_row_set() ?: array() as $g) {
+        $image = getImage('/games/' . $g['code'] . '/game') ?: getImage('/games/' . $g['realgame'] . '/game');
+        $gameIcons[$g['code']] = $image ? $image['url'] : IMAGE_PATH . '/game.png';
+    }
+
     // Servers
     $filter  = $mode == 'servers' ? "serverId='$server_id'" : "game='$game'";
     $filter2 = $mode == 'servers' ? "s.serverId='$server_id'" : "s.game='$game'";
@@ -80,6 +87,7 @@ if ( $type ==  "main" ) {
                            'act_map'     => $row['act_map'],
                            'act_players' => $row['act_players'],
                            'max_players' => $row['max_players'],
+                           'game_icon'   => $gameIcons[$row['game']] ?? '',
                            'bg'          => BgColor("server"));
 
     }
@@ -107,6 +115,7 @@ if ( $type ==  "main" ) {
                         l.connected,
 
                         s.name AS server_name,
+                        s.game,
                         IFNULL(NULLIF(s.publicaddress, ''), CONCAT(s.address, ':', s.port)) AS server_addr,
                         s.act_map,
                         s.act_players,
@@ -146,6 +155,7 @@ if ( $type ==  "main" ) {
                         l.connected,
 
                         s.name AS server_name,
+                        s.game,
                         IFNULL(NULLIF(s.publicaddress, ''), CONCAT(s.address, ':', s.port)) AS server_addr,
                         s.act_map,
                         s.act_players,
@@ -180,6 +190,7 @@ if ( $type ==  "main" ) {
                            'cli_country' => $row['cli_country'],
                            'cli_flag'    => $row['cli_flag'],
                            'server_name' => $row['server_name'],
+                           'game_icon'   => $gameIcons[$row['game']] ?? '',
                            'playerId'    => $row['player_id'],
                            'name'        => $row['name'],
                            'team'        => $row['team'],

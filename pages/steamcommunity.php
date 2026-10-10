@@ -37,10 +37,13 @@ if (is_file($sc_cache_file) && (time() - filemtime($sc_cache_file)) < $sc_cache_
 	$sc_xml_raw = file_get_contents($sc_cache_file);
 } else {
 	$url = 'https://steamcommunity.com/groups/' . urlencode($group_slug) . '/memberslistxml/?xml=1';
-	$ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'HLstatsZ/1.0']]);
+	$ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'HLstatsZ/1.0'], 'ssl' => hlstatsSsl()]);
 	$sc_xml_raw = @file_get_contents($url, false, $ctx);
 	if ($sc_xml_raw !== false) {
 		@file_put_contents($sc_cache_file, $sc_xml_raw, LOCK_EX);
+	} elseif (is_file($sc_cache_file)) {
+		// Steam did not answer: what it said last time
+		$sc_xml_raw = file_get_contents($sc_cache_file);
 	}
 }
 

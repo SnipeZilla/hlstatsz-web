@@ -188,7 +188,7 @@ function sbSteamApi($method, array $params)
 	if (!defined('STEAM_API') || !preg_match('/^[A-F0-9]{32}$/i', (string) STEAM_API)) {
 		return null;
 	}
-	$context = stream_context_create(array('http' => array('timeout' => 5, 'ignore_errors' => true)));
+	$context = stream_context_create(array('http' => array('timeout' => 5, 'ignore_errors' => true), 'ssl' => function_exists('hlstatsSsl') ? hlstatsSsl() : array()));
 	$body    = @file_get_contents('https://api.steampowered.com/' . $method . '/?' . http_build_query(array('key' => STEAM_API) + $params), false, $context);
 	return $body ? json_decode($body, true) : null;
 }

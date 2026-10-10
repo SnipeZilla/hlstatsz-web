@@ -189,6 +189,7 @@ $scripturl = $g_options['scripturl'];
                 <span class="hlstats-profile-label"><?= tLabel('activity') ?></span>
                 <span class="hlstats-profile-big"><?= max(0, (int) $playerdata['activity']) ?>%</span>
                 <meter min="0" max="100" low="25" high="50" optimum="75" value="<?= max(0, (int) $playerdata['activity']) ?>"></meter>
+                <span class="hlstats-kpi-note" data-tooltip="<?= htmlspecialchars(t('th.connection.time'), ENT_QUOTES) ?>"><?= TimeStamp(max(0, (int) $playerdata['connection_time'])) ?></span>
             </div>
         </div>
     </div>

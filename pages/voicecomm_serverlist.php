@@ -156,13 +156,18 @@ For current support and updates:
 					}
 					if (!is_array($dc_widget)) {
 						$widget_url  = 'https://discord.com/api/guilds/' . urlencode($dc_server['addr']) . '/widget.json';
-						$ctx = stream_context_create(['http' => ['timeout' => 3, 'ignore_errors' => true]]);
+						// The certificates HLstatsZ checks https with (hlstatsSsl()): without them PHP on Windows fails now and then
+						$ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true], 'ssl' => hlstatsSsl()]);
 						$widget_json = @file_get_contents($widget_url, false, $ctx);
 						if ($widget_json !== false) {
 							$dc_widget = json_decode($widget_json, true);
 							if (is_array($dc_widget)) {
 								@file_put_contents($dc_cache_file, json_encode($dc_widget), LOCK_EX);
 							}
+						}
+						// Discord did not answer: what it said last time
+						if (!is_array($dc_widget) && is_file($dc_cache_file)) {
+							$dc_widget = json_decode(file_get_contents($dc_cache_file), true);
 						}
 					}
 					if (is_array($dc_widget)) {
@@ -211,10 +216,12 @@ For current support and updates:
 						$sc_xml_raw = file_get_contents($sc_cache_file);
 					} else {
 						$url = 'https://steamcommunity.com/groups/' . urlencode($sc_slug) . '/memberslistxml/?xml=1';
-						$ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'HLstatsZ/1.0']]);
+						$ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'HLstatsZ/1.0'], 'ssl' => hlstatsSsl()]);
 						$sc_xml_raw = @file_get_contents($url, false, $ctx);
 						if ($sc_xml_raw !== false) {
 							@file_put_contents($sc_cache_file, $sc_xml_raw, LOCK_EX);
+						} elseif (is_file($sc_cache_file)) {
+							$sc_xml_raw = file_get_contents($sc_cache_file);
 						}
 					}
 

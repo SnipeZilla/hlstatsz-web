@@ -1381,10 +1381,11 @@ th:hover::after{
 }
 .hlstats-kpi-value{
   margin: 4px 0 2px;
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 600;
   line-height: 1.15;
   font-variant-numeric: proportional-nums;
+  word-break: break-all;
 }
 .hlstats-kpi-note{
   font-size: 13px;
@@ -1526,7 +1527,7 @@ th:hover::after{
   opacity: .7;
 }
 .hlstats-profile-big{
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
   line-height: 1.15;
   white-space: nowrap;

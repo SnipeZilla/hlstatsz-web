@@ -17,7 +17,8 @@ For current support and updates:
 function steamAuthScheme()
 {
     return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
-        (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443)
+        (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443) ||
+        strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https'
         ? 'https://'
         : 'http://';
 }
@@ -39,7 +40,7 @@ function steamAuthFilteredQuery()
     }
 
     foreach (array_keys($queryArray) as $key) {
-        if (strpos($key, 'openid_') === 0 || $key === 'signout') {
+        if (strpos($key, 'openid_') === 0 || strpos($key, 'openid.') === 0 || $key === 'signout') {
             unset($queryArray[$key]);
         }
     }
@@ -90,11 +91,12 @@ function steamAuthIsTrustedReturnTo($url)
         parse_str($expectedParts['query'], $expectedQuery);
     }
 
-    $returnToPort = isset($returnToParts['port']) ? (int) $returnToParts['port'] : null;
-    $expectedPort = isset($expectedParts['port']) ? (int) $expectedParts['port'] : null;
+    // http or https, and the default ports, are the same page: a proxy may say one and the visitor see the other
+    $port = fn($parts) => isset($parts['port']) && !in_array((int) $parts['port'], array(80, 443), true) ? (int) $parts['port'] : null;
+    $returnToPort = $port($returnToParts);
+    $expectedPort = $port($expectedParts);
 
-    return strtolower($returnToParts['scheme'] ?? '') === strtolower($expectedParts['scheme'] ?? '')
-        && strtolower($returnToParts['host'] ?? '') === strtolower($expectedParts['host'] ?? '')
+    return strtolower($returnToParts['host'] ?? '') === strtolower($expectedParts['host'] ?? '')
         && $returnToPort === $expectedPort
         && ($returnToParts['path'] ?? '/') === ($expectedParts['path'] ?? '/')
         && steamAuthNormalizeQuery($returnToQuery) === steamAuthNormalizeQuery($expectedQuery);
@@ -153,7 +155,13 @@ function steamAuthFetch($url, $context = null, &$responseHeaders = [], $attempts
 {
 
     for ($attempt = 1; $attempt <= $attempts; $attempt++) {
-        $result = @file_get_contents($url, false, $context);
+        $warnings = [];
+        set_error_handler(function ($no, $text) use (&$warnings) {
+            $warnings[] = (string) $text;
+            return true;
+        });
+        $result = file_get_contents($url, false, $context);
+        restore_error_handler();
         $responseHeaders = function_exists('http_get_last_response_headers')
             ? (http_get_last_response_headers() ?? [])
             : ($http_response_header ?? []);
@@ -163,43 +171,42 @@ function steamAuthFetch($url, $context = null, &$responseHeaders = [], $attempts
         }
 
         $host = parse_url($url, PHP_URL_HOST);
-        $error = error_get_last();
-        error_log(sprintf('HLstatsZ Steam sign-in: %s unreachable (attempt %d/%d): %s',
-            $host, $attempt, $attempts, str_replace($url, $host, $error['message'] ?? 'unknown error')));
+        if (defined('DEBUG') && DEBUG === true && $attempt == $attempts) {
+            error_log(sprintf('HLstatsZ Steam sign-in: %s unreachable (attempt %d/%d): %s',
+                $host, $attempt, $attempts, str_replace($url, $host, $warnings ? implode(' / ', array_unique($warnings)) : 'unknown error')));
+        }
     }
 
     return false;
 }
 
-$hasSteamAPI = defined('STEAM_API') && is_string(STEAM_API) && preg_match('/\A[a-f0-9]{32}\z/i', STEAM_API) === 1;
-
-if ( isset($_GET['openid_assoc_handle']) ) {
-    $returnToUrl = steamAuthReturnToUrl();
-    $claimedId = $_GET['openid_claimed_id'] ?? '';
-    $returnTo = $_GET['openid_return_to'] ?? '';
-    $isTrustedReturnTo = steamAuthIsTrustedReturnTo($returnTo);
-
-    if (!$isTrustedReturnTo || empty($_GET['openid_signed']) || empty($_GET['openid_sig'])) {
-        $returnTo = $returnToUrl;
+function steamAuthCallback($hasSteamAPI)
+{
+    if (!$hasSteamAPI) {
+        return 'no Steam API key (STEAM_API in config.php)';
+    }
+    $claimedId = (string) ($_GET['openid_claimed_id'] ?? '');
+    $returnTo  = (string) ($_GET['openid_return_to'] ?? '');
+    $signed    = explode(',', (string) ($_GET['openid_signed'] ?? ''));
+    if (empty($_GET['openid_sig']) || !in_array('claimed_id', $signed, true) || !in_array('return_to', $signed, true)) {
+        return 'the answer of Steam is not signed';
+    }
+    if (!steamAuthIsTrustedReturnTo($returnTo)) {
+        return 'the answer of Steam is for another page (' . $returnTo . ', expected ' . steamAuthReturnToUrl() . ')';
     }
 
-    // openid
+    // Steam checks that it gave this answer, once (a page loaded again is refused)
     $params = [
-        'openid.assoc_handle' => $_GET['openid_assoc_handle'],
-        'openid.signed'       => $_GET['openid_signed'],
-        'openid.sig'          => $_GET['openid_sig'],
+        'openid.assoc_handle' => (string) ($_GET['openid_assoc_handle'] ?? ''),
+        'openid.signed'       => (string) $_GET['openid_signed'],
+        'openid.sig'          => (string) $_GET['openid_sig'],
         'openid.ns'           => 'http://specs.openid.net/auth/2.0',
     ];
-
-    $signed = explode(',', $_GET['openid_signed']);
-    foreach($signed as $item) {
-        $key = 'openid_'.str_replace('.', '_', $item);
-        if (!isset($_GET[$key])) {
-            continue;
+    foreach ($signed as $item) {
+        $key = 'openid_' . str_replace('.', '_', $item);
+        if (isset($_GET[$key]) && is_string($_GET[$key])) {
+            $params['openid.' . $item] = $_GET[$key];
         }
-
-        $val = $_GET[$key];
-        $params['openid.'.$item] = stripslashes($val);
     }
     $params['openid.mode'] = 'check_authentication';
 
@@ -215,54 +222,59 @@ if ( isset($_GET['openid_assoc_handle']) ) {
             'content' => $data,
             'timeout' => 10,
         ],
+        'ssl' => hlstatsSsl(),
     ]);
-
-    // Steam Validation:
     $result = steamAuthFetch('https://steamcommunity.com/openid/login', $context);
-    $url = $returnTo;
-
-    if ( $isTrustedReturnTo && preg_match("/is_valid:true$/",$result) ) {
-
-        preg_match('#^https://steamcommunity.com/openid/id/([0-9]{17,25})#', $claimedId, $matches);
-        $steamID64 = !empty($matches[1]) && is_numeric($matches[1]) ? $matches[1] : 0;
-        
-        if ($steamID64 > 0) {
-            $apiContext = stream_context_create(['http' => ['timeout' => 10]]);
-            $apiResult = steamAuthFetch('https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key='.STEAM_API.'&steamids='.$steamID64, $apiContext, $responseHeaders);
-
-            if ($apiResult === false) {
-                foreach ($responseHeaders as $header) {
-                    if (preg_match('/^HTTP\/\S+\s+(401|403)/', $header)) {
-                        error("STEAM_API &rarr; invalid_key");
-                    }
-                }
-            }
-
-            $response = json_decode($apiResult, true);
-
-            if ( !empty($response['response']['players'][0]['steamid']) ) {
-
-                $steam = array('ID64' => $response['response']['players'][0]['steamid'],
-                               'avatar'  => $response['response']['players'][0]['avatarfull'],
-                               'sig'     => '');
-
-                $steam['sig'] = steamAuthSignPayload($steam);
-
-                if ( $steam['ID64'] === $steamID64 ) {
-
-                    clearAuthSession(false);
-                    session_regenerate_id(true);
-                    $_SESSION['ID64']=$steamID64;
-                    myCookie('steam', steamAuthCookieValue($steam), time()+(24*3600));
-                    header("Location: $url");
-                    exit;
-                }
-
-            }
-
-        }
-
+    if ($result === false) {
+        return 'Steam did not answer';
     }
+    if (!preg_match('/^is_valid\s*:\s*true\s*$/m', (string) $result)) {
+        return 'Steam did not confirm the sign-in (an old or reused answer)';
+    }
+    if (!preg_match('#^https?://steamcommunity\.com/openid/id/(7656119[0-9]{10})$#', $claimedId, $matches)) {
+        return 'no Steam account in the answer';
+    }
+    $steamID64 = $matches[1];
+
+    // The avatar of the player: Steam's own default one when the Steam Web API does not answer
+    $apiContext = stream_context_create(['http' => ['timeout' => 10], 'ssl' => hlstatsSsl()]);
+    $apiResult  = steamAuthFetch('https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key='.STEAM_API.'&steamids='.$steamID64, $apiContext, $responseHeaders);
+    if ($apiResult === false) {
+        foreach ($responseHeaders as $header) {
+            if (preg_match('/^HTTP\/\S+\s+(401|403)/', $header)) {
+                error("STEAM_API &rarr; invalid_key");
+            }
+        }
+    }
+    $player = json_decode((string) $apiResult, true)['response']['players'][0] ?? [];
+    $avatar = is_string($player['avatarfull'] ?? null) && preg_match('#^https://#', $player['avatarfull'])
+            ? $player['avatarfull'] : 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg';
+    if (isset($player['steamid']) && (string) $player['steamid'] !== $steamID64) {
+        return 'Steam gave another account';
+    }
+
+    $steam = array('ID64' => $steamID64, 'avatar' => $avatar, 'sig' => '');
+    $steam['sig'] = steamAuthSignPayload($steam);
+
+    clearAuthSession(false);
+    session_regenerate_id(true);
+    $_SESSION['ID64'] = $steamID64;
+    myCookie('steam', steamAuthCookieValue($steam), time()+(24*3600));
+    header('Location: ' . steamAuthReturnToUrl());
+    exit;
+}
+
+$hasSteamAPI = defined('STEAM_API') && is_string(STEAM_API) && preg_match('/\A[a-f0-9]{32}\z/i', STEAM_API) === 1;
+
+// Back from Steam: signed in, or back to the same page without the answer of Steam in its address
+if ( isset($_GET['openid_mode']) || isset($_GET['openid_assoc_handle']) ) {
+    if (($_GET['openid_mode'] ?? '') !== 'cancel') {
+        $why = steamAuthCallback($hasSteamAPI);
+        error_log('HLstatsZ Steam sign-in failed: ' . $why);
+        $_SESSION['steam_signin_failed'] = 1;
+    }
+    header('Location: ' . steamAuthReturnToUrl());
+    exit;
 
 } else if (!empty($_GET['signout'])) {
     clearAuthSession();
@@ -302,22 +314,21 @@ if ( isset($_GET['openid_assoc_handle']) ) {
     
 }
 
-$settings = [
-            'apikey'     => STEAM_API,
-            'domainname' => $_SERVER['SERVER_NAME'],
-            'loginpage'  => getAddress(),
-            ];
-
+// Steam sends the player back to this page, as it is without a sign-in or a sign-out in its address;
 $openid = [
     'openid.ns'         => 'http://specs.openid.net/auth/2.0',
     'openid.mode'       => 'checkid_setup',
-    'openid.return_to'  => $settings['loginpage'],
-    'openid.realm'      => getAddress(),
+    'openid.return_to'  => steamAuthReturnToUrl(),
+    'openid.realm'      => steamAuthScheme() . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/',
     'openid.identity'   => 'http://specs.openid.net/auth/2.0/identifier_select',
     'openid.claimed_id' => 'http://specs.openid.net/auth/2.0/identifier_select',
 ];
 
 $steamurl='https://steamcommunity.com/openid/login'.'?'.http_build_query($openid, '', '&');
-return $hasSteamAPI ? "<a href=\"$steamurl\">Sign in with Steam</a>" : '';
+// A sign-in that failed just before: said once, on the link
+$failed = !empty($_SESSION['steam_signin_failed']);
+unset($_SESSION['steam_signin_failed']);
+return $hasSteamAPI ? '<a href="' . htmlspecialchars($steamurl, ENT_QUOTES, 'UTF-8') . '"'
+    . ($failed ? ' class="is-failed" data-tooltip="' . htmlspecialchars(t('signin.failed'), ENT_QUOTES, 'UTF-8') . '"' : '') . '>Sign in with Steam</a>' : '';
 
 ?>

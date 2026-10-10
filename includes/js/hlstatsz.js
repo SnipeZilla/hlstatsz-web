@@ -372,6 +372,10 @@ function popupOpts() {
   };
 }
 
+function gameIcon(url) {
+  return url ? `<img class="sb-field-icon" src="${escHtml(url)}" alt="">` : '';
+}
+
 function serverCard(server) {
   const name = decodeAndEsc(server.name);
   const city = escHtml(server.city);
@@ -383,7 +387,7 @@ function serverCard(server) {
   return `
     <div class="hlstats-map-card">
       <div class="hlstats-map-top">
-        <div class="hlstats-map-title">${name}</div>
+        <div class="hlstats-map-title">${gameIcon(server.game_icon)}${name}</div>
         <div class="hlstats-map-sub">${geocity}</div>
       </div>
 
@@ -427,7 +431,7 @@ function playerCard(player) {
           </span><a href="hlstats.php?mode=playerinfo&player=${encodeURIComponent(player.playerId)}"><span class="hlstats-name">${name}</span></a>
         </div>
         <div class="hlstats-map-sub"><span class="hlstats-flag"><img src="${flag}" onerror="this.style.display='none'"></span><span class="hlstats-name">${geocity}</span></div>
-        <div class="hlstats-map-sub">${server}</div>
+        <div class="hlstats-map-sub">${gameIcon(player.game_icon)}${server}</div>
       </div>
 
       <div class="hlstats-map-row">

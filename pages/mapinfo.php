@@ -55,7 +55,8 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
     $resultCount = $db->query("
         SELECT
             COUNT(DISTINCT hlstats_Events_Frags.killerId),
-            SUM(hlstats_Events_Frags.map='$map')
+            SUM(hlstats_Events_Frags.map='$map'),
+            SUM(hlstats_Events_Frags.headshot=1)
         FROM
             hlstats_Events_Frags,
             hlstats_Servers
@@ -65,7 +66,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
             AND hlstats_Servers.game='$game'
     ");
 
-    list($numitems, $totalkills) = $db->fetch_row($resultCount);
+    list($numitems, $totalkills, $totalheadshots) = $db->fetch_row($resultCount);
 
     $result = $db->query("
         WITH Base AS (
@@ -103,15 +104,14 @@ if (!is_ajax()) {
 ?>
 
 
-	<?php printSectionTitle(t('title.map.details')); ?>
+	<?php printSectionTitle(t('title.map.details'));
+
+    // The map on a row of its own, its picture, then its numbers
+    kpiTiles(array(array(t('th.map'), htmlspecialchars($map), '')));
+    ?>
 <div class="hlstats-cards-grid">
 <section class="hlstats-section hlstats-card">
-  <div class="hlstats-pname"><?= $map ?></div>
-  <div class="hlstats-card-foot"><?= t('map.stats', ["{kills}" => '<strong>'.nf(intval($totalkills)).'</strong>']) ?></div>
-</section>
-
-<section class="hlstats-section hlstats-card">
-<div style="margin: 0 auto;">
+<div style="margin: 0 auto; text-align:center;">
 
 <?php // figure out URL and absolute path of image
 	if ($mapimg = getImage("/games/$realgame/maps/$map"))
@@ -129,7 +129,7 @@ if (!is_ajax()) {
 	
 	if ($mapimg)
 	{
-		echo "<a href=\"" . $mapimg . "\" rel=\"boxed\" data-tooltip=\"".htmlspecialchars($map, ENT_QUOTES)."\"><img src=\"$mapimg\" alt=\"$map\" style=\"max-width:100%;\"/></a>";
+		echo "<a href=\"" . $mapimg . "\" rel=\"boxed\" data-tooltip=\"".htmlspecialchars($map, ENT_QUOTES)."\"><img src=\"$mapimg\" alt=\"$map\" style=\"max-width:min(100%, 640px);\"/></a>";
 	}
 
 	if ($g_options['map_dlurl'])
@@ -172,6 +172,11 @@ if (!is_ajax()) {
 </div>
 
 <?php
+    kpiTiles(array(
+        array(t('th.kills'), nf($totalkills), ''),
+        array(t('th.headshots'), nf($totalheadshots), $totalkills > 0 ? t('game.kpi.hs', ['{n}' => nf($totalheadshots / $totalkills * 100, 1)]) : ''),
+        array(t('players'), nf($numitems), ''),
+    ));
 }
 
         if (!is_ajax()) {

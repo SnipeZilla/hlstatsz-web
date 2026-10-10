@@ -990,4 +990,34 @@ function svgIcon(string $name, int $size = 16): string
          . ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' . ($paths[$name] ?? '') . '</svg>';
 }
 
+function hlstatsSsl()
+{
+    static $ssl = null;
+    if ($ssl !== null) {
+        return $ssl;
+    }
+    $ssl  = array('verify_peer' => true, 'verify_peer_name' => true);
+    $file = '';
+    foreach (array(ini_get('openssl.cafile'), getenv('SSL_CERT_FILE')) as $given) {
+        if (is_string($given) && $given !== '' && is_file($given) && is_readable($given)) {
+            $file = $given;
+            break;
+        }
+    }
+    if ($file === '' && PHP_OS_FAMILY !== 'Windows') {
+        $system = function_exists('openssl_get_cert_locations') ? openssl_get_cert_locations() : array();
+        if (is_file((string) ($system['default_cert_file'] ?? '')) || is_dir((string) ($system['default_cert_dir'] ?? ''))) {
+            return $ssl;
+        }
+    }
+    $bundled = __DIR__ . '/../vendor/composer/ca-bundle/res/cacert.pem';
+    if ($file === '' && is_file($bundled)) {
+        $file = realpath($bundled);
+    }
+    if ($file !== '') {
+        $ssl['cafile'] = $file;
+    }
+    return $ssl;
+}
+
 ?>

@@ -116,9 +116,6 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 if (!is_ajax()){
 printSectionTitle(t('title.roles.details'));
 
-echo '<div class="hlstats-cards-grid">
-  <section class="hlstats-section hlstats-card">';
-
         $image = getImage("/games/$game/roles/$role");
 
         if ($image) {
@@ -128,15 +125,15 @@ echo '<div class="hlstats-cards-grid">
         } else {
             $imagestring = '';
         }
-    echo '<div class="hlstats-award'.($numitems>0?' has-winner':'').'">
-            <div class="hlstats-award-title">'.htmlspecialchars($role_name).'</div>
-            <div class="hlstats-award-icon">'.$imagestring.'</div>
-            <div class="hlstats-award-count">'.t('total.role.stats',
-               ["{kills}" => '<strong>'.nf($totalkills).'</strong>',
-               "{role}"   => '<strong>'.htmlspecialchars($role_name).'</strong>']).'</div>
-          </div>
-  </section>
-</div>';
+
+    // Headline tiles, as on the General Statistics: the role, its kills, its headshots, who played it
+    // The role on a row of its own, then its numbers
+    kpiTiles(array(array(t('th.role'), htmlspecialchars($role_name), $imagestring)));
+    kpiTiles(array(
+        array(t('th.kills'), nf($totalkills), ''),
+        array(t('th.headshots'), nf($totalheadshots), $totalkills > 0 ? t('game.kpi.hs', ['{n}' => nf($totalheadshots / $totalkills * 100, 1)]) : ''),
+        array(t('players'), nf($numitems), ''),
+    ));
 }
 
 

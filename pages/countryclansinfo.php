@@ -57,75 +57,61 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	if (!is_ajax()) {
 
     printSectionTitle(t('title.country.info'));
+
+    $members  = (int) $clandata['nummembers'];
+    $seconds  = (int) $clandata['connection_time'];
+    $activity = max(0, (int) $clandata['activity']);
+    $bigFlag  = IMAGE_PATH . '/flags/' . strtolower($flag) . '_large.png';
 ?>
-<div class="hlstats-cards-grid">
-  <section class="hlstats-section hlstats-card">
-    <div class="hlstats-card-title"><?= t('statistics.summary') ?></div>
-    <div class="hlstats-pname"><?= $clandata['name'] ?></div>
-    <div class="hlstats-card-body hlstats-card-grid">
-      <div class="label"><?= t('members') ?></div>
-      <div class="value"><strong><?= $clandata['nummembers'] ?></strong></div>
-      <div class="label"><?= t('activity') ?></div>
-      <div class="value meter-ratio">
-        <div class="meter-container">
-          <meter min="0" max="100" low="25" high="50" optimum="75" value="<?= $clandata['activity'] ?>"></meter>
-          <div class="meter-value" id="meterText"><?= $clandata['activity'] ?>%</div>
+<section class="hlstats-section hlstats-card hlstats-profile">
+    <div class="hlstats-profile-main">
+        <div class="hlstats-profile-identity">
+<?php if (file_exists($bigFlag)) { ?>
+            <img class="hlstats-profile-avatar" src="<?= htmlspecialchars($bigFlag, ENT_QUOTES) ?>" alt="<?= htmlspecialchars($flag, ENT_QUOTES) ?>" style="object-fit: contain;" />
+<?php } ?>
+            <div class="hlstats-profile-info">
+                <div class="hlstats-profile-name">
+<?php if (!file_exists($bigFlag)) { ?>
+                    <span class="hlstats-flag"><img src="<?= getFlag($flag) ?>" alt="<?= htmlspecialchars($flag, ENT_QUOTES) ?>" /></span>
+<?php } ?>
+                    <span><?= htmlspecialchars($clandata['name'] ?? '', ENT_COMPAT) ?></span>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="label"><?= t('total.kills') ?></div>
-      <div class="value"><?= nf($clandata['kills']) ?></div>
-      <div class="label"><?= t('total.deaths') ?></div>
-      <div class="value"><?= nf($clandata['deaths']) ?></div>
-      <div class="label"><?= t('avg.kills') ?></div>
-      <div class="value"><?php if ($clandata['nummembers'] > 0) { echo nf($clandata['kills'] / ($clandata['nummembers'])); } else { echo'-'; } ?></div>
-      <div class="label"><?= t('kills.death') ?></div>
-      <div class="value"><?php
-                          if ($clandata['deaths'] != 0)
-                          {
-                              printf('%0.2f', $clandata['kills'] / $clandata['deaths']);
-                          }
-                          else
-                          {
-                              echo '-';
-                          }
-                         ?>
-      </div>
-      <div class="label"><?= t('kills.minute') ?></div>
-      <div class="value"><?php
-                          if ($clandata['connection_time'] > 0) {
-                              echo sprintf('%.2f', ($clandata['kills'] / ($clandata['connection_time'] / 60)));
-                          } else {
-                              echo '-'; 
-                          }
-                         ?>
-      </div>
-      <div class="label"><?= t('avg.points') ?></div>
-      <div class="value"><?= nf($clandata['avgskill']) ?></div>
-      <div class="label"><?= t('avg.time') ?></div>
-      <div class="value"><?php
-                          if ($clandata['connection_time'] > 0) {
-                              echo TimeStamp($clandata['connection_time'] / ($clandata['nummembers']));
-                          } else {
-                              echo '-'; 
-                          }
-                         ?>
-      </div>
-      <div class="label"><?= t('total.time') ?></div>
-      <div class="value"><?= TimeStamp($clandata['connection_time']); ?></div>
 
-
-  </div>
+        <div class="hlstats-profile-headline">
+            <div>
+                <span class="hlstats-profile-label"><?= tLabel('members') ?></span>
+                <span class="hlstats-profile-big"><?= nf($members) ?></span>
+            </div>
+<?php if ($g_options['rankingtype'] != 'kills') { ?>
+            <div>
+                <span class="hlstats-profile-label"><?= tLabel('avg.points') ?></span>
+                <span class="hlstats-profile-big"><?= nf($clandata['avgskill']) ?></span>
+            </div>
+<?php } ?>
+            <div class="hlstats-profile-activity">
+                <span class="hlstats-profile-label"><?= tLabel('activity') ?></span>
+                <span class="hlstats-profile-big"><?= $activity ?>%</span>
+                <meter min="0" max="100" low="25" high="50" optimum="75" value="<?= $activity ?>"></meter>
+                <span class="hlstats-kpi-note" data-tooltip="<?= htmlspecialchars(tLabel('total.time'), ENT_QUOTES) ?>"><?= TimeStamp($seconds) ?></span>
+            </div>
+        </div>
+    </div>
 </section>
+
 <?php
-if (file_exists(IMAGE_PATH.'/flags/'.strtolower($flag).'_large.png')) {
-
-  echo '<section class="hlstats-section hlstats-card">';
-  echo '<img src="'.IMAGE_PATH.'/flags/'.strtolower($flag).'_large.png" style="border:0px;" alt="'.$flag.'" />';
-  echo '</section>';
-
-}
+    kpiTiles(array(
+        array(tLabel('total.kills'), nf($clandata['kills']), ''),
+        array(tLabel('total.deaths'), nf($clandata['deaths']), ''),
+    ), 'hlstats-profile-kpis');
+    kpiTiles(array(
+        array(tLabel('kills.death'), $clandata['deaths'] != 0 ? sprintf('%0.2f', $clandata['kills'] / $clandata['deaths']) : '-', ''),
+        array(tLabel('kills.minute'), $seconds > 0 ? sprintf('%.2f', $clandata['kills'] / ($seconds / 60)) : '-', ''),
+        array(tLabel('avg.kills'), $members > 0 ? nf($clandata['kills'] / $members) : '-', ''),
+        array(tLabel('avg.time'), $members > 0 && $seconds > 0 ? TimeStamp($seconds / $members) : '-', ''),
+    ), 'hlstats-profile-kpis');
 ?>
-</div>
 
 <?php
     ob_flush();

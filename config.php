@@ -89,3 +89,4 @@ define('DEBUG', false);
 define('INCLUDE_PATH', './includes');
 define('PAGE_PATH', './pages');
 define('IMAGE_PATH', './hlstatsimg');
+?>

@@ -24,7 +24,8 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	
 	$db->query("
 		SELECT
-			name
+			name,
+			modifier
 		FROM
 			hlstats_Weapons
 		WHERE
@@ -137,18 +138,19 @@ printSectionTitle(t('title.weapons.details'));
             } else {
                 $weapimg = '';
             }
+
+    // The weapon on a row of its own, then its numbers
+    kpiTiles(array(array(t('th.weapon'), htmlspecialchars($wep_name), $weapimg)));
+    $tiles = array(
+        array(t('th.kills'), nf($totalkills), ''),
+        array(t('th.headshots'), nf($totalheadshots), $totalkills > 0 ? t('game.kpi.hs', ['{n}' => nf($totalheadshots / $totalkills * 100, 1)]) : ''),
+        array(t('players'), nf($numitems), ''),
+    );
+    if (isset($weapondata['modifier']) && is_numeric($weapondata['modifier'])) {
+        $tiles[] = array(t('modifier'), '&times;' . nf($weapondata['modifier'], 2), '');
+    }
+    kpiTiles($tiles);
 ?>
-<div class="hlstats-cards-grid">
-    <section class="hlstats-section hlstats-card">
-    <div class="hlstats-award has-winner">
-    <div class="hlstats-award-title"><?= htmlspecialchars($wep_name) ?></div>
-    <div class="hlstats-award-icon"><?= $weapimg ?></div>
-    <div class="hlstats-award-count"><?= t('total.kills.stats',
-    ["{kills}" => '<strong>'.nf($totalkills).'</strong>',
-     "{hs}"    => '<strong>'.nf($totalheadshots).'</strong>']) ?></div>
-    </div>
-    </section>
-</div>
 
 <div id="weaponinfo">
 <?php
