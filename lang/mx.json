@@ -26,6 +26,7 @@
     "search.in.clan":    "Nombres de Clanes",
     "search.game":       "Juego:",
     "search.all":        "Todos",
+    "signin.failed":     "El inicio de sesión en Steam no funcionó: inténtalo de nuevo",
 
     "theme.seasonal":     "Tema de temporada",
     "theme.seasonal.on":  "Cambiar al tema de temporada",

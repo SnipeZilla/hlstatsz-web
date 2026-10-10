@@ -26,6 +26,7 @@
     "search.in.clan":    "Clannamen",
     "search.game":       "Spiel:",
     "search.all":        "Alle",
+    "signin.failed":     "Die Steam-Anmeldung ist fehlgeschlagen: Bitte erneut versuchen",
 
     "theme.seasonal":     "Saisonales Design",
     "theme.seasonal.on":  "Zum saisonalen Design wechseln",

@@ -26,6 +26,7 @@
     "search.in.clan":    "Clan Names",
     "search.game":       "Game:",
     "search.all":        "All",
+    "signin.failed":     "Steam sign-in did not work: try again",
 
     "theme.seasonal":     "Seasonal theme",
     "theme.seasonal.on":  "Switch to the seasonal theme",

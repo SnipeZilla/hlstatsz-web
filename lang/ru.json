@@ -26,6 +26,7 @@
     "search.in.clan":    "Названия кланов",
     "search.game":       "Игра:",
     "search.all":        "Все",
+    "signin.failed":     "Не удалось войти через Steam: попробуйте еще раз",
 
     "theme.seasonal":     "Сезонная тема",
     "theme.seasonal.on":  "Включить сезонную тему",

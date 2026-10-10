@@ -26,6 +26,7 @@
     "search.in.clan":    "Noms de clans",
     "search.game":       "Jeu :",
     "search.all":        "Tous",
+    "signin.failed":     "La connexion Steam n'a pas abouti : réessayez",
 
     "theme.seasonal":     "Thème saisonnier",
     "theme.seasonal.on":  "Passer au thème saisonnier",
