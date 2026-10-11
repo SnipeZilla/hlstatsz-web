@@ -203,7 +203,7 @@ function printserverstats($server_id, $server)
 				$team_display_name = $thisteam['team'] ? htmlspecialchars(ucfirst(strtolower($thisteam['team']))) : '';
 				// Team is not in hlstats_Teams, but is also empty in the game log, e.g. player<123><STEAM_0:0:xxxxxxx><> and hence is null in Livestats table. This is a connecting client 100% of the time.
 				if ($team_display_name == '') {
-					$team_display_name = 'Unknown team';
+					$team_display_name = 'Unassigned'; //in lobby or loading screen
 				}
 			}
 
