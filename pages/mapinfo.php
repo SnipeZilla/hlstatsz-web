@@ -156,7 +156,7 @@ if (!is_ajax()) {
 				break;
 			}
 		}
-		curl_close($curl);
+		$curl=null;
 
 		if ($exist) {
 			$_SESSION['map'] = $map.$ext;
