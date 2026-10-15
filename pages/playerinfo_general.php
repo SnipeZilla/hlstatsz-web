@@ -382,7 +382,7 @@ printSectionTitle(t('title.misc.stats')); ?>
             <button type="button" class="hlstats-btn is-small<?= $code === $sigFirst ? ' is-active' : '' ?>" aria-pressed="<?= $code === $sigFirst ? 'true' : 'false' ?>" data-code="<?= htmlspecialchars($code, ENT_QUOTES) ?>" data-hint="<?= htmlspecialchars($hint, ENT_QUOTES) ?>"><?= htmlspecialchars($name, ENT_COMPAT) ?></button>
 <?php } ?>
         </div>
-        <textarea class="hlstats-sigcode-text" rows="3" readonly aria-label="<?= htmlspecialchars(t('forum.signature'), ENT_QUOTES) ?>" onclick="this.select()"><?= htmlspecialchars($sigFirst, ENT_COMPAT) ?></textarea>
+        <textarea class="hlstats-sigcode-text hlstats-scrollbar" rows="3" readonly aria-label="<?= htmlspecialchars(t('forum.signature'), ENT_QUOTES) ?>" onclick="this.select()"><?= htmlspecialchars($sigFirst, ENT_COMPAT) ?></textarea>
         <div class="hlstats-sigcode-foot">
             <span class="hlstats-sigcode-hint"></span>
             <button type="button" class="hlstats-btn is-small" data-copy="<?= htmlspecialchars($sigFirst, ENT_QUOTES) ?>"><?= svgIcon('copy', 14) . svgIcon('check', 14) . t('copy') ?></button>
