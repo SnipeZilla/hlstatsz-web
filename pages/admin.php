@@ -919,7 +919,7 @@ function checkVersion() {
 
     global $db, $g_options;
     $needsupdate = false;
-    $web = '2.07';
+    $web = '2.08';
     $webversion = $web.'.'.$g_options['dbversion'];
     if (isset($g_options['webversion']) && ($g_options['webversion'] != $webversion)) {
         $db->query("UPDATE hlstats_Options SET `value` = '$webversion' WHERE `keyname` = 'webversion'");
@@ -1103,6 +1103,7 @@ $adminTaskTitles = array(
 	'tools_editdetails_player' => 'Edit Player Details',
 	'tools_editdetails_clan' => 'Edit Clan Details',
 	'tools_adminevents' => 'Admin Event History',
+	'tools_backup' => 'Backup Database',
 	'tools_optimize' => 'Optimize Database',
 	'tools_reset' => 'Full / Partial Reset',
 	'tools_reset_2' => 'Clean up Player Statistics',
@@ -1113,6 +1114,12 @@ $adminTaskTitles = array(
 $task = (object) array(
 	'title' => isset($adminTaskTitles[$selTask]) ? $adminTaskTitles[$selTask] : ucwords(str_replace('_', ' ', $selTask))
 );
+
+// A backup is downloaded by a plain POST, not the panel's fetch: the task sends the file instead of a page
+if (!is_ajax() && $selTask === 'tools_backup' && isset($_POST['backup_token'])) {
+    include PAGE_PATH . '/admintasks/tools_backup.php';
+    exit;
+}
 
 if (is_ajax() && !empty($_GET['task'])) {
     $taskCode = preg_replace('/[^a-zA-Z0-9_]/', '', $_GET['task']);
@@ -1221,6 +1228,7 @@ $result = $db->query("
           <li><a href="#" class="hlstats-admin-task" data-url="tools_rcon">RCON console</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_editdetails">Edit Player/Clan</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_adminevents">Admin Event History</a></li>
+          <li><a href="#" class="hlstats-admin-task" data-url="tools_backup">Backup Database</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_optimize">Optimize Database</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_reset">Full / Partial Reset</a></li>
           <li><a href="#" class="hlstats-admin-task" data-url="tools_reset_2">Clean up Player Statistics</a></li>

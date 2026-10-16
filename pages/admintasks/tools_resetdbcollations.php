@@ -136,7 +136,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 <form method="POST">
 <?php
-message('warning','You should not lose any data, but be sure to back up your database before running to be on the safe side');
+message('warning','You should not lose any data, but be sure to <a href="?mode=admin&amp;task=tools_backup">back up your database</a> before running to be on the safe side');
 ?>
 <div class="hlstats-admin-note">
 <p>

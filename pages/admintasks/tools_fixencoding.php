@@ -329,7 +329,7 @@ if (!$apply && isset($_POST['fixenc_other'])) {
 <div class="panel">
 <?php
 if (!$apply) {
-    message('warning', 'This repairs text saved in UTF-8 twice, such as <b>JosÃ©</b> for <b>José</b> or <b>â™›</b> for <b>♛</b>. Back up your database before you repair it.');
+    message('warning', 'This repairs text saved in UTF-8 twice, such as <b>JosÃ©</b> for <b>José</b> or <b>â™›</b> for <b>♛</b>. <a href="?mode=admin&amp;task=tools_backup">Back up your database</a> before you repair it.');
 }
 
 // [connection, database, heading]: HLstatsZ's, and SourceBans' when it is set up on the same server, or the other one
