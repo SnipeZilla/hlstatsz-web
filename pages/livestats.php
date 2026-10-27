@@ -84,7 +84,7 @@ function printserverstats($server_id, $server)
 	}
 
 ?>
-<table class="livestats-table-players">
+<table class="livestats-table-players" data-live="players-<?= (int)$server_id ?>">
 	<thead><tr>
 		<th class="right">#</th>
 		<th class="hlstats-main-column left responsive"><?= t('player') ?></th>

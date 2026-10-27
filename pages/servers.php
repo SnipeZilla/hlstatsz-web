@@ -16,6 +16,7 @@ For current support and updates:
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 require('livestats.php');
+require_once INCLUDE_PATH . '/live.php';
 $server_id = 1;
 
 if ((isset($_GET['server_id'])) && (is_numeric($_GET['server_id']))) {
@@ -23,6 +24,9 @@ if ((isset($_GET['server_id'])) && (is_numeric($_GET['server_id']))) {
 } else {
     error(t('error.no.uniqueid'));
 }
+
+// A visit or a refresh: the page saved by the live refresh, when it still shows the current data (includes/live.php)
+if (liveShowSaved()) return;
 
 $query= "
         SELECT
@@ -88,7 +92,7 @@ if ($g_options['show_google_map'] == 1) {
             <th class="hide-2"><?= t('th.headshots') ?></th>
             <th class="hide-3"><?= t('th.hsk') ?></th>
         </tr>
-        <tr>
+        <tr data-live="server-<?= (int)$server_id ?>">
             <td class="left">
             <?php
                 $image = getImage("/games/$game/game");
@@ -217,3 +221,4 @@ if (!isset($g_options['chart']) || $g_options['chart'] == 0) { //pChart
         </tr>
     </table>
 <?php } ?>
+<?php liveStart(); // live refresh every LIVE_INTERVAL seconds (includes/live.php) ?>

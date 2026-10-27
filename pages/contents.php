@@ -25,6 +25,19 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
         exit;
     }
 
+    // A visit or a refresh: the page saved by the live refresh, when it still shows the current data (includes/live.php)
+    if (!defined('HLSTATS_LIVE') && !is_ajax()) {
+        require_once INCLUDE_PATH . '/live.php';
+        if ($liveEntry = liveCurrent(liveCacheFile())) {
+            if ($num_games && !(($num_games == 1 && $num_voices == 0) || !empty($_GET['game']))) {
+                unset($_SESSION['game']);
+            }
+            echo $liveEntry['body'];
+            echo '<script>Live.start(' . json_encode($liveEntry['version']) . ', ' . (LIVE_INTERVAL * 1000) . ');</script>';
+            return;
+        }
+    }
+
     if (($num_games == 1 && $num_voices == 0) || !empty($_GET['game'])) {
         include(PAGE_PATH . '/game.php');
 
@@ -88,7 +101,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
             [t('th.kills'), $num_kills, $lastevent ? t('contents.last_kill', ['{date}' => formatDate(strtotime($lastevent), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT)]) : ''],
         ];
 ?>
-        <div class="hlstats-cards-grid hlstats-kpis">
+        <div class="hlstats-cards-grid hlstats-kpis" data-live="kpis">
             <?php foreach ($tiles as [$label, $value, $note]) { ?>
             <div class="hlstats-card hlstats-kpi">
                 <div class="hlstats-kpi-label"><?= $label ?></div>
@@ -111,7 +124,7 @@ if ($g_options['show_google_map'] == 1) {
 <?php
 }
 ?>
-            <table>
+            <table data-live="games">
                 <tr>
                     <th class="hlstats-main-description left responsive"><?= t('game.servers') ?></th>
                     <th class="hide-2"></th>
@@ -255,6 +268,14 @@ if ($g_options['show_google_map'] == 1) {
         <?php } ?>
     </p>
 </div>
+<?php
+    }
+
+    // Live refresh every LIVE_INTERVAL seconds (includes/live.php, Live in hlstatsz.js)
+    if (!defined('HLSTATS_LIVE')) {
+        require_once INCLUDE_PATH . '/live.php';
+?>
+<script>Live.start(<?= json_encode(liveVersion()) ?>, <?= LIVE_INTERVAL * 1000 ?>);</script>
 <?php
     }
 ?>

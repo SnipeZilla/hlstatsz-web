@@ -22,6 +22,14 @@ if (defined('DEBUG') && DEBUG === true) {
     error_reporting(-1);
     ini_set('display_errors', '0');
 }
+// Live refresh (includes/live.php): a page saved LIVE_INTERVAL seconds ago or less is answered here, before the
+// session and the database
+if (!empty($_GET['live']) && in_array($_GET['mode'] ?? '', ['', 'contents', 'servers'], true)
+	&& strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest') {
+	require_once INCLUDE_PATH . '/live.php';
+	if ($liveEntry = liveFresh(liveCacheFile())) liveSend($liveEntry, 'hit');
+}
+
 session_set_cookie_params([
     'lifetime' => 0,
     'path'     => rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\') . '/',
@@ -252,6 +260,27 @@ if ($mode == 'contents' || $mode == 'teamspeak' || $mode == 'discord' || $mode =
     if ($num_games == 1 && !$num_voices && !$game) {
         list($game) = $db->fetch_row($resultGames);
     }
+}
+
+// Live refresh of the front, game and server pages, the saved page is older (includes/live.php): renewed when the data did not change, else
+// rendered once and saved for everyone
+if (($mode === 'contents' || $mode === 'servers') && !empty($_GET['live']) && is_ajax()) {
+	require_once INCLUDE_PATH . '/live.php';
+	$liveFile = liveCacheFile();
+	if ($liveEntry = liveCurrent($liveFile)) liveSend($liveEntry, 'renewed');
+	$liveVersion = liveVersion();
+	define('HLSTATS_LIVE', true);
+	ob_start();
+	include PAGE_PATH . "/$mode.php";
+	$liveBody = ob_get_clean();
+	ob_start();
+	if ($g_options['show_google_map'] == 1) {
+		$type = 'main';
+		include INCLUDE_PATH . '/openstreetmap.php';
+	}
+	$liveMap = ob_get_clean();
+	$liveSaved = liveCacheSave($liveFile, $liveVersion, $liveBody, $liveMap);
+	liveSend(['version' => $liveVersion, 'body' => $liveBody, 'map' => $liveMap], $liveSaved ? 'saved' : 'failed');
 }
 
 if (!is_ajax() && $mode !== 'admin' && $mode !== 'download')

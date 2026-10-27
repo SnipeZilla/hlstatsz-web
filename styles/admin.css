@@ -105,7 +105,7 @@
 }
 .hlstats-task li > a::after,
 .hlstats-sub-task li > a::after {
-    content: "▼";
+    content: "\25BC";
     position: absolute;
     left: -18px;
     top: 50%;

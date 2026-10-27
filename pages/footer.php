@@ -86,7 +86,12 @@ global $mode, $game;
 if (($g_options["show_google_map"] == 1) && ($mode == "contents" || $mode == "servers" || $mode == "claninfo"))
 {
     $type = $mode == "contents" || $mode == "servers" ? 'main' : 'clan';
-    include(INCLUDE_PATH . '/openstreetmap.php');
+    global $liveEntry;
+    if (($mode == "contents" || $mode == "servers") && !empty($liveEntry['map'])) {
+        echo $liveEntry['map'];   // saved with the page by the live refresh (includes/live.php)
+    } else {
+        include(INCLUDE_PATH . '/openstreetmap.php');
+    }
 ?>
     <script src="<?= INCLUDE_PATH ?>/js/leaflet.js"></script>
     <script src="<?= INCLUDE_PATH ?>/js/markercluster.js"></script>

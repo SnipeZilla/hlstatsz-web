@@ -1211,10 +1211,10 @@ th::after {
   opacity:0.3;
 }
 th.desc::after {
-  content: "▼";
+  content: "\25BC";
 }
 th.asc::after{
-    content: "▲";
+    content: "\25B2";
 }
 th.active::after {
   opacity:0.85;
@@ -1225,7 +1225,7 @@ th:hover::after{
 }
 
 .skill::after {
-  content: "●";
+  content: "\25CF";
   position:absolute;
   right:0;
   opacity: 0.6;
@@ -1233,13 +1233,13 @@ th:hover::after{
 }
 
 .skill.up::after {
-  content: "▲";
+  content: "\25B2";
   font-size:10px;
   opacity: 1;
 }
 
 .skill.down::after {
-  content: "▼";
+  content: "\25BC";
   font-size:10px;
   opacity: 1;
 }

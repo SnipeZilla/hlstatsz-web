@@ -116,7 +116,7 @@ printSectionTitle(t('title.stats'));
 			[t('contents.kpi.servers'), $total_servers, t('contents.kpi.busy', ['{n}' => nf($busy)])],
 		];
 ?>
-		<div class="hlstats-cards-grid hlstats-kpis">
+		<div class="hlstats-cards-grid hlstats-kpis" data-live="kpis">
 			<?php foreach ($tiles as [$label, $value, $note]) { ?>
 			<div class="hlstats-card hlstats-kpi">
 				<div class="hlstats-kpi-label"><?= $label ?></div>
@@ -198,7 +198,7 @@ printSectionTitle(t('title.servers'));
 					<th class="hide-3"><?= t('th.hsk') ?></th>
 				</tr></thead><tbody>
 <?php } else { echo '<table class="livestats-table-server hlstats-table-fixed '.($i==count($servers)-1? ' livestats-table-last':' livestats-table-next').'"><tbody>'; } ?>
-				<tr class="<?= $slider ? 'hlstats-server-row ' : '' ?><?= $i % 2 === 0 ? 'row-odd' : 'row-even' ?>">
+				<tr class="<?= $slider ? 'hlstats-server-row ' : '' ?><?= $i % 2 === 0 ? 'row-odd' : 'row-even' ?>" data-live="server-<?= (int)$server_id ?>">
 					<td class="left"><?php
 			$image = getImage("/games/$game/game");
 			if ($slider) echo '<span class="hlstats-slider-arrow" data-tooltip="'.t('click.detail').'">▼</span>';

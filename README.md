@@ -38,7 +38,7 @@ Modern yet familiar: a clean, responsive, AJAX-first layout that keeps the origi
 - Installer: the database, its tables and your first admin, in one step
 - Database updater, daemon control, RCON console (also for servers HLstatsZ doesn't track)
 - Game, server, award, rank and ban settings
-- Database tools: optimize, reset, fix collations, repair double-encoded text
+- Database tools: backup (download as .sql or .sql.gz), optimize, reset, fix collations, repair double-encoded text
 
 ---
 

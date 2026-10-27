@@ -653,3 +653,97 @@ function formatNum(num) {
 
     return formatted;
 }
+
+/* Live refresh (front and game pages)
+ * Every few seconds asks the same page with live=1 (hlstats.php, includes/live.php). Nothing changed: the
+ * server answers 204 and nothing is done. Otherwise only the blocks marked data-live="..." whose content
+ * changed are swapped (their element stays, so slider state and handlers on it survive), and the map
+ * markers are redrawn without moving the map. Paused while the tab is hidden.
+ */
+const Live = {
+    url: '',
+    version: '',
+    every: 30000,
+    timer: null,
+    busy: false,
+    mapData: null,
+
+    start(version = '', every = 30000) {
+        if (this.url) return;
+        const url = new URL(location.href);
+        url.hash = '';
+        url.searchParams.set('live', '1');
+        this.url = url.toString();
+        this.version = version;
+        this.every = every;
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) this.tick();
+        });
+        this.schedule();
+    },
+
+    schedule() {
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => this.tick(), this.every);
+    },
+
+    async tick() {
+        if (document.hidden || this.busy) return;
+        if (!document.querySelector('[data-live]')) return;   // left the page (search...): stop
+        this.busy = true;
+        try {
+            const r = await fetch(this.url, {
+                cache: 'no-store',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-Live-Version': this.version }
+            });
+            if (r.status === 200) {
+                this.version = r.headers.get('X-Live-Version') || '';
+                this.apply(await r.text());
+            }
+        } catch (e) {
+            // offline, server restarting...: try again next time
+        } finally {
+            this.busy = false;
+            this.schedule();
+        }
+    },
+
+    apply(html) {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        doc.querySelectorAll('[data-live]').forEach(fresh => {
+            const cur = document.querySelector('[data-live="' + CSS.escape(fresh.dataset.live) + '"]');
+            if (cur && cur.innerHTML !== fresh.innerHTML) cur.innerHTML = fresh.innerHTML;
+        });
+        this.applyMap(doc);
+    },
+
+    applyMap(doc) {
+        if (!window.OpenMap || typeof serverMarkers === 'undefined') return;
+        const s = doc.getElementById('servers-json');
+        const p = doc.getElementById('players-json');
+        if (!s || !p) return;
+        const data = s.textContent + '\n' + p.textContent;
+        if (this.mapData === null) {
+            const s0 = document.getElementById('servers-json');
+            const p0 = document.getElementById('players-json');
+            this.mapData = (s0 ? s0.textContent : '') + '\n' + (p0 ? p0.textContent : '');
+        }
+        if (data === this.mapData) return;
+
+        const redraw = () => {
+            this.mapData = data;
+            serverMarkers.clearLayers();
+            playerMarkers.clearLayers();
+            createServers(JSON.parse(s.textContent || '[]'));
+            createPlayer(JSON.parse(p.textContent || '[]'));
+        };
+        // a popup is open: wait until it is closed, so it does not vanish under the mouse
+        if (document.querySelector('#map .leaflet-popup')) {
+            OpenMap.off('popupclose', this._pending);
+            this._pending = () => { this._pending = null; redraw(); };
+            OpenMap.once('popupclose', this._pending);
+        } else {
+            redraw();
+        }
+    }
+};
