@@ -15,7 +15,7 @@ For current support and updates:
 */
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
-if (!defined('LIVE_INTERVAL')) define('LIVE_INTERVAL', 30);   // seconds between asks, and life of a saved page
+if (!defined('LIVE_INTERVAL')) define('LIVE_INTERVAL', 20);   // seconds between asks, and life of a saved page
 define('LIVE_MAP_MARK', "\n<!--live:map-->\n");                // between the page body and the map data in a file
 
 // One file per page and language: needs neither the session nor the database
