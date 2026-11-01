@@ -288,6 +288,8 @@
     "slots.used":                 "Belegte Plätze",
     "notes":                      "Notizen",
     "view.graphs":                "Auslastungsgraphen anzeigen",
+    "graphs":                     "Graphen",
+    "graphs.toggle":              "Graphen ein- oder ausblenden",
     "click.detail":               "Server ein-/ausklappen",
     "last.points":                "{last} Punkte",
     "no.winner":                  "Kein Auszeichnungsgewinner",

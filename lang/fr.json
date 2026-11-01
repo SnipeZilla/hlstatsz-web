@@ -288,6 +288,8 @@
     "slots.used":                  "Slots utilisés",
     "notes":                       "Notes",
     "view.graphs":                 "Voir les graphiques de charge",
+    "graphs":                      "Graphiques",
+    "graphs.toggle":               "Afficher ou masquer les graphiques",
     "click.detail":                "Développer/Réduire le serveur",
     "last.points":                 "{last} points",
     "no.winner":                   "Pas de gagnant",

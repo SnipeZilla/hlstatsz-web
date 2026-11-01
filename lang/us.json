@@ -288,6 +288,8 @@
     "slots.used":                "Slots used",
     "notes":                     "Notes",
     "view.graphs":               "View Load Graphs",
+    "graphs":                    "Graphs",
+    "graphs.toggle":             "Show or hide the graphs",
     "click.detail":              "Expand/Collapse Server",
     "last.points":               "{last} points",
     "no.winner":                 "No Award Winner",

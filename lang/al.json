@@ -288,6 +288,8 @@
     "slots.used":                "Vende të zëna",
     "notes":                     "Shënime",
     "view.graphs":               "Shiko Grafikët e Ngarkesës",
+    "graphs":                    "Grafikët",
+    "graphs.toggle":             "Shfaq ose fshih grafikët",
     "click.detail":              "Zgjero/Mbyll Serverin",
     "last.points":               "{last} pikë",
     "no.winner":                 "Pa Fitues Çmimi",
