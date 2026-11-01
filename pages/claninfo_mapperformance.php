@@ -35,7 +35,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'maps') {
 
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
-    $start = isset($_GET['maps_page']) ? ((int)$_GET['maps_page'] - 1) * 30 : 0;
+    $start = max(0, (int) ($_GET['maps_page'] ?? 1) - 1) * 30;
 
     $result = $db->query("
         WITH clan_kills AS (
@@ -80,7 +80,8 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'maps') {
         SELECT * FROM ranked
         ORDER BY
             $sort $sortorder,
-            $sort2 $sortorder
+            $sort2 $sortorder,
+            map ASC
         LIMIT 30 OFFSET $start;
     ");
     

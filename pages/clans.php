@@ -26,14 +26,15 @@ function qClansRank()
 {
     global $game, $g_options, $sort, $sortorder, $rank_type;
 
+    // The ranking: average of the first column over the members, then the sum of the second (fewest deaths first)
     if ($g_options['rankingtype'] !== 'kills') {
         $rank_type1 = 'skill';
         $rank_type2 = 'kills';
-        $sortorder2 = 'DESC';
+        $rank_sort2 = 'DESC';
     } else {
         $rank_type1 = 'kills';
         $rank_type2 = 'deaths';
-        $sortorder2 = 'ASC';
+        $rank_sort2 = 'ASC';
     }
 
     $col = array("rank_position","name", "tag", "skill","kills","deaths","kpd","headshots","hpk","members","activity","connection_time");
@@ -41,18 +42,13 @@ function qClansRank()
         $sort      = 'rank_position';
         $sortorder = 'ASC';
     }
-    
-    if ($sort == $rank_type2) {
-        $sort2 = $rank_type1;
-        $sortorder2 = 'DESC';
-    } else {
-        $sort2 = $rank_type1;
-        $sortorder2 = 'DESC';
-    }
+
+    // Clans equal on the column: by the first rank column, then the time; the id keeps them in one order
+    $sort2 = $rank_type1;
 
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
-    $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 30 : 0;
+    $start = max(0, (int) ($_GET['page'] ?? 1) - 1) * 30;
 
     switch ($rank_type) {
         case 0: // Global
@@ -64,9 +60,9 @@ function qClansRank()
                            AND h.eventTime < CURDATE()";
             break;
     
-        case 2: // Last Weekend (Sat + Sun)
-            $dateFilter = "YEARWEEK(h.eventTime, 1) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)
-                           AND WEEKDAY(h.eventTime) IN (5,6)";
+        case 2: // Last Weekend (Sat + Sun): the two days before this week's Monday, a range of the date index
+            $dateFilter = "h.eventTime >= CURDATE() - INTERVAL (WEEKDAY(CURDATE()) + 2) DAY
+                           AND h.eventTime < CURDATE() - INTERVAL WEEKDAY(CURDATE()) DAY";
             break;
     
         case 3: // Last 7 days
@@ -74,7 +70,7 @@ function qClansRank()
             break;
     
         case 4: // Last 28 days
-            $dateFilter = "h.eventTime >= NOW() - INTERVAL ".$g_options['MinActivity']." DAY";
+            $dateFilter = "h.eventTime >= NOW() - INTERVAL ".(int)$g_options['MinActivity']." DAY";
             break;
 
         default:
@@ -85,97 +81,126 @@ function qClansRank()
 
     // ---------------------------------------------------------
     // GLOBAL RANKING (no history table)
+    // The clans of two ranked members or more, summed from their members; their names joined after
     // ---------------------------------------------------------
     if ($rank_type == 0) {
     return "SELECT
-               RANK() OVER (ORDER BY AVG(p.$rank_type1) DESC, SUM(p.$rank_type2) $sortorder2) AS rank_position,
-               p.clan as clan,
+               r.*,
                c.tag AS tag,
-               c.name AS name,
-               p.flag AS flag,
-               p.country AS country,
-               SUM(p.kills) AS kills,
-               SUM(p.deaths) AS deaths,
-               SUM(p.last_skill_change) AS last_skill_change,
-               FLOOR(AVG(p.skill)) AS skill,
-               SUM(p.shots) AS shots,
-               SUM(p.hits) AS hits,
-               SUM(p.headshots) AS headshots,
-               MAX(p.activity) AS activity,
-               MAX(p.last_event) AS last_event,
-               SUM(p.connection_time) as connection_time,
-               COUNT(p.playerId) AS members,
-               ROUND(SUM(p.kills) / NULLIF(SUM(p.deaths), 0),2) AS kpd,
-               ROUND(SUM(p.headshots) / NULLIF(SUM(p.kills), 0),2) AS hpk,
-               COUNT(*) OVER() AS total_rows
-           FROM
-               hlstats_Players AS p
+               c.name AS name
+           FROM (
+               SELECT
+                   RANK() OVER (ORDER BY AVG(p.$rank_type1) DESC, SUM(p.$rank_type2) $rank_sort2) AS rank_position,
+                   p.clan as clan,
+                   SUM(p.kills) AS kills,
+                   SUM(p.deaths) AS deaths,
+                   SUM(p.last_skill_change) AS last_skill_change,
+                   FLOOR(AVG(p.skill)) AS skill,
+                   SUM(p.shots) AS shots,
+                   SUM(p.hits) AS hits,
+                   SUM(p.headshots) AS headshots,
+                   MAX(p.activity) AS activity,
+                   MAX(p.last_event) AS last_event,
+                   SUM(p.connection_time) as connection_time,
+                   COUNT(p.playerId) AS members,
+                   ROUND(SUM(p.kills) / NULLIF(SUM(p.deaths), 0),2) AS kpd,
+                   ROUND(SUM(p.headshots) / NULLIF(SUM(p.kills), 0),2) AS hpk,
+                   COUNT(*) OVER() AS total_rows
+               FROM
+                   hlstats_Players AS p
+               WHERE
+                   p.hideranking = 0
+                   AND p.lastAddress <> ''
+                   AND p.game = '".$game."'
+                   AND p.clan > 0
+               GROUP BY
+                   p.clan
+               HAVING
+                   COUNT(p.playerId) > 1
+           ) AS r
            LEFT JOIN
-               hlstats_Clans AS c ON p.clan = c.clanId
-           WHERE
-               p.hideranking = 0 
-               AND p.lastAddress <> ''
-               AND p.game = '".$game."'
-               AND p.clan > 0
-           GROUP BY
-               p.clan
-           HAVING
-               COUNT(p.playerId) > 1
+               hlstats_Clans AS c ON c.clanId = r.clan
            ORDER BY
                $sort $sortorder,
-               $sort2 $sortorder2,
-               connection_time DESC
-           LIMIT 
+               $sort2 DESC,
+               connection_time DESC,
+               clan
+           LIMIT
                30 OFFSET $start
             ";
     }
 
     // ---------------------------------------------------------
     // DATE-FILTERED RANKING (history table)
+    // The days of the view are read on the date index, then their players: each member's days are summed first, so
+    // that he counts once in his clan. Read from the clan members instead, the history of every day they played would
+    // be read.
     // ---------------------------------------------------------
-    $rank1Col = ($rank_type1 === 'skill') ? 'p.skill' : 'h.'.$rank_type1;
-    $rank2Col = ($rank_type2 === 'skill') ? 'p.skill' : 'h.'.$rank_type2;
+    require_once INCLUDE_PATH . '/players_rank.php';
+    $dateIndex = historyIndex();
     return "SELECT
-               RANK() OVER (ORDER BY AVG($rank1Col) DESC, SUM($rank2Col) $sortorder2) AS rank_position,
-               p.clan as clan,
+               r.*,
                c.tag AS tag,
-               c.name AS name,
-               p.flag AS flag,
-               p.country AS country,
-               SUM(h.kills) AS kills,
-               SUM(h.deaths) AS deaths,
-               SUM(h.skill_change) AS last_skill_change,
-               FLOOR(AVG(p.skill)) AS skill,
-               SUM(h.shots) AS shots,
-               SUM(h.hits) AS hits,
-               SUM(h.headshots) AS headshots,
-               MAX(p.activity) AS activity,
-               SUM(h.connection_time) as connection_time,
-               COUNT(p.playerId) AS members,
-               ROUND(SUM(h.kills) / NULLIF(SUM(h.deaths), 0),2) AS kpd,
-               ROUND(SUM(h.headshots) / NULLIF(SUM(h.kills), 0),2) AS hpk,
-               COUNT(*) OVER() AS total_rows
-           FROM
-               hlstats_Players AS p
-           INNER JOIN
-               hlstats_Players_History AS h ON h.playerId = p.playerId
+               c.name AS name
+           FROM (
+               SELECT
+                   RANK() OVER (ORDER BY AVG(m.$rank_type1) DESC, SUM(m.$rank_type2) $rank_sort2) AS rank_position,
+                   m.clan as clan,
+                   SUM(m.kills) AS kills,
+                   SUM(m.deaths) AS deaths,
+                   SUM(m.skill_change) AS last_skill_change,
+                   FLOOR(AVG(m.skill)) AS skill,
+                   SUM(m.shots) AS shots,
+                   SUM(m.hits) AS hits,
+                   SUM(m.headshots) AS headshots,
+                   MAX(m.activity) AS activity,
+                   MAX(m.last_event) AS last_event,
+                   SUM(m.connection_time) as connection_time,
+                   COUNT(*) AS members,
+                   ROUND(SUM(m.kills) / NULLIF(SUM(m.deaths), 0),2) AS kpd,
+                   ROUND(SUM(m.headshots) / NULLIF(SUM(m.kills), 0),2) AS hpk,
+                   COUNT(*) OVER() AS total_rows
+               FROM (
+                   SELECT
+                       p.playerId,
+                       p.clan,
+                       p.skill,
+                       p.activity,
+                       p.last_event,
+                       SUM(h.kills) AS kills,
+                       SUM(h.deaths) AS deaths,
+                       SUM(h.skill_change) AS skill_change,
+                       SUM(h.shots) AS shots,
+                       SUM(h.hits) AS hits,
+                       SUM(h.headshots) AS headshots,
+                       SUM(h.connection_time) AS connection_time
+                   FROM
+                       hlstats_Players_History AS h $dateIndex
+                   STRAIGHT_JOIN
+                       hlstats_Players AS p ON p.playerId = h.playerId
+                   WHERE
+                       $dateFilter
+                       AND h.game = '".$game."'
+                       AND p.hideranking = 0
+                       AND p.lastAddress <> ''
+                       AND p.game = '".$game."'
+                       AND p.clan > 0
+                   GROUP BY
+                       p.playerId
+               ) AS m
+               GROUP BY
+                   m.clan
+               HAVING
+                   COUNT(*) > 1
+           ) AS r
            LEFT JOIN
-               hlstats_Clans AS c ON p.clan = c.clanId
-           WHERE
-               p.hideranking = 0
-               AND p.lastAddress <> ''
-               AND p.game = '".$game."'
-               AND $dateFilter
-               AND p.clan > 0
-           GROUP BY
-               p.clan
-           HAVING
-               COUNT(p.playerId) > 1
+               hlstats_Clans AS c ON c.clanId = r.clan
            ORDER BY
                $sort $sortorder,
                $sort2 $sortorder,
-               connection_time DESC
-           LIMIT 
+               connection_time DESC,
+               clan
+           LIMIT
                30 OFFSET $start
             ";
 

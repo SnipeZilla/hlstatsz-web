@@ -101,6 +101,8 @@ function printserverstats($server_id, $server)
 
 <?php 
 		unset($team_colors);
+		$config = $db->query("SELECT value FROM hlstats_Servers_Config where serverId =$server_id and parameter = 'IgnoreBots'");
+		$IgnoreBots = $db->fetch_row($config)[0];
 		$statsdata = $db->query("
 			SELECT 
 				team, 
@@ -113,8 +115,6 @@ function printserverstats($server_id, $server)
 				teamshots, 
 				teamhits, 
 				teamjointime, 
-				IFNULL(playerlist_bgcolor,'#D5D5D5') as playerlist_bgcolor, 
-				IFNULL(playerlist_color,'#050505') AS playerlist_color, 
 				IFNULL( playerlist_index, 99 ) AS playerlist_index
 			FROM 
 				hlstats_Teams
@@ -238,8 +238,15 @@ function printserverstats($server_id, $server)
 					{
 						echo '<span class="hlstats-flag"><img src="'.getFlag($thisplayer['cli_flag']).'" alt="'.ucfirst(strtolower($thisplayer['cli_country'])).'" data-tooltip="'.htmlspecialchars(ucfirst(strtolower($thisplayer['cli_country'])), ENT_QUOTES).'" /></span>';
 					}
-					echo '<a href="'.$g_options['scripturl'].'?mode='.$mode.'&amp;player='.$thisplayer['player_id'].'"><span class="hlstats-name">';
-					echo htmlspecialchars(html_entity_decode($thisplayer['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</span></a>';
+					if ( $thisplayer['steam_id'] == 'BOT' && $IgnoreBots != 0)
+						 echo '<span class="hlstats-name">'.htmlspecialchars(html_entity_decode($thisplayer['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</span>';
+					else {
+						echo '<a href="'.$g_options['scripturl'].'?mode='.$mode.'&amp;player='.$thisplayer['player_id'].'">'.
+						 '<span class="hlstats-name">'.htmlspecialchars(html_entity_decode($thisplayer['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT).'</span>'.
+						 '</a>';
+					}
+
+
 				}
 				else
 				{

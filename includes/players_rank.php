@@ -28,6 +28,9 @@ for the players of the page only.
 
 A rank's players (rankinfo.php): a small rank is ranked whole, a big one like the global ranking.
 
+A clan's members (claninfo): the page is read from the clan's members alone, then the ranks of its players are counted
+like any page of the global ranking.
+
 Indexes (updater/93.php):
     ranking       (game, hideranking, skill, kills, connection_time, playerId, lastAddress)
     ranking_kills (game, hideranking, kills, deaths DESC, connection_time, playerId, lastAddress)
@@ -86,6 +89,19 @@ function rankIndex(?string $index = null): string
         $hints[$index] = $db->num_rows() ? "FORCE INDEX ($index)" : '';
     }
     return $hints[$index];
+}
+
+// The date index of the history, named for a query on days: its rows are written day after day, so the days of a
+// view are read together. Without the name MySQL reads the history in player order to sum it, every row of it.
+function historyIndex(): string
+{
+    global $db;
+    static $hint = null;
+    if ($hint === null) {
+        $db->query("SHOW INDEX FROM hlstats_Players_History WHERE Key_name = 'eventTime'");
+        $hint = $db->num_rows() ? 'FORCE INDEX (eventTime)' : '';
+    }
+    return $hint;
 }
 
 // SQL: the players in the ranking of a game
@@ -314,6 +330,43 @@ function rankInfoPlayers(string $game, int $minKills, int $maxKills, string $sor
     return ['rows' => $list, 'total' => $total];
 }
 
+// A page of a clan's members in the ranking, each with his rank_position among all the players of the game:
+// ['rows' => the members, 'total' => members in the ranking]. $sort: rank_position, lastName, skill, kills, percent
+// (his share of $clanKills, the clan's kills), deaths, kpd, activity or connection_time; members equal on it are sorted
+// by the ranking's second column (its first when sorted by the second), then by id.
+function rankClanMembers(string $game, int $clan, int $clanKills, string $sort, string $sortorder, int $page, int $perpage = 15): array
+{
+    global $db;
+    [$r1, $r2] = rankColumns();
+    $where = rankWhere($game);
+    $start = max(0, $page - 1) * $perpage;
+    $by    = $sort === 'rank_position'
+        ? rankOrder($sort, $sortorder)
+        : "$sort $sortorder, " . ($sort === $r2 ? $r1 : $r2) . " $sortorder, playerId DESC";
+
+    // The page, its ranks and its details are read from the same snapshot
+    $db->query("START TRANSACTION WITH CONSISTENT SNAPSHOT, READ ONLY");
+    $list = $db->fetch_row_set($db->query("
+        SELECT playerId, lastName, country, flag, skill, connection_time, kills, deaths, clan, last_event,
+            last_skill_change, activity,
+            ROUND(IF(deaths=0, 0, kills/deaths), 2) AS kpd,
+            ROUND(kills / IF($clanKills = 0, 1, $clanKills) * 100, 2) AS percent,
+            COUNT(*) OVER () AS total_rows
+        FROM hlstats_Players " . rankIndex('playerclan') . "
+        WHERE clan = $clan AND $where
+        ORDER BY $by
+        LIMIT $perpage OFFSET $start
+    ")) ?: [];
+
+    $rank = rankList($list, null, 0, false, $where, rankIndex());
+    $db->query("COMMIT");
+
+    foreach ($list as $i => $r) {
+        $list[$i]['rank_position'] = $rank[$r['playerId']];
+    }
+    return ['rows' => $list, 'total' => $list ? (int) $list[0]['total_rows'] : 0];
+}
+
 // A page of a date ranking: the history summed over $dateFilter (on h.eventTime). Same result as rankPlayers().
 function rankPlayersHistory(string $game, string $sort, string $sortorder, int $page, string $dateFilter, int $perpage = 30): array
 {
@@ -329,7 +382,7 @@ function rankPlayersHistory(string $game, string $sort, string $sortorder, int $
                 SUM(h.connection_time) AS connection_time, SUM(h.kills) AS kills, SUM(h.deaths) AS deaths,
                 SUM(h.skill_change) AS skill, SUM(h.shots) AS shots, SUM(h.hits) AS hits,
                 SUM(h.headshots) AS headshots, MAX(h.kill_streak) AS kill_streak, MAX(h.death_streak) AS death_streak
-            FROM hlstats_Players_History h
+            FROM hlstats_Players_History h " . historyIndex() . "
             WHERE $dateFilter
             AND h.game = '$g'
             GROUP BY h.playerId

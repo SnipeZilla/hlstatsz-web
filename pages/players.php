@@ -44,9 +44,9 @@ switch ($rank_type) {
                        AND h.eventTime < CURDATE()";
         break;
 
-    case 2: // Last Weekend (Sat + Sun)
-        $dateFilter = "YEARWEEK(h.eventTime, 1) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)
-                       AND WEEKDAY(h.eventTime) IN (5,6)";
+    case 2: // Last Weekend (Sat + Sun): the two days before this week's Monday, a range of the date index
+        $dateFilter = "h.eventTime >= CURDATE() - INTERVAL (WEEKDAY(CURDATE()) + 2) DAY
+                       AND h.eventTime < CURDATE() - INTERVAL WEEKDAY(CURDATE()) DAY";
         break;
 
     case 3: // Last 7 days

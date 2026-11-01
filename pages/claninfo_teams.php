@@ -156,27 +156,37 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'roles') {
 	");
 	list($numrolejoins) = $db->fetch_row();
 
+// Each role: how many times the members picked it, and their kills and deaths in it (as playerinfo counts them for a
+// player), each read from the members' own events
 $result = $db->query("
-        WITH agg AS (
+        WITH members AS (
+            SELECT playerId FROM hlstats_Players WHERE clan = $clan
+        ),
+        agg AS (
             SELECT
-                IFNULL(r.name, e.role) AS name,
-                IFNULL(r.code, e.role) AS code,
-                COUNT(e.id) AS rolecount,
-                SUM(CASE WHEN f.killerId = e.playerId THEN 1 ELSE 0 END) AS killsTotal,
-                SUM(CASE WHEN f.victimId = e.playerId THEN 1 ELSE 0 END) AS deathsTotal
-            FROM hlstats_Events_ChangeRole e
-            LEFT JOIN hlstats_Roles r ON e.role = r.code
-            LEFT JOIN hlstats_Servers s ON s.serverId = e.serverId
-            LEFT JOIN hlstats_Players p ON p.playerId = e.playerId
-            LEFT JOIN hlstats_Events_Frags f
-                ON f.serverId = e.serverId
-            AND s.game = '$game'
-            AND (f.killerRole = e.role OR f.victimRole = e.role)
+                IFNULL(MAX(r.name), e.role) AS name,
+                IFNULL(MAX(r.code), e.role) AS code,
+                COUNT(e.id) AS rolecount
+            FROM members m
+            JOIN hlstats_Events_ChangeRole e ON e.playerId = m.playerId
+            JOIN hlstats_Servers s ON s.serverId = e.serverId
+            JOIN hlstats_Roles r ON r.code = e.role
             WHERE
                 s.game = '$game'
-                AND p.clan = $clan
                 AND r.game = '$game'
             GROUP BY e.role
+        ),
+        role_kills AS (
+            SELECT f.killerRole AS role, COUNT(*) AS killsTotal
+            FROM members m
+            JOIN hlstats_Events_Frags f ON f.killerId = m.playerId
+            GROUP BY f.killerRole
+        ),
+        role_deaths AS (
+            SELECT f.victimRole AS role, COUNT(*) AS deathsTotal
+            FROM members m
+            JOIN hlstats_Events_Frags f ON f.victimId = m.playerId
+            GROUP BY f.victimRole
         ),
         ranked AS (
             SELECT
@@ -184,12 +194,14 @@ $result = $db->query("
                 agg.code,
                 agg.rolecount,
                 LEAST(ROUND(agg.rolecount / IF($numrolejoins = 0, 1, $numrolejoins) * 100, 2),100) AS percent,
-                agg.killsTotal,
-                agg.deathsTotal,
-                ROUND(agg.killsTotal / IF(agg.deathsTotal = 0, 1, agg.deathsTotal), 2) AS kpd,
+                IFNULL(k.killsTotal, 0) AS killsTotal,
+                IFNULL(d.deathsTotal, 0) AS deathsTotal,
+                ROUND(IFNULL(k.killsTotal, 0) / IF(IFNULL(d.deathsTotal, 0) = 0, 1, d.deathsTotal), 2) AS kpd,
                 RANK() OVER (ORDER BY agg.rolecount DESC, agg.code ASC) AS rank_position,
                 COUNT(*) OVER() AS total_rows
             FROM agg
+            LEFT JOIN role_kills k ON k.role = agg.code
+            LEFT JOIN role_deaths d ON d.role = agg.code
         )
         SELECT * FROM ranked
         ORDER BY

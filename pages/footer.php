@@ -103,7 +103,18 @@ if (($g_options["show_google_map"] == 1) && ($mode == "contents" || $mode == "se
     const DetailPage = <?= empty($game) ? 1 : 0 ?>;
 
     function setupMap() {
-        if (!document.querySelector("#map")) return;
+        const el = document.querySelector("#map");
+        if (!el) return;
+
+        // In a tab that is not shown (claninfo), the map has no size to be drawn in: it is drawn when its tab is
+        // shown again (tab:shown)
+        if (el.offsetWidth <= 0) return;
+
+        // The map already drawn in this box, shown again or next to something just loaded: only its size is checked
+        if (OpenMap && OpenMap.getContainer() === el) {
+            OpenMap.invalidateSize();
+            return;
+        }
 
         if (OpenMap) { OpenMap.remove(); OpenMap = null; }
 
@@ -131,6 +142,7 @@ if (($g_options["show_google_map"] == 1) && ($mode == "contents" || $mode == "se
 
     document.getElementById('hlstats-contents')
         ?.addEventListener('fetch:loaded', setupMap);
+    document.addEventListener('tab:shown', setupMap);
     </script>
 <?php
 }

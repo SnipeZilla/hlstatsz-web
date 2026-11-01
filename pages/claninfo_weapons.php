@@ -53,7 +53,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'weapons') {
 
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
-    $start = isset($_GET['weap_page']) ? ((int)$_GET['weap_page'] - 1) * 10 : 0;
+    $start = max(0, (int) ($_GET['weap_page'] ?? 1) - 1) * 10;
 
 
     $result = $db->query("
@@ -86,7 +86,8 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'weapons') {
         SELECT * FROM ranked
         ORDER BY
             $sort $sortorder,
-            $sort2 $sortorder
+            $sort2 $sortorder,
+            weapon ASC
         LIMIT 10 OFFSET $start;
 ");
     if ($db->num_rows($result)) {
@@ -177,7 +178,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'statsme') {
         $sort2 = "smkills";
     }
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
-    $start = isset($_GET['sm_page']) ? ((int)$_GET['sm_page'] - 1) * 10 : 0;
+    $start = max(0, (int) ($_GET['sm_page'] ?? 1) - 1) * 10;
     $result = $db->query("
 
 	
@@ -213,7 +214,8 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'statsme') {
     SELECT * FROM ranked
     ORDER BY
         $sort $sortorder,
-        $sort2 $sortorder
+        $sort2 $sortorder,
+        smweapon ASC
     LIMIT 10 OFFSET $start;
 	");
     
@@ -299,7 +301,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'statsme2') {
 	}
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
-    $start = isset($_GET['sm2_page']) ? ((int)$_GET['sm2_page'] - 1) * 10 : 0;
+    $start = max(0, (int) ($_GET['sm2_page'] ?? 1) - 1) * 10;
 	$query = "
         WITH sm2 AS (
 		SELECT
@@ -372,7 +374,8 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'statsme2') {
         SELECT * FROM ranked
         ORDER BY
             $sort $sortorder,
-            $sort2 $sortorder
+            $sort2 $sortorder,
+            smweapon ASC
         LIMIT 10 OFFSET $start;
 	";
   $result = $db->query($query);    	
@@ -399,8 +402,10 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'statsme2') {
         <th class="<?= isSorted('smright',$sort,$sortorder) ?>"><?= headerUrl('smright', ['sm2_sort','sm2_sortorder'], 'statsme2') .t('th.right') ?></a></th>
     </tr>
     <?php
+        $sm2rows = array();   // kept for the hitbox below
         while ($res = $db->fetch_array($result))
         {
+            $sm2rows[] = $res;
             $total = $res['total_rows'];
             $weapon = strtolower($res['smweapon']);
             $image = getImage("/games/$realgame/weapons/" . $weapon);
@@ -433,7 +438,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'statsme2') {
 <section>
 
 			<?php
-    $result = $db->query($query);
+		// the hitbox: the weapons of the table above, from its rows (the same query, not run twice)
 		$weapon_data = array();
 		$css_models = array('ct', 'ct2', 'ct3', 'ct4', 'ts', 'ts2', 'ts3', 'ts4');
     $css_ct_weapons = array ('usp', 'tmp', 'm4a1', 'aug', 'famas', 'sig550');
@@ -449,7 +454,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'statsme2') {
 		$dinodday_models = array('ddd_allies', 'ddd_axis');
     $dinodday_allies_weapons = array('garand', 'greasegun', 'thompson', 'shotgun', 'sten', 'carbine', 'bar', 'mosin', 'p38', 'piat', 'nagant', 'flechette', 'pistol', 'trigger');
     $dinodday_axis_weapons = array('mp40', 'k98', 'mp44', 'k98sniper', 'luger', 'stygimoloch', 'mg42', 'trex');
-    while ($rowdata = $db->fetch_array())
+    foreach ($sm2rows as $rowdata)
     {
 			$weapon_data['total']['head']					+= $rowdata['smhead'];
 			$weapon_data['total']['leftarm']				+= $rowdata['smleftarm'];

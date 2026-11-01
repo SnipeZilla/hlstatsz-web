@@ -273,6 +273,9 @@ const Tabs = {
         if (clickedTab) {
             clickedTab.closest('li').classList.add('active');
         }
+
+        // Shown: what needs its size to be drawn (the map of claninfo) can take it now
+        document.getElementById(targetId).dispatchEvent(new CustomEvent('tab:shown', { bubbles: true }));
     },
 
     loadFromHash() {

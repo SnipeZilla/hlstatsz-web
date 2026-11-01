@@ -34,7 +34,7 @@ $asterisk = $g_options['DeleteDays'] ? ' *' : '';
 
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
-    $start = isset($_GET['obj_page']) ? ((int)$_GET['obj_page'] - 1) * 30 : 0;
+    $start = max(0, (int) ($_GET['obj_page'] ?? 1) - 1) * 30;
 
 	$result = $db->query("
         WITH combined AS (
@@ -69,7 +69,7 @@ $asterisk = $g_options['DeleteDays'] ? ' *' : '';
         final AS (
             SELECT
                 code,
-                description,
+                MIN(description) AS description,
                 SUM(obj_count) AS obj_count,
                 SUM(obj_bonus) AS obj_bonus
             FROM combined
@@ -84,7 +84,8 @@ $asterisk = $g_options['DeleteDays'] ? ' *' : '';
         SELECT * FROM ranked
         ORDER BY
             $sort $sortorder,
-            $sort2 $sortorder
+            $sort2 $sortorder,
+            code ASC
         LIMIT 30 OFFSET $start;
 
 
