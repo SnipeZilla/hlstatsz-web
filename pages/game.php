@@ -128,10 +128,24 @@ printSectionTitle(t('title.stats'));
 <?php
 
     
-printSectionTitle(t('title.servers'));
+if ($g_options['show_server_load_image'] == 1) {
+	// The Servers title holds the graphs switch; the choice is kept in the browser and applied before the graphs show
+?>
+<script>try { if (localStorage.getItem('hlz-graphs') === 'off') document.documentElement.classList.add('hlz-graphs-off'); } catch (e) {}</script>
+<h1 class="hlstats-title-bar"><span><?= t('title.servers') ?></span>
+	<button type="button" class="hlstats-graphs-toggle" aria-pressed="true" data-tooltip="<?= t('graphs.toggle') ?>" onclick="toggleGraphs(this)">
+		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+		<span class="hlstats-graphs-label"><?= t('graphs') ?></span>
+		<span class="hlstats-switch" aria-hidden="true"><span></span></span>
+	</button>
+</h1>
+<?php
+} else {
+	printSectionTitle(t('title.servers'));
+}
 ?>
 
-<table class="hlstats-map">
+<table class="hlstats-map" data-graphs>
 
 <?php
 
@@ -168,7 +182,7 @@ printSectionTitle(t('title.servers'));
 
 
         $slider = ($g_options['slider'] == 1 && count($servers) > 1) ? ' hlstats-slider' : '';
-        echo '<div class="responsive-table livestats'.($slider ? ' slider-group' : ' expand-group').'">';
+        echo '<div class="responsive-table livestats'.($slider ? ' slider-group' : ' expand-group').'" data-graphs>';
 
 		$i=0;
 		for ($i=0; $i<count($servers); $i++)
@@ -345,6 +359,19 @@ if ($g_options['slider'] == 1 && count($servers) > 1) {
     }
     updateGraphColspan();
     window.addEventListener('resize', updateGraphColspan);
+
+    // The graphs switch in the Servers title
+    var toggle = document.querySelector('.hlstats-graphs-toggle');
+    function syncToggle() {
+        if (toggle) toggle.setAttribute('aria-pressed', document.documentElement.classList.contains('hlz-graphs-off') ? 'false' : 'true');
+    }
+    window.toggleGraphs = function() {
+        var off = document.documentElement.classList.toggle('hlz-graphs-off');
+        try { localStorage.setItem('hlz-graphs', off ? 'off' : 'on'); } catch (e) {}
+        syncToggle();
+        if (!off) updateGraphColspan();
+    };
+    syncToggle();
 })();
 </script>
 <?php

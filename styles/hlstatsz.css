@@ -413,6 +413,64 @@ appearance: textfield;
 .hlstats-btn.is-active{ border-color: var(--sba-accent); background: var(--table-td-bg-hover); }
 :is(.hlstats-btn, .sba-btn):disabled{ opacity: .5; cursor: progress; }
 :is(.hlstats-btn, .sba-btn).is-primary{ border-color: transparent; background: var(--button-bg); color: var(--button-color); }
+
+/* a section title with a control on the right */
+.hlstats-title-bar{ display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+/* the graphs switch of the live view: an icon, a label and a small switch */
+.hlstats-graphs-toggle{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 0;
+  padding: 4px 6px 4px 10px;
+  border: var(--input-border);
+  border-radius: 999px;
+  background: var(--input-bg);
+  color: var(--main-color);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .2px;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.hlstats-graphs-toggle:hover{ border-color: var(--sba-accent); }
+.hlstats-graphs-toggle:focus-visible{ outline: 2px solid var(--sba-accent); outline-offset: 2px; }
+.hlstats-graphs-toggle svg{ flex: none; opacity: .9; transition: opacity .2s; }
+.hlstats-switch{
+  position: relative;
+  flex: none;
+  width: 30px;
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.18);
+  transition: background .2s;
+}
+.hlstats-switch span{
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.4);
+  transition: transform .2s;
+}
+.hlstats-graphs-toggle[aria-pressed="true"] .hlstats-switch{ background: var(--button-bg); }
+.hlstats-graphs-toggle[aria-pressed="true"] .hlstats-switch span{ transform: translateX(14px); }
+.hlstats-graphs-toggle[aria-pressed="false"] svg,
+.hlstats-graphs-toggle[aria-pressed="false"] .hlstats-graphs-label{ opacity: .55; }
+
+/* the graphs hidden; shown again, they fade in */
+html.hlz-graphs-off [data-graphs] .hlstats-graph{ display: none !important; }
+[data-graphs] .hlstats-graph > td > *{ animation: hlz-graphs-in .3s ease-out; }
+@keyframes hlz-graphs-in{ from{ opacity: 0; transform: translateY(-4px); } to{ opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce){
+  .hlstats-graphs-toggle, .hlstats-switch, .hlstats-switch span{ transition: none; }
+  [data-graphs] .hlstats-graph > td > *{ animation: none; }
+}
 :is(.hlstats-btn, .sba-btn).is-danger{ color: var(--sba-danger); }
 :is(.hlstats-btn, .sba-btn).is-danger:hover{ border-color: currentColor; }
 :is(.hlstats-btn, .sba-btn).is-danger.is-solid{ border-color: transparent; background: #d73a49; color: #fff; }
