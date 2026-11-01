@@ -20,7 +20,9 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	
 	$db->query("
 		SELECT
-			rankName
+			rankName,
+			minKills,
+			maxKills
 		FROM
 			hlstats_Ranks
 		WHERE
@@ -39,7 +41,6 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
     $sortorder = $_GET['sortorder'] ?? '';
     $sort      = $_GET['sort'] ?? '';
-    $sort2     = "kills";
 
     $col = array("rank_position","skill","kills","playerName");
     if (!in_array($sort, $col)) {
@@ -47,62 +48,17 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
         $sortorder = "ASC";
     }
 
-    if ($sort == "kills") {
-        $sort2 = "skill";
-    }
-
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
-    $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 30 : 0;
+    $page = max(1, (int)($_GET['page'] ?? 1));
 
-    $result = $db->query("
-        WITH Base AS (
-            SELECT
-                p.skill,
-                p.kills,
-                p.flag,
-                p.lastName AS playerName,
-                p.playerId
-            FROM hlstats_Players p
-            JOIN hlstats_Ranks r
-                ON r.rankId = $rank
-                AND r.game = p.game
-            WHERE
-                p.game = '$game' AND
-                p.kills >= r.minKills AND
-                p.kills <= r.maxKills AND
-                p.hideranking <> '1'
-        ),
-        Ranked AS (
-            SELECT
-                *,
-                RANK() OVER (ORDER BY skill DESC, kills DESC) AS rank_position,
-                COUNT(*) OVER () AS total_rows
-            FROM Base
-        )
-        SELECT *
-        FROM Ranked
-        ORDER BY
-            $sort $sortorder,
-            $sort2 $sortorder,
-            playerName ASC
-        LIMIT 30 OFFSET $start
-	");
-
-	$db->query("
-		SELECT COUNT(p.playerId)
-		FROM hlstats_Players p
-		JOIN hlstats_Ranks r
-			ON r.rankId = $rank
-			AND r.game = p.game
-		WHERE
-			p.game = '$game' AND
-			p.kills >= r.minKills AND
-			p.kills <= r.maxKills AND
-			p.hideranking <> '1'
-	");
-
-	list($numitems) = $db->fetch_row();
+    // The page with each player's rank among the players of the rank (includes/players_rank.php)
+    require_once INCLUDE_PATH . '/players_rank.php';
+    $ranking = isset($actiondata)
+        ? rankInfoPlayers($game, (int) $actiondata['minKills'], (int) $actiondata['maxKills'], $sort, $sortorder, $page)
+        : array('rows' => array(), 'total' => 0);
+    $numitems = $ranking['total'];
+    $total    = $numitems;
 
 	$resultRank = $db->query("
 		SELECT
@@ -161,9 +117,8 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
         <th class="<?= isSorted('skill',$sort,$sortorder) ?>"><?= headerUrl('skill', ['sort','sortorder'], 'rankinfo') ?>Skill</a></th>
     </tr>
     <?php
-        while ($res = $db->fetch_array($result))
+        foreach ($ranking['rows'] as $res)
         {
-            $total = $res['total_rows'];
             echo '<tr>
                   <td class="nowrap right">'.$res['rank_position'].'</td>
                   <td class="hlstats-main-description left">
@@ -177,7 +132,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
    ?>
    </table></div>
    <?php
-       echo Pagination($total, $_GET['page'] ?? 1, 30, 'page', true, 'rankinfo');
+       echo Pagination($total, $page, 30, 'page', true, 'rankinfo');
 
   if (is_ajax()) exit;
   ?>

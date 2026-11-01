@@ -15,32 +15,49 @@ For current support and updates:
 */
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
-// select the available ribbons
-$result = $db->query("
-    SELECT
-        r.ribbonId,
-        r.ribbonName,
-        r.image,
-        a.name AS awardName,
-        r.awardCount,
-        COALESCE(pr.achievedcount, 0) AS achievedcount
-    FROM hlstats_Ribbons r
-    JOIN hlstats_Awards a
-      ON a.code = r.awardCode
-     AND a.game = r.game
-    LEFT JOIN (
-        SELECT pr.ribbonId, COUNT(DISTINCT pr.playerId) AS achievedcount
-        FROM hlstats_Players_Ribbons pr
-        JOIN hlstats_Players p ON p.playerId = pr.playerId
-        WHERE p.hideranking <> '1'
-        GROUP BY pr.ribbonId
-    ) pr
-      ON pr.ribbonId = r.ribbonId
-    WHERE r.game = '$game'
-      AND r.special = 0
-    ORDER BY r.awardCount, r.ribbonName, r.awardCode;
-");
-if (!$db->num_rows()) return;
+// select the available ribbons, with the players who have them (hidden players left out). Only this game's ribbons
+// are counted. Ribbons change only when hlstats-awards.pl gives them, and it writes ribbons_date once they are all
+// given (awards_d_date with an older script): the list is kept until then (delete cache/hlstatsz_ribbons_*.json to
+// see a change made in between).
+$ribbons = null;
+$awardsDate = (string) (($g_options['ribbons_date'] ?? '') ?: ($g_options['awards_d_date'] ?? ''));
+$cacheFile = './cache/hlstatsz_ribbons_' . md5($game) . '.json';
+$saved = json_decode((string) @file_get_contents($cacheFile), true);
+if (is_array($saved) && ($saved['date'] ?? null) === $awardsDate && is_array($saved['ribbons'] ?? null)) {
+    $ribbons = $saved['ribbons'];
+}
+if (!is_array($ribbons)) {
+    $db->query("
+        SELECT
+            r.ribbonId,
+            r.ribbonName,
+            r.image,
+            a.name AS awardName,
+            r.awardCount,
+            COALESCE(pr.achievedcount, 0) AS achievedcount
+        FROM hlstats_Ribbons r
+        JOIN hlstats_Awards a
+          ON a.code = r.awardCode
+         AND a.game = r.game
+        LEFT JOIN (
+            SELECT pr.ribbonId, COUNT(DISTINCT pr.playerId) AS achievedcount
+            FROM hlstats_Ribbons gr
+            JOIN hlstats_Players_Ribbons pr ON pr.ribbonId = gr.ribbonId
+            JOIN hlstats_Players p ON p.playerId = pr.playerId
+            WHERE gr.game = '$game'
+              AND p.hideranking <> '1'
+            GROUP BY pr.ribbonId
+        ) pr
+          ON pr.ribbonId = r.ribbonId
+        WHERE r.game = '$game'
+          AND r.special = 0
+        ORDER BY r.awardCount, r.ribbonName, r.awardCode
+    ");
+    $ribbons = $db->fetch_row_set() ?: array();
+    if (!is_dir('./cache')) @mkdir('./cache', 0755, true);
+    @file_put_contents($cacheFile, json_encode(array('date' => $awardsDate, 'ribbons' => $ribbons), JSON_INVALID_UTF8_SUBSTITUTE), LOCK_EX);
+}
+if (!$ribbons) return;
 ?>
 
 <?php printSectionTitle(t('title.awards.ribbons')); ?>
@@ -48,7 +65,7 @@ if (!$db->num_rows()) return;
 <?php
     $c   = 0;
     $cnt = -1;
-    while ($r = $db->fetch_array())
+    foreach ($ribbons as $r)
     {
         if ($cnt != $r['awardCount'])
         {

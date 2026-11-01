@@ -192,14 +192,6 @@ function playerIdentity(array $playerdata, string $uqid, string $coid, array $st
     list($uqid, $coid) = $db->fetch_row();
 
 
-    // Build rank comparison expression for correlated COUNT subquery.
-    // This replaces RANK() OVER which forces a full-table scan + sort on every page load.
-    if ($g_options['rankingtype'] !== 'kills') {
-        $rank_above = "(p2.skill > p.skill OR (p2.skill = p.skill AND p2.kills > p.kills))";
-    } else {
-        $rank_above = "(p2.kills > p.kills OR (p2.kills = p.kills AND p2.deaths < p.deaths))";
-    }
-
     $db->query("SELECT game
                 FROM hlstats_Players
                 WHERE playerId = '$player'
@@ -238,14 +230,7 @@ function playerIdentity(array $playerdata, string $uqid, string $coid, array $st
                     ROUND(IF(p.kills=0, 0, p.headshots/p.kills), 2) AS hpk,
                     ROUND(IF(p.shots=0, 0, p.hits/p.shots), 3) AS acc,
                     CONCAT(c.name) AS clan_name,
-                    p.hideranking,
-                    (SELECT COUNT(*) + 1
-                     FROM hlstats_Players p2
-                     WHERE p2.game = p.game
-                       AND p2.lastAddress <> ''
-                       AND p2.hideranking = 0
-                       AND $rank_above
-                    ) AS rank_position
+                    p.hideranking
                 FROM hlstats_Players AS p
                 LEFT JOIN hlstats_Clans AS c ON c.clanId = p.clan
                 WHERE p.playerId = '$player'
@@ -260,6 +245,10 @@ function playerIdentity(array $playerdata, string $uqid, string $coid, array $st
 
     $playerdata = $db->fetch_array();
     $db->free_result();
+
+    // His rank: 1 + the players ranked above him, counted on the ranking index (includes/players_rank.php)
+    require_once INCLUDE_PATH . '/players_rank.php';
+    $playerdata['rank_position'] = rankOfPlayer($playerdata['game'], $playerdata);
 
     $error = '';
 

@@ -15,37 +15,10 @@ For current support and updates:
 */
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
-$result = $db->query("
-    SELECT
-        rankName,
-        minKills,
-        rankId,
-        count(playerId) AS obj_count
-    FROM
-        hlstats_Ranks
-    INNER JOIN
-        hlstats_Players
-    ON (
-       hlstats_Ranks.game=hlstats_Players.game
-       )    
-    WHERE
-        kills>=minKills
-        AND kills<=maxKills
-        AND hideranking <> '1'
-        AND hlstats_Ranks.game='$game'
-    GROUP BY
-        rankName,
-        minKills,
-        rankId
-");
+require_once INCLUDE_PATH . '/players_rank.php';
 
-while ($r = $db->fetch_array())
-{
-    $ranks[$r['rankId']] = $r['obj_count'];
-}
-$db->free_result();
 // select the available ranks
-$result = $db->query("
+$db->query("
     SELECT
         rankName,
         minKills,
@@ -59,6 +32,52 @@ $result = $db->query("
     ORDER BY
         minKills
 ");
+$rankList = $db->fetch_row_set() ?: array();
+
+// Players of each rank (kills from minKills to maxKills, not hidden), in one pass over the game's players on the
+// ranking index: INTERVAL() puts each player in his slice of kills between two rank bounds, and each rank adds up its
+// slices (so ranks may leave gaps or overlap). Counted once a minute.
+$bounds = array();
+foreach ($rankList as $r) {
+    $bounds[] = (int) $r['minKills'];
+    $bounds[] = (int) $r['maxKills'] + 1;
+}
+$bounds = array_values(array_unique($bounds));
+sort($bounds);
+
+$slices = null;
+$cacheFile = './cache/hlstatsz_ranks_' . md5($game . '|' . implode(',', $bounds)) . '.json';
+if (is_file($cacheFile) && time() - filemtime($cacheFile) < 60) {
+    $slices = json_decode((string) @file_get_contents($cacheFile), true);
+}
+if (!is_array($slices)) {
+    $slices = array();
+    if ($bounds) {
+        $db->query("
+            SELECT INTERVAL(kills, " . implode(', ', $bounds) . ") AS slice, COUNT(*)
+            FROM hlstats_Players " . rankIndex() . "
+            WHERE game = '$game'
+            AND hideranking <> 1
+            GROUP BY slice
+        ");
+        while (list($slice, $players) = $db->fetch_row()) {
+            $slices[(int) $slice] = (int) $players;
+        }
+    }
+    if (!is_dir('./cache')) @mkdir('./cache', 0755, true);
+    @file_put_contents($cacheFile, json_encode($slices), LOCK_EX);
+}
+
+// slice i holds the kills from $bounds[i - 1] to $bounds[i] - 1
+$ranks = array();
+foreach ($rankList as $r) {
+    $from = array_search((int) $r['minKills'], $bounds, true) + 1;
+    $to   = array_search((int) $r['maxKills'] + 1, $bounds, true);
+    $ranks[$r['rankId']] = 0;
+    for ($i = $from; $i <= $to; $i++) {
+        $ranks[$r['rankId']] += $slices[$i] ?? 0;
+    }
+}
 ?>
 
 
@@ -68,7 +87,7 @@ $result = $db->query("
     <div class="hlstats-center">
 
 <?php
-    while ($r = $db->fetch_array())
+    foreach ($rankList as $r)
     {
   
         $image = getImage('/ranks/'.$r['image']);

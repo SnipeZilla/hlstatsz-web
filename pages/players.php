@@ -17,187 +17,57 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	if (!$game) {
         error("No such game.");
 	}
+require_once INCLUDE_PATH . '/players_rank.php';
+
 $total     = 0;
 $rank_type = (int)valid_request($_GET['rank_type'] ?? '', false);
 $sortorder = valid_request($_GET['sortorder'] ?? '', false);
 $sort      = valid_request($_GET['sort'] ?? '', false);
+$page      = max(1, (int)($_GET['page'] ?? 1));
 
-function qPlayersRank()
-{
-    global $game, $g_options, $sort, $sortorder, $rank_type;
-
-    // Determine ranking columns
-    if ($g_options['rankingtype'] !== 'kills') {
-        $rank_type1 = 'skill';
-        $rank_type2 = 'kills';
-        $sortorder2 = 'DESC';
-    } else {
-        $rank_type1 = 'kills';
-        $rank_type2 = 'deaths';
-        $sortorder2 = 'ASC';
-    }
-
-    // Allowed sort columns
-    $col = array("lastName","rank_position","skill","kills","deaths","kpd","headshots","hpk","acc","activity","connection_time");
-    if (!in_array($sort, $col)) {
-        $sort      = 'rank_position';
-        $sortorder = 'ASC';
-    }
-
-    // Secondary sort
-    if ($sort == $rank_type2) {
-        $sort2 = $rank_type1;
-        $sortorder2 = 'DESC';
-    } else {
-        $sort2 = $rank_type1;
-        $sortorder2 = 'DESC';
-    }
-
-    $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
-
-    $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 30 : 0;
-
-    // Date filter
-    switch ($rank_type) {
-        case 0: // Global
-            $dateFilter = "1=1";
-            break;
-
-        case 1: // Yesterday
-            $dateFilter = "h.eventTime >= CURDATE() - INTERVAL 1 DAY
-                           AND h.eventTime < CURDATE()";
-            break;
-    
-        case 2: // Last Weekend (Sat + Sun)
-            $dateFilter = "YEARWEEK(h.eventTime, 1) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)
-                           AND WEEKDAY(h.eventTime) IN (5,6)";
-            break;
-    
-        case 3: // Last 7 days
-            $dateFilter = "h.eventTime >= NOW() - INTERVAL 7 DAY";
-            break;
-    
-        case 4: // Last 28 days
-            $dateFilter = "h.eventTime >= NOW() - INTERVAL ".$g_options['MinActivity']." DAY";
-            break;
-
-        default:
-            $rank_type  =0;
-            $dateFilter = "1=1";
-            break;
-    }
-
-    // ---------------------------------------------------------
-    // GLOBAL RANKING (no history table)
-    // ---------------------------------------------------------
-    if ($rank_type == 0) {
-        return "WITH Base AS (
-                SELECT
-                    p.playerId,
-                    p.last_event,
-                    p.connection_time,
-                    p.lastName,
-                    p.flag,
-                    p.country,
-                    p.kills,
-                    p.deaths,
-                    p.skill,
-                    p.shots,
-                    p.hits,
-                    p.headshots,
-                    p.last_skill_change,
-                    p.kill_streak,
-                    p.death_streak,
-                    p.activity,
-                    uid.uniqueId
-                FROM hlstats_Players p
-                LEFT JOIN hlstats_PlayerUniqueIds uid ON uid.playerId = p.playerId
-                WHERE p.hideranking = 0
-                AND p.lastAddress <> ''
-                AND p.game = '$game'
-            ),
-            Ranked AS (
-                SELECT
-                    *,
-                    RANK() OVER (ORDER BY $rank_type1 DESC, $rank_type2 $sortorder2) AS rank_position,
-                    COUNT(*) OVER() AS total_rows
-                FROM Base
-            )
-            SELECT *,
-                ROUND(IF(deaths=0, 0, kills/deaths), 2) AS kpd,
-                ROUND(IF(kills=0, 0, headshots/kills), 2) AS hpk,
-                ROUND(IF(shots=0, 0, hits/shots), 3) AS acc
-            FROM Ranked
-            ORDER BY $sort $sortorder,
-                    $sort2 $sortorder2,
-                    connection_time DESC
-            LIMIT 30 OFFSET $start
-        ";
-    }
-
-    // ---------------------------------------------------------
-    // DATE-FILTERED RANKING (history table)
-    // ---------------------------------------------------------
-    return "WITH Aggregated AS (
-            SELECT
-                h.playerId,
-                SUM(h.connection_time) AS connection_time,
-                SUM(h.kills) AS kills,
-                SUM(h.deaths) AS deaths,
-                SUM(h.skill_change) AS skill,
-                SUM(h.shots) AS shots,
-                SUM(h.hits) AS hits,
-                SUM(h.headshots) AS headshots,
-                MAX(h.kill_streak) AS kill_streak,
-                MAX(h.death_streak) AS death_streak
-            FROM hlstats_Players_History h
-            WHERE $dateFilter
-            AND h.game = '$game'
-            GROUP BY h.playerId
-        ),
-        Base AS (
-            SELECT
-                a.playerId,
-                p.last_event,
-                a.connection_time,
-                p.lastName,
-                p.flag,
-                p.country,
-                uid.uniqueId,
-                a.kills,
-                a.deaths,
-                a.skill,
-                a.shots,
-                a.hits,
-                a.headshots,
-                p.last_skill_change,
-                a.kill_streak,
-                a.death_streak,
-                p.activity
-            FROM Aggregated a
-            JOIN hlstats_Players p ON p.playerId = a.playerId
-            LEFT JOIN hlstats_PlayerUniqueIds uid ON uid.playerId = a.playerId
-            WHERE p.hideranking = 0
-            AND p.lastAddress <> ''
-        ),
-        Ranked AS (
-            SELECT
-                *,
-                RANK() OVER (ORDER BY $rank_type1 DESC, $rank_type2 $sortorder2) AS rank_position,
-                COUNT(*) OVER() AS total_rows
-            FROM Base
-        )
-        SELECT *,
-            ROUND(IF(deaths=0, 0, kills/deaths), 2) AS kpd,
-            ROUND(IF(kills=0, 0, headshots/kills), 2) AS hpk,
-            ROUND(IF(shots=0, 0, hits/shots), 3) AS acc
-        FROM Ranked
-        ORDER BY $sort $sortorder,
-                $sort2 $sortorder2,
-                connection_time DESC
-        LIMIT 30 OFFSET $start
-    ";
+// Allowed sort columns
+$col = array("lastName","rank_position","skill","kills","deaths","kpd","headshots","hpk","acc","activity","connection_time");
+if (!in_array($sort, $col)) {
+    $sort      = 'rank_position';
+    $sortorder = 'ASC';
 }
+$sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
+
+// Date filter
+switch ($rank_type) {
+    case 0: // Global
+        $dateFilter = "1=1";
+        break;
+
+    case 1: // Yesterday
+        $dateFilter = "h.eventTime >= CURDATE() - INTERVAL 1 DAY
+                       AND h.eventTime < CURDATE()";
+        break;
+
+    case 2: // Last Weekend (Sat + Sun)
+        $dateFilter = "YEARWEEK(h.eventTime, 1) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)
+                       AND WEEKDAY(h.eventTime) IN (5,6)";
+        break;
+
+    case 3: // Last 7 days
+        $dateFilter = "h.eventTime >= NOW() - INTERVAL 7 DAY";
+        break;
+
+    case 4: // Last 28 days
+        $dateFilter = "h.eventTime >= NOW() - INTERVAL ".(int)$g_options['MinActivity']." DAY";
+        break;
+
+    default:
+        $rank_type  = 0;
+        $dateFilter = "1=1";
+        break;
+}
+
+// The page with each player's true rank (includes/players_rank.php)
+$ranking = $rank_type == 0
+    ? rankPlayers($game, $sort, $sortorder, $page)
+    : rankPlayersHistory($game, $sort, $sortorder, $page, $dateFilter);
+$total = $ranking['total'];
 
 if (!is_ajax()) {
     printSectionTitle(t('title.player.rankings'));
@@ -219,8 +89,6 @@ if (!is_ajax()) {
 <?php
 }
 
-$query  = qPlayersRank();
-
 echo '<div class="responsive-table">
 <table class="players-table">
     <tr>
@@ -240,12 +108,8 @@ echo '<div class="responsive-table">
         <th class="hide-1'. isSorted('connection_time', $sort, $sortorder) .'">'. headerUrl('connection_time',['sort','sortorder'],'players') .t('th.connection.time').'</a></th>
     </tr>';
 
-    if (!empty($query)) {
-        $result = $db->query($query);
-
-        while ($res = $db->fetch_array($result))
+        foreach ($ranking['rows'] as $res)
         {
-            $total   = $res['total_rows'];
             $time    =  TimeStamp($res['connection_time']);
             $sign    = '';
             $class   = ' skill';
@@ -285,9 +149,8 @@ echo '<div class="responsive-table">
                 <td class="nowrap hide-1">'.$time.'</td>
             </tr>';
         }
-    }
     echo  '</table></div>'.
-          Pagination($total, $_GET['page'] ?? 1, 30, 'page');
+          Pagination($total, $page, 30, 'page');
 
 if (is_ajax()) exit();
 

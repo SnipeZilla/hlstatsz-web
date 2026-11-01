@@ -15,82 +15,19 @@ For current support and updates:
 */
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
+require_once INCLUDE_PATH . '/players_rank.php';
+
 $rank_type = 0;
 $sortorder = valid_request($_GET['sortorder'] ?? '', false);
 $sort      = valid_request($_GET['sort'] ?? '', false);
+$page      = max(1, (int)($_GET['page'] ?? 1));
 
-function qPlayersRank()
-{
-    global $game, $g_options, $sort, $sortorder, $rank_type;
-
-
-    if ($g_options['rankingtype'] !== 'kills') {
-        $rank_type1 = 'skill';
-        $rank_type2 = 'kills';
-        $sortorder2 = 'DESC';
-    } else {
-        $rank_type1 = 'kills';
-        $rank_type2 = 'deaths';
-        $sortorder2 = 'ASC';
-    }
-
-    $col = array("lastName","rank_position","skill","kills","deaths","kpd","headshots","hpk","acc","activity","connection_time");
-    if (!in_array($sort, $col)) {
-        $sort      = $rank_type1;
-        $sortorder = 'DESC';
-    }
-    
-    if ($sort == $rank_type2) {
-        $sort2 = $rank_type1;
-        $sortorder2 = 'DESC';
-    } else { $sort2 = $rank_type1; }
-
-    $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
-
-    $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 30 : 0;
-
-    $dateFilter = "1=1"; // no date restriction
-
-    return "
-        WITH RankedPlayers AS (
-            SELECT
-                RANK() OVER (ORDER BY $rank_type1 DESC, $rank_type2 $sortorder2) AS rank_position,
-                p.playerId,
-                p.last_event,
-                p.connection_time,
-                p.lastName,
-                p.flag,
-                p.country,
-                p.kills,
-                p.deaths,
-                p.skill,
-                p.shots,
-                p.hits,
-                p.headshots,
-                p.last_skill_change,
-                p.kill_streak,
-                p.death_streak,
-                p.activity,
-                uid.uniqueId,
-                ROUND(IF(p.deaths=0, 0, p.kills/p.deaths), 2) AS kpd,
-                ROUND(IF(p.kills=0, 0, p.headshots/p.kills), 2) AS hpk,
-                ROUND(IF(p.shots=0, 0, p.hits/p.shots), 3) AS acc,
-                COUNT(*) OVER() AS total_rows
-            FROM hlstats_Players p
-            LEFT JOIN hlstats_PlayerUniqueIds uid ON uid.playerId = p.playerId
-            WHERE p.hideranking = 0
-              AND p.lastAddress <> ''
-              AND p.game = '".$game."'
-        )
-        SELECT *
-        FROM RankedPlayers
-        ORDER BY $sort $sortorder,
-                 $sort2 $sortorder2,
-                 connection_time DESC
-        LIMIT 30 OFFSET $start
-    ";
-
+$col = array("lastName","rank_position","skill","kills","deaths","kpd","headshots","hpk","acc","activity","connection_time");
+if (!in_array($sort, $col)) {
+    $sort      = rankColumns()[0];
+    $sortorder = 'DESC';
 }
+$sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
 // Player Rankings
 $db->query("
@@ -117,7 +54,9 @@ $db->free_result();
 <?php
 
 
-$query  = qPlayersRank();
+// The page with each player's true rank (includes/players_rank.php)
+$ranking = rankPlayers($game, $sort, $sortorder, $page);
+$total   = $ranking['total'];
 
 echo '
 <table class="players-table">
@@ -138,12 +77,8 @@ echo '
         <th class="'. isSorted('connection_time', $sort, $sortorder) .'">'. headerUrl('connection_time',['sort','sortorder'],'players') .'Connection Time</a></th>
     </tr>';
 
-    if (!empty($query)) {
-        $result = $db->query($query);
-
-        while ($res = $db->fetch_array($result))
+        foreach ($ranking['rows'] as $res)
         {
-            $total   = $res['total_rows'];
             $time    =  TimeStamp($res['connection_time']);
             $sign    = '';
             $class   = ' skill';
@@ -178,9 +113,8 @@ echo '
                 <td class="nowrap">'.$time.'</td>
             </tr>';
         }
-    }
     echo  '</table>'.
-          Pagination($total, $_GET['page'] ?? 1, 30, 'page', false);
+          Pagination($total, $page, 30, 'page', false);
 
 
 
