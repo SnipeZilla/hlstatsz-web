@@ -438,7 +438,7 @@ appearance: textfield;
 .hlstats-graphs-toggle:hover{ border-color: var(--sba-accent); }
 .hlstats-graphs-toggle:focus-visible{ outline: 2px solid var(--sba-accent); outline-offset: 2px; }
 .hlstats-graphs-toggle svg{ flex: none; opacity: .9; transition: opacity .2s; }
-.hlstats-switch{
+.hlstats-graphs-toggle .hlstats-switch{
   position: relative;
   flex: none;
   width: 30px;
@@ -447,7 +447,7 @@ appearance: textfield;
   background: rgba(255,255,255,.18);
   transition: background .2s;
 }
-.hlstats-switch span{
+.hlstats-graphs-toggle .hlstats-switch span{
   position: absolute;
   top: 2px;
   left: 2px;
@@ -468,7 +468,7 @@ html.hlz-graphs-off [data-graphs] .hlstats-graph{ display: none !important; }
 [data-graphs] .hlstats-graph > td > *{ animation: hlz-graphs-in .3s ease-out; }
 @keyframes hlz-graphs-in{ from{ opacity: 0; transform: translateY(-4px); } to{ opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce){
-  .hlstats-graphs-toggle, .hlstats-switch, .hlstats-switch span{ transition: none; }
+  .hlstats-graphs-toggle, .hlstats-graphs-toggle .hlstats-switch, .hlstats-graphs-toggle .hlstats-switch span{ transition: none; }
   [data-graphs] .hlstats-graph > td > *{ animation: none; }
 }
 :is(.hlstats-btn, .sba-btn).is-danger{ color: var(--sba-danger); }
@@ -542,6 +542,7 @@ a.hlstats-chip:not(.green, .orange, .red):hover,
 a.hlstats-chip:is(.green, .orange, .red):hover{ background: color-mix(in srgb, currentColor 26%, transparent); }
 
 .hlstats-switch{
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 8px;
