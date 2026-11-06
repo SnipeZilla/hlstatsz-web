@@ -73,9 +73,6 @@ define('SECRET_KEY', 'GdXtjLW6A8eIgoeYMbnRFhf366e111SAQMomkeYqDVGMOwjxY4WOd4y7t5
 
 // ── Cache ────────────────────────────────────────────────────────────────────────────────────────────
 
-// How long files in cache/, hlstatsimg/progress and hlstatsimg/avatars are kept
-define('CACHE_CLEAN_INTERVAL', 86400);
-
 // How long forum signatures, graphs and charts are kept before they are drawn again, in seconds.
 define('IMAGE_UPDATE_INTERVAL', 300);
 
