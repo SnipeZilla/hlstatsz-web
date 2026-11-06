@@ -22,12 +22,24 @@ if (defined('DEBUG') && DEBUG === true) {
     error_reporting(-1);
     ini_set('display_errors', '0');
 }
-// Live refresh (includes/live.php): a page saved LIVE_INTERVAL seconds ago or less is answered here, before the
-// session and the database
+// Live refresh
 if (!empty($_GET['live']) && in_array($_GET['mode'] ?? '', ['', 'contents', 'servers'], true)
 	&& strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest') {
 	require_once INCLUDE_PATH . '/live.php';
 	if ($liveEntry = liveFresh(liveCacheFile())) liveSend($liveEntry, 'hit');
+}
+
+// Cache cleaning: asked by a page in the background when it is due.
+// the cleaning goes on after the answer where the server allows it (PHP-FPM, LiteSpeed)
+if (isset($_GET['cacheclean']) && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+	require_once INCLUDE_PATH . '/live.php';
+	ignore_user_abort(true);
+	http_response_code(204);
+	header('Cache-Control: no-store');
+	if (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
+	elseif (function_exists('litespeed_finish_request')) litespeed_finish_request();
+	cacheClean();
+	exit;
 }
 
 session_set_cookie_params([

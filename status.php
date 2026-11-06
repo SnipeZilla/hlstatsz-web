@@ -200,7 +200,9 @@ if (isset($_GET['show_password']) && is_string($_GET['show_password'])) {
 //// Entries
 $result = $db->query("
 	SELECT
-		IF(publicaddress != '', publicaddress, concat(address, ':', port)) AS addr,
+		" . serverConnectAddressSql() . " AS addr,
+		" . serverDisplayAddressSql() . " AS addr_text,
+		CONCAT(address, ':', port) AS addr_local,
 		name, 
 		publicaddress, 
 		act_map, 
@@ -271,7 +273,7 @@ if ($server_data['addr'] != '')  {
 	if ($server_url == 1)
 	{
 		echo '<tr><td align="center" colspan="2" class="'.$fsize.'">';
-		echo '<a href="steam://connect/'.$server_data['addr'].'" title="Connent to Server"><b>'.$server_data['addr'].'</b></a>';
+		echo '<a href="steam://connect/'.htmlspecialchars(serverConnectUrl($server_data['addr'], $server_data['addr_local'])).'" title="Connect to Server"><b>'.htmlspecialchars($server_data['addr_text']).'</b></a>';
 		echo '</td></tr>';
 	}
 

@@ -378,10 +378,8 @@ printSectionTitle('Participating Servers');
     $query= "
             SELECT
                 name,
-                IF(publicaddress != '',
-                    publicaddress,
-                    concat(address, ':', port)
-                ) AS addr,
+                " . serverConnectAddressSql() . " AS addr,
+                " . serverDisplayAddressSql() . " AS addr_text,
                 kills,
                 headshots,
                 act_players,
@@ -413,7 +411,7 @@ printSectionTitle('Participating Servers');
 		$rowdata = $servers[$i]; 
 		$server_id = $rowdata['serverId'];
 		$c = ($i % 2) + 1;
-		$addr = $rowdata["addr"];
+		$addr = htmlspecialchars($rowdata["addr_text"]);
 		$kills     = $rowdata['kills'];
 		$headshots = $rowdata['headshots'];
 		$player_string = $rowdata['act_players']."/".$rowdata['max_players'];

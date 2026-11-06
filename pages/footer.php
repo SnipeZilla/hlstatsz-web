@@ -106,11 +106,10 @@ if (($g_options["show_google_map"] == 1) && ($mode == "contents" || $mode == "se
         const el = document.querySelector("#map");
         if (!el) return;
 
-        // In a tab that is not shown (claninfo), the map has no size to be drawn in: it is drawn when its tab is
-        // shown again (tab:shown)
+        // In a tab that is not shown (claninfo)
         if (el.offsetWidth <= 0) return;
 
-        // The map already drawn in this box, shown again or next to something just loaded: only its size is checked
+        // The map already drawn in this box
         if (OpenMap && OpenMap.getContainer() === el) {
             OpenMap.invalidateSize();
             return;
@@ -136,6 +135,8 @@ if (($g_options["show_google_map"] == 1) && ($mode == "contents" || $mode == "se
 
         jsonEl = document.querySelector("#players-json");
         if (jsonEl) createPlayer(JSON.parse(jsonEl.textContent || "[]"));
+
+        MapView.fit(false);   // to the servers or the players
     }
 
     waitForElement("#map", setupMap, { timeout: 50 });
@@ -146,6 +147,8 @@ if (($g_options["show_google_map"] == 1) && ($mode == "contents" || $mode == "se
     </script>
 <?php
 }
+require_once INCLUDE_PATH . '/live.php';
+cacheCleanBeacon();
 ?>
 </body>
 </html>

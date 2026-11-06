@@ -138,3 +138,75 @@ function liveStart(?string $version = null): void
     if (defined('HLSTATS_LIVE')) return;
     echo '<script>Live.start(' . json_encode($version ?? liveVersion()) . ', ' . (LIVE_INTERVAL * 1000) . ');</script>';
 }
+
+// Cache cleaning
+
+// How often cache/, hlstatsimg/progress and hlstatsimg/avatars are emptied
+// hlstatsz_dns.json is kept.
+if (!defined('CACHE_CLEAN_INTERVAL')) define('CACHE_CLEAN_INTERVAL', 86400);
+define('CACHE_CLEAN_STAMP', './cache/hlstatsz_clean.stamp');   // holds the time of the last cleaning
+
+// True when the last cleaning is CACHE_CLEAN_INTERVAL seconds old or more, or never was
+function cacheCleanDue(): bool
+{
+    return (int) @file_get_contents(CACHE_CLEAN_STAMP) <= time() - CACHE_CLEAN_INTERVAL;
+}
+
+function cacheCleanBeacon(): void
+{
+    global $g_options;
+    if (!cacheCleanDue()) return;
+    $url = json_encode(($g_options['scripturl'] ?? 'hlstats.php') . '?cacheclean=1', JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
+    echo "<script>(function(){var u=$url;if(!(navigator.sendBeacon&&navigator.sendBeacon(u)))fetch(u,{method:'POST',keepalive:true}).catch(function(){});})();</script>";
+}
+
+function cacheClean(): void
+{
+    if (!is_dir('./cache')) @mkdir('./cache', 0755, true);
+    $lock = @fopen(CACHE_CLEAN_STAMP, 'c+');
+    if (!$lock) return;
+    if (!flock($lock, LOCK_EX | LOCK_NB)) { fclose($lock); return; }   // another request is cleaning
+
+    // Due?
+    if ((int) stream_get_contents($lock) > time() - CACHE_CLEAN_INTERVAL) {
+        flock($lock, LOCK_UN);
+        fclose($lock);
+        return;
+    }
+    ftruncate($lock, 0);
+    rewind($lock);
+    fwrite($lock, (string) time());
+    fflush($lock);
+
+    ignore_user_abort(true);
+    @set_time_limit(300);
+    $keep   = ['hlstatsz_dns.json', basename(CACHE_CLEAN_STAMP), 'web.config'];
+    $recent = time() - 60;
+
+    foreach (['./cache', IMAGE_PATH . '/progress', IMAGE_PATH . '/avatars'] as $dir) {
+        if (!is_dir($dir)) continue;
+        try {
+            $items = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($items as $item) {
+                try {
+                    $path = $item->getPathname();
+                    if ($item->isDir()) { @rmdir($path); continue; }   // a sub-folder, once emptied
+                    $name = $item->getFilename();
+                    if (in_array($name, $keep, true) || $name[0] === '.' || stripos($name, 'index.') === 0
+                        || $item->getExtension() === '' || $item->getMTime() > $recent) continue;
+                    @unlink($path);
+                } catch (Throwable $e) {
+                    // gone meanwhile, or not readable: left for the next cleaning
+                }
+            }
+        } catch (Throwable $e) {
+            // the folder can't be read
+        }
+    }
+
+    flock($lock, LOCK_UN);
+    fclose($lock);
+}

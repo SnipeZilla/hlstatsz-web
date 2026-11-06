@@ -32,10 +32,9 @@ $query= "
         SELECT
             serverId,
             name,
-            IF(publicaddress != '',
-                publicaddress,
-                concat(address, ':', port)
-            ) AS addr,
+            " . serverConnectAddressSql() . " AS addr,
+            " . serverDisplayAddressSql() . " AS addr_text,
+            CONCAT(address, ':', port) AS addr_local,
             statusurl,
             kills,
             players,
@@ -67,7 +66,22 @@ if (!$db->num_rows($result)) { error(t('error.uniqueid',["{$server_id}" => $serv
 
 $server = array();
 $server[] = $db->fetch_array($result);
-printSectionTitle(t('title.server.live'));
+
+if ($g_options['show_server_load_image'] == 1) {
+	// The Servers title holds the graphs switch; the choice is kept in the browser and applied before the graphs show
+?>
+<script>try { if (localStorage.getItem('hlz-graphs') === 'off') document.documentElement.classList.add('hlz-graphs-off'); } catch (e) {}</script>
+<h1 class="hlstats-title-bar"><span><?= t('title.server.live') ?></span>
+	<button type="button" class="hlstats-graphs-toggle" aria-pressed="true" data-tooltip="<?= t('graphs.toggle') ?>" onclick="toggleGraphs(this)">
+		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+		<span class="hlstats-graphs-label"><?= t('graphs') ?></span>
+		<span class="hlstats-switch" aria-hidden="true"><span></span></span>
+	</button>
+</h1>
+<?php
+} else {
+	printSectionTitle(t('title.server.live'));
+}
 
 $rowdata = $server[0]; 
 
@@ -110,8 +124,9 @@ if ($g_options['show_google_map'] == 1) {
             </td>
             <td class="hide nowrap">
             <?php
-                $addr = $rowdata['addr'];
-                echo "<a data-tooltip=\"".t('map.join')."\" href=\"steam://connect/$addr\">$addr <a href=\"steam://connect/$addr\"></a>";
+                $addr = htmlspecialchars(serverConnectUrl($rowdata['addr'], $rowdata['addr_local']));
+                $addr_text = htmlspecialchars($rowdata['addr_text']);
+                echo "<a data-tooltip=\"".t('map.join')."\" href=\"steam://connect/$addr\">$addr_text</a>";
             ?>
             </td>
             <td><?= $rowdata['act_map'] ?></td>
@@ -136,7 +151,7 @@ if ($g_options['show_google_map'] == 1) {
         </tr>
 </table>
 
-<table class="hlstats-table-fixed">
+<table class="hlstats-table-fixed" data-graphs>
   <tr class="hlstats-graph hlstats-chart">
    <td style="text-align:center; padding:0;">
      <div class="responsive-table">
@@ -160,6 +175,26 @@ if ($g_options['show_google_map'] == 1) {
     printserverstats($server_id, $server);
 
 echo '</div>';
+
+if ($g_options['show_server_load_image'] == 1) {
+	// The graphs switch in the title hides the live graph only; Server Load History below always stays visible
+?>
+<script>
+(function() {
+    var toggle = document.querySelector('.hlstats-graphs-toggle');
+    function syncToggle() {
+        if (toggle) toggle.setAttribute('aria-pressed', document.documentElement.classList.contains('hlz-graphs-off') ? 'false' : 'true');
+    }
+    window.toggleGraphs = function() {
+        var off = document.documentElement.classList.toggle('hlz-graphs-off');
+        try { localStorage.setItem('hlz-graphs', off ? 'off' : 'on'); } catch (e) {}
+        syncToggle();
+    };
+    syncToggle();
+})();
+</script>
+<?php
+}
 
 printSectionTitle(t('title.server.load'));
 

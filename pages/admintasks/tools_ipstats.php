@@ -70,7 +70,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 <p>
 <?php if ($hostgroup === null): ?>
 	Player connects by host group<?= $g_options['DeleteDays'] > 0 ? ', over the last ' . (int) $g_options['DeleteDays'] . ' days' : '' ?>.
-	Host names come from the daemon's DNS lookups: without them, every connect is unresolved.
+	Host names come from hlstats-resolve.pl (the daemon does not look them up): until it runs, every connect is unresolved.
 <?php else: ?>
 	<a href="<?= $taskUrl(array()) ?>">All host groups</a> &rsaquo; <b><?= htmlspecialchars($groupLabel($hostgroup)) ?></b>
 <?php endif; ?>

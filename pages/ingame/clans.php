@@ -43,48 +43,49 @@ function qClansRank()
 
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
-    $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 30 : 0;
+    $start = max(0, (int) ($_GET['page'] ?? 1) - 1) * 30;
 
-    $dateFilter = "1=1"; // no date restriction
-
-    return "SELECT 
-               RANK() OVER (ORDER BY AVG($rank_type1) DESC, SUM($rank_type2) $rank_sort2) AS rank_position,
-               p.clan as clan,
+    return "SELECT
+               r.*,
                c.tag AS tag,
-               c.name AS name,
-               p.flag AS flag,
-               p.country AS country,
-               SUM(p.kills) AS kills,
-               SUM(p.deaths) AS deaths,
-               SUM(p.last_skill_change) AS last_skill_change,
-               FLOOR(AVG(p.skill)) AS skill,
-               SUM(p.shots) AS shots,
-               SUM(p.hits) AS hits,
-               SUM(p.headshots) AS headshots,
-               MAX(p.activity) AS activity,
-               SUM(p.connection_time) as connection_time,
-               COUNT(p.playerId) AS members,
-               ROUND(SUM(p.kills) / NULLIF(SUM(p.deaths), 0),2) AS kpd,
-               ROUND(SUM(p.headshots) / NULLIF(SUM(p.kills), 0),2) AS hpk,
-               COUNT(*) OVER() AS total_rows
-           FROM
-               hlstats_Players AS p
+               c.name AS name
+           FROM (
+               SELECT
+                   RANK() OVER (ORDER BY AVG(p.$rank_type1) DESC, SUM(p.$rank_type2) $rank_sort2) AS rank_position,
+                   p.clan as clan,
+                   SUM(p.kills) AS kills,
+                   SUM(p.deaths) AS deaths,
+                   SUM(p.last_skill_change) AS last_skill_change,
+                   FLOOR(AVG(p.skill)) AS skill,
+                   SUM(p.shots) AS shots,
+                   SUM(p.hits) AS hits,
+                   SUM(p.headshots) AS headshots,
+                   MAX(p.activity) AS activity,
+                   SUM(p.connection_time) as connection_time,
+                   COUNT(p.playerId) AS members,
+                   ROUND(SUM(p.kills) / NULLIF(SUM(p.deaths), 0),2) AS kpd,
+                   ROUND(SUM(p.headshots) / NULLIF(SUM(p.kills), 0),2) AS hpk,
+                   COUNT(*) OVER() AS total_rows
+               FROM
+                   hlstats_Players AS p
+               WHERE
+                   p.hideranking = 0
+                   AND p.lastAddress <> ''
+                   AND p.game = '".$game."'
+                   AND p.clan > 0
+               GROUP BY
+                   p.clan
+               HAVING
+                   COUNT(p.playerId) > 1
+           ) AS r
            LEFT JOIN
-               hlstats_Clans AS c ON p.clan = c.clanId
-           WHERE
-               p.hideranking = 0 
-               AND p.lastAddress <> ''
-               AND p.game = '".$game."'
-               AND p.clan > 0
-           GROUP BY
-               p.clan
-           HAVING
-               COUNT(p.playerId) > 1
+               hlstats_Clans AS c ON c.clanId = r.clan
            ORDER BY
                $sort $sortorder,
                $sort2 $sortorder,
-               connection_time DESC
-           LIMIT 
+               connection_time DESC,
+               clan
+           LIMIT
                30 OFFSET $start
             ";
 }

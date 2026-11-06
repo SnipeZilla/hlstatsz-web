@@ -34,7 +34,9 @@ if ( $type ==  "main" ) {
         $db->query("SELECT 
                         s.serverId,
                         s.game,
-                        IFNULL(NULLIF(s.publicaddress, ''), CONCAT(s.address, ':', s.port)) AS addr,
+                        " . serverConnectAddressSql('s') . " AS addr,
+                        " . serverDisplayAddressSql('s') . " AS addr_text,
+                        CONCAT(s.address, ':', s.port) AS addr_local,
                         s.name,
                         s.act_players,
                         s.max_players,
@@ -56,7 +58,9 @@ if ( $type ==  "main" ) {
         $db->query("SELECT
                         serverId,
                         game,
-                        IFNULL(NULLIF(publicaddress, ''), CONCAT(address, ':', port)) AS addr,
+                        " . serverConnectAddressSql() . " AS addr,
+                        " . serverDisplayAddressSql() . " AS addr_text,
+                        CONCAT(address, ':', port) AS addr_local,
                         name,
                         act_players,
                         max_players,
@@ -82,7 +86,8 @@ if ( $type ==  "main" ) {
                            'country'     => $row['country'],
                            'serverId'    => $row['serverId'],
                            'name'        => $row['name'],
-                           'addr'        => $row['addr'],
+                           'addr'        => serverConnectUrl($row['addr'], $row['addr_local']),
+                           'addr_text'   => $row['addr_text'],
                            'name'        => $row['name'],
                            'act_map'     => $row['act_map'],
                            'act_players' => $row['act_players'],
@@ -116,7 +121,7 @@ if ( $type ==  "main" ) {
 
                         s.name AS server_name,
                         s.game,
-                        IFNULL(NULLIF(s.publicaddress, ''), CONCAT(s.address, ':', s.port)) AS server_addr,
+                        " . serverConnectAddressSql('s') . " AS server_addr,
                         s.act_map,
                         s.act_players,
                         s.max_players
@@ -156,7 +161,7 @@ if ( $type ==  "main" ) {
 
                         s.name AS server_name,
                         s.game,
-                        IFNULL(NULLIF(s.publicaddress, ''), CONCAT(s.address, ':', s.port)) AS server_addr,
+                        " . serverConnectAddressSql('s') . " AS server_addr,
                         s.act_map,
                         s.act_players,
                         s.max_players

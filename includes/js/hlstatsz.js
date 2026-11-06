@@ -291,20 +291,21 @@ const Tabs = {
 
 /* Map */
 function iniMap() {
-    OpenMap = L.map('map',{zoomControl:false}).setView([35.45, -12.00], 2);
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        minZoom: 2,
-        maxZoom: 19,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(OpenMap);
-
     var bounds = L.latLngBounds(
         L.latLng(-89.98155760646617, -180),
         L.latLng(89.99346179538875, 180)
     );
 
-    OpenMap.setMaxBounds(bounds);
+    const el = document.getElementById('map');
+    const minZoom = Math.max(1, Math.floor(Math.log2(el.offsetWidth / 256)));
+    OpenMap = L.map(el, { zoomControl: false, minZoom: minZoom, maxBounds: bounds }).setView([35.45, 0], minZoom);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        minZoom: minZoom,
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(OpenMap);
+
     OpenMap.on('drag', () => {
         OpenMap.panInsideBounds(bounds, { animate: false });
     });
@@ -326,7 +327,102 @@ function iniMap() {
     playerMarkers = clusterGroup('players');
     OpenMap.addLayer(serverMarkers);
     OpenMap.addLayer(playerMarkers);
+    MapView.watch(OpenMap);
 }
+
+/*
+ * The map follows what is going on by itself while the visitor leaves it alone
+ */
+const MapView = {
+    idle: 60000,    // ms after the visitor last touched the map before it moves by itself again
+    zoom: 5,        // the closest it zooms by itself (one player, players in one place)
+    radius: 2000,   // km: players closer than this, one to the next, are in the same area
+    pad: 48,        // px kept free around the markers: a pin stands 43 px over its place
+    touched: 0,     // when the visitor last touched the map
+    showing: '',    // what it last moved to by itself: 'world' or 'players'
+    timer: null,
+
+    watch(map) {
+        clearTimeout(this.timer);
+        this.timer = null;
+        this.touched = 0;
+        this.showing = '';
+        const el = map.getContainer();
+        // capture: seen before Leaflet handles it; the same function is added once to an element
+        ['pointerdown', 'pointermove', 'wheel', 'keydown'].forEach(ev =>
+            el.addEventListener(ev, MapView.touch, { capture: true, passive: true }));
+    },
+
+    touch() {
+        MapView.touched = Date.now();
+        if (!MapView.timer) MapView.timer = setTimeout(() => MapView.fit(), MapView.idle);
+    },
+
+    // The players to show: the area holding more than half of them, else all of them (two far apart: both)
+    area(points) {
+        const left = points.slice(), areas = [];
+        while (left.length) {
+            const area = [left.pop()];
+            for (let i = 0; i < area.length; i++) {                      // and whoever is close to one in it
+                for (let j = left.length - 1; j >= 0; j--) {
+                    if (area[i].distanceTo(left[j]) <= this.radius * 1000) area.push(left.splice(j, 1)[0]);
+                }
+            }
+            areas.push(area);
+        }
+        const most = areas.reduce((a, b) => (b.length > a.length ? b : a));
+        return most.length * 2 > points.length ? most : points;
+    },
+
+    // All the points inside the map, away from its edges
+    inView(points) {
+        const pad = L.point(this.pad, this.pad);
+        const inner = L.bounds(pad, OpenMap.getSize().subtract(pad));
+        return points.every(p => inner.contains(OpenMap.latLngToContainerPoint(p)));
+    },
+
+    // Zoomed out all the way, on the latitude of the servers as far as the world lets it (not past its edges)
+    world() {
+        const zoom = OpenMap.getMinZoom(), half = OpenMap.getSize().y / 2, h = 256 * Math.pow(2, zoom);
+        const servers = serverMarkers.getLayers().map(m => m.getLatLng());
+        const lat = servers.length ? L.latLngBounds(servers).getCenter().lat : 35.45;
+        const y = half * 2 >= h ? h / 2 : Math.min(Math.max(OpenMap.project([lat, 0], zoom).y, half), h - half);
+        return OpenMap.unproject(L.point(h / 2, y), zoom);
+    },
+
+    fit(animate = true) {
+        clearTimeout(this.timer);
+        this.timer = null;
+        if (!window.OpenMap || typeof serverMarkers === 'undefined') return;
+        const wait = this.touched + this.idle - Date.now();
+        if (wait > 0) {                                                   // in use: once it is left alone
+            this.timer = setTimeout(() => this.fit(), wait);
+            return;
+        }
+        if (OpenMap.getContainer().querySelector('.leaflet-popup')) return;   // closing it is a touch
+
+        const opts = { padding: [this.pad, this.pad], animate: animate, duration: 1.2 };
+        const players = playerMarkers.getLayers().map(m => m.getLatLng());
+        if (!players.length) {
+            if (this.showing === 'world') return;
+            this.showing = 'world';
+            if (animate) OpenMap.flyTo(this.world(), OpenMap.getMinZoom(), opts);
+            else OpenMap.setView(this.world(), OpenMap.getMinZoom(), opts);
+            return;
+        }
+
+        const area = this.area(players);
+        if (this.showing === 'players') {
+            if (this.inView(area)) return;
+            opts.maxZoom = OpenMap.getZoom();                             // the zoom is kept, or zoomed out to fit
+        } else {
+            opts.maxZoom = this.zoom;
+        }
+        this.showing = 'players';
+        if (animate) OpenMap.flyToBounds(L.latLngBounds(area), opts);
+        else OpenMap.fitBounds(L.latLngBounds(area), opts);
+    }
+};
 
 function escHtml(s) {
   return String(s ?? "").replace(/[&<>"']/g, m => ({
@@ -384,7 +480,7 @@ function serverCard(server) {
   const city = escHtml(server.city);
   const country = escHtml(server.country);
   const addrRaw = stripBackslashes(server.addr);
-  const addrText = escHtml(addrRaw);
+  const addrText = escHtml(stripBackslashes(server.addr_text || server.addr));
   const geocity = Location(country, '', city);
 
   return `
@@ -661,7 +757,8 @@ function formatNum(num) {
  * Every few seconds asks the same page with live=1 (hlstats.php, includes/live.php). Nothing changed: the
  * server answers 204 and nothing is done. Otherwise only the blocks marked data-live="..." whose content
  * changed are swapped (their element stays, so slider state and handlers on it survive), and the map
- * markers are redrawn without moving the map. Paused while the tab is hidden.
+ * markers are redrawn; the map moves to them only while the visitor leaves it alone (MapView). Paused while the
+ * tab is hidden.
  */
 const Live = {
     url: '',
@@ -739,6 +836,7 @@ const Live = {
             playerMarkers.clearLayers();
             createServers(JSON.parse(s.textContent || '[]'));
             createPlayer(JSON.parse(p.textContent || '[]'));
+            MapView.fit();
         };
         // a popup is open: wait until it is closed, so it does not vanish under the mouse
         if (document.querySelector('#map .leaflet-popup')) {

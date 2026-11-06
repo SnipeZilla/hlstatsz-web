@@ -35,6 +35,37 @@ const FIXENC_CP1252 = array(
     0x2122 => 0x99, 0x0161 => 0x9A, 0x203A => 0x9B, 0x0153 => 0x9C, 0x017E => 0x9E, 0x0178 => 0x9F,
 );
 
+// Scripts a word does not mix (Chinese, Japanese and Korean do, together)
+const FIXENC_SCRIPTS = array(
+    '\p{Latin}', '\p{Greek}', '\p{Cyrillic}', '\p{Armenian}', '\p{Hebrew}', '\p{Arabic}', '\p{Syriac}', '\p{Thaana}',
+    '\p{Devanagari}', '\p{Bengali}', '\p{Gurmukhi}', '\p{Gujarati}', '\p{Tamil}', '\p{Telugu}', '\p{Kannada}',
+    '\p{Malayalam}', '\p{Thai}', '\p{Lao}', '\p{Tibetan}', '\p{Georgian}', '\p{Ethiopic}', '\p{Khmer}',
+    '[\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}\p{Bopomofo}]',
+);
+
+/**
+ * Whether repaired text reads as text. Bytes that happen to be valid UTF-8 give, instead, a word of two scripts or
+ * an accent on nothing: the name "ZerinhØ™" was not double-encoded, its "Ø™" read as UTF-8 is an Arabic vowel mark
+ * on the Latin "h". Such a value stays as it is.
+ */
+function fixencReadable(string $text): bool
+{
+    preg_match_all('/[\p{L}\p{M}]+/u', $text, $words);
+    foreach ($words[0] as $word) {
+        if (preg_match('/^\p{M}/u', $word)) {
+            return false;    // an accent on no letter
+        }
+        $scripts = 0;
+        foreach (FIXENC_SCRIPTS as $script) {
+            $scripts += preg_match('/' . $script . '/u', $word);
+        }
+        if ($scripts > 1) {
+            return false;
+        }
+    }
+    return true;
+}
+
 /**
  * The text with each layer of "UTF-8 read as Windows-1252" undone, or the text itself when it is not such text.
  */
@@ -71,6 +102,9 @@ function fixencText(string $text): string
                 break;
             }
             $bytes = $cut;
+        }
+        if (!fixencReadable($bytes)) {
+            break;         // bytes that read as UTF-8 by chance: this layer was not double encoding
         }
         $fixed = $bytes;
     }

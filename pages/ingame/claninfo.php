@@ -251,61 +251,18 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
     $sortorder = valid_request($_GET['sortorder'] ?? '', false);
     $sort      = valid_request($_GET['sort'] ?? '', false);
 
-    if ($g_options['rankingtype'] !== 'kills') {
-        $rank_type1 = 'skill';
-        $rank_type2 = 'kills';
-    } else {
-        $rank_type1 = 'kills';
-        $rank_type2 = 'deaths';
-    }
     $col = array("lastName","rank_position","skill","kills","deaths","activity","kpd","activity","connection_time");
     if (!in_array($sort, $col)) {
-        $sort      = $rank_type1;
+        $sort      = $g_options['rankingtype'] !== 'kills' ? 'skill' : 'kills';
         $sortorder = "DESC";
     }
-    
-    $sort2 = ($sort == $rank_type2? $rank_type1: $rank_type2);
 
     $sortorder = strtoupper($sortorder) === "ASC" ? "ASC" : "DESC";
 
-    $start = isset($_GET['page']) ? ((int)$_GET['page'] - 1) * 15 : 0;
-
-    $result = $db->query("
-        WITH RankedPlayers AS (
-            SELECT
-                RANK() OVER (ORDER BY $rank_type1 DESC, $rank_type2 DESC) AS rank_position,
-                playerId,
-                lastName,
-                country,
-                flag,
-                skill,
-                connection_time,
-                kills,
-                deaths,
-                clan,
-                ROUND(IF(deaths=0, 0, kills/deaths), 2) AS kpd,
-                ROUND(
-                    kills / IF(" . (int)$clandata['kills'] . " = 0, 1, " . (int)$clandata['kills'] . ") * 100,
-                    2
-                ) AS percent,
-                activity
-            FROM hlstats_Players
-            WHERE hideranking = 0
-              AND lastAddress <> ''
-              AND game = '".$game."'
-        ),
-        ClanPlayers AS (
-            SELECT *
-            FROM RankedPlayers
-            WHERE clan = $clan
-        )
-        SELECT
-            *,
-            COUNT(*) OVER() AS total_rows
-        FROM ClanPlayers
-        ORDER BY $sort $sortorder, $sort2 $sortorder
-        LIMIT 15 OFFSET $start
-    ");
+    // The members of the page, each with his rank among all the players of the game (includes/players_rank.php)
+    require_once INCLUDE_PATH . '/players_rank.php';
+    $memberPage = rankClanMembers($game, (int) $clan, (int) $clandata['kills'], $sort, $sortorder, max(1, (int) ($_GET['page'] ?? 1)));
+    $total      = $memberPage['total'];
 
 echo '<div id="members"><div class="responsive-table">
 <table class="players-table">
@@ -324,9 +281,8 @@ echo '<div id="members"><div class="responsive-table">
         <th class="'. isSorted('connection_time', $sort, $sortorder) .'">'. headerUrl('connection_time',['sort','sortorder'],'members') .'Connection Time</a></th>
     </tr>';
 
-     while ($res = $db->fetch_array($result))
+     foreach ($memberPage['rows'] as $res)
      {
-         $total   = $res['total_rows'];
          $time    =  TimeStamp($res['connection_time']);
          $sign    = '';
          $class   = ' skill';

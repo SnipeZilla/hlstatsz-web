@@ -81,10 +81,9 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 			SELECT
                 serverId,
                 name,
-                IF(publicaddress != '',
-                    publicaddress,
-                    concat(address, ':', port)
-                ) AS addr,
+                " . serverConnectAddressSql() . " AS addr,
+                " . serverDisplayAddressSql() . " AS addr_text,
+                CONCAT(address, ':', port) AS addr_local,
                 kills,
                 headshots,
                 act_players,
@@ -129,7 +128,6 @@ printSectionTitle(t('title.stats'));
 
     
 if ($g_options['show_server_load_image'] == 1) {
-	// The Servers title holds the graphs switch; the choice is kept in the browser and applied before the graphs show
 ?>
 <script>try { if (localStorage.getItem('hlz-graphs') === 'off') document.documentElement.classList.add('hlz-graphs-off'); } catch (e) {}</script>
 <h1 class="hlstats-title-bar"><span><?= t('title.servers') ?></span>
@@ -192,7 +190,8 @@ if ($g_options['show_server_load_image'] == 1) {
 			$server_id = $rowdata['serverId'];
 
 
-			$addr = $rowdata['addr'];
+			$addr = htmlspecialchars(serverConnectUrl($rowdata['addr'], $rowdata['addr_local']));
+			$addr_text = htmlspecialchars($rowdata['addr_text']);
 			$kills = $rowdata['kills'];
 			$headshots = $rowdata['headshots'];
 			$player_string = $rowdata['act_players'] . "/" . $rowdata['max_players'];
@@ -228,7 +227,7 @@ if ($g_options['show_server_load_image'] == 1) {
 			echo "<a href=\"" . $g_options['scripturl'] . "?mode=servers&amp;server_id=$server_id\"><span class=\"hlstats-name\" data-tooltip=\"".t('title.server.live')."\">" . htmlspecialchars(html_entity_decode($rowdata['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT) . "</span></a>";
 	?></td>
 						<td class="hide nowrap"><?php
-			echo "<a data-tooltip=\"".t('map.join')."\" href=\"steam://connect/$addr\">$addr <a href=\"steam://connect/$addr\"></a>";
+			echo "<a data-tooltip=\"".t('map.join')."\" href=\"steam://connect/$addr\">$addr_text</a>";
 	?></td>
 						<td><?php
 			echo $rowdata['act_map'];

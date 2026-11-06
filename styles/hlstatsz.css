@@ -353,9 +353,9 @@ appearance: textfield;
 
 /* servers: solid accent */
 #map .marker-cluster-servers div {
-  background: var(--button-bg);
+  background: #35994d;
   color: var(--button-color);
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--a-color) 35%, transparent);
+  box-shadow: 0 0 0 5px color-mix(in srgb, #35994d 35%, transparent);
 }
 
 /* players: dark fill, accent outline */

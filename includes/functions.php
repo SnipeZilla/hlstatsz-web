@@ -1020,4 +1020,110 @@ function hlstatsSsl()
     return $ssl;
 }
 
+/**
+ * The address players connect a server by (steam://connect/...), from its public address.
+ */
+function serverConnectAddress($publicaddress, $address, $port)
+{
+    $public = trim((string) $publicaddress);
+    if ($public === '') {
+        return $address . ':' . $port;
+    }
+    // "ip:port" or "host:port" already has its port
+    if (preg_match('/^[^:]+:\d+$/', $public)) {
+        return $public;
+    }
+    return $public . ':' . $port;
+}
+
+/**
+ * The address for a steam://connect/
+ */
+function serverConnectUrl($addr, $fallback = '')
+{
+    $addr = trim((string) $addr);
+    $fallback = $fallback !== '' ? $fallback : $addr;
+    if (preg_match('/^(\d{1,3}(?:\.\d{1,3}){3})(:\d+)?$/', $addr, $m)) {
+        return filter_var($m[1], FILTER_VALIDATE_IP) ? $addr : $fallback;
+    }
+    if (!preg_match('/^((?:[A-Za-z0-9-]+\.)+[A-Za-z][A-Za-z0-9-]*)(:\d+)?$/', $addr, $m)) {
+        return $fallback;
+    }
+    $ip = serverResolveHost($m[1]);
+    return $ip !== '' ? $ip . ($m[2] ?? '') : $fallback;
+}
+
+// How long the IP of a host name is kept (cache/hlstatsz_dns.json) before it is looked up again: a day, so a new IP
+if (!defined('DNS_CACHE_TTL')) define('DNS_CACHE_TTL', 86400);
+
+/**
+ * The IP of a host name, looked up once and kept in cache/hlstatsz_dns.json for every request after
+ */
+function serverResolveHost($host)
+{
+    static $cache = null;
+    $file = './cache/hlstatsz_dns.json';
+    // Still good: a name that resolved for DNS_CACHE_TTL seconds, one that did not for an hour
+    $fresh = function ($entry) {
+        return is_array($entry) && time() - (int) ($entry['time'] ?? 0) < (!empty($entry['ok']) ? DNS_CACHE_TTL : 3600);
+    };
+    if ($cache === null) {
+        $cache = json_decode((string) @file_get_contents($file), true);
+        $cache = is_array($cache) ? $cache : array();
+    }
+    $host  = strtolower($host);
+    $entry = (isset($cache[$host]) && is_array($cache[$host]) ? $cache[$host] : array())
+           + array('ip' => '', 'ok' => false, 'time' => 0);
+    if ($fresh($entry)) {
+        return (string) $entry['ip'];
+    }
+
+    $ip = gethostbyname($host);   // the name itself when it does not resolve
+    $ok = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false;
+    $cache[$host] = array('ip' => $ok ? $ip : (string) $entry['ip'], 'ok' => $ok, 'time' => time());
+
+    // Only the names still good are saved: one that expired and was not asked for again (a server removed, or its
+    // address changed) drops out. This request keeps it, for its last IP should its new lookup fail.
+    $saved = array_filter($cache, $fresh);
+    if (!is_dir('./cache')) @mkdir('./cache', 0755, true);
+    $tmp = $file . '.' . uniqid('', true) . '.tmp';
+    if (@file_put_contents($tmp, json_encode($saved, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false
+        || !@rename($tmp, $file)) {
+        @unlink($tmp);
+    }
+    return $cache[$host]['ip'];
+}
+
+/**
+ * The address shown for a server: its public address, else address:port.
+ * Link it to serverConnectAddress(), which has the port.
+ */
+function serverDisplayAddress($publicaddress, $address, $port)
+{
+    $public = trim((string) $publicaddress);
+    return $public !== '' ? $public : $address . ':' . $port;
+}
+
+/**
+ * The same as serverDisplayAddress(), as an SQL expression: "... AS addr_text".
+ */
+function serverDisplayAddressSql($alias = '')
+{
+    $t = $alias !== '' ? "$alias." : '';
+    return "IF(TRIM(IFNULL({$t}publicaddress, '')) = '', CONCAT({$t}address, ':', {$t}port), TRIM({$t}publicaddress))";
+}
+
+/**
+ * The same as serverConnectAddress(), as an SQL expression for the columns publicaddress, address and port 
+ */
+function serverConnectAddressSql($alias = '')
+{
+    $t = $alias !== '' ? "$alias." : '';
+    return "CASE
+                WHEN TRIM(IFNULL({$t}publicaddress, '')) = '' THEN CONCAT({$t}address, ':', {$t}port)
+                WHEN TRIM({$t}publicaddress) REGEXP '^[^:]+:[0-9]+$' THEN TRIM({$t}publicaddress)
+                ELSE CONCAT(TRIM({$t}publicaddress), ':', {$t}port)
+            END";
+}
+
 ?>

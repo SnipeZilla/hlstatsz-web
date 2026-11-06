@@ -27,10 +27,8 @@ function printserverstats($server_id, $server)
                 SELECT
                     serverId,
                     name,
-                    IF(publicaddress != '',
-                        publicaddress,
-                        concat(address, ':', port)
-                    ) AS addr,
+                    " . serverConnectAddressSql() . " AS addr,
+                    " . serverDisplayAddressSql() . " AS addr_text,
                     statusurl,
                     kills,
                     players,
