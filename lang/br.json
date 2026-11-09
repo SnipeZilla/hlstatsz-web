@@ -26,6 +26,7 @@
     "search.in.clan":    "Nomes de Clãs",
     "search.game":       "Jogo:",
     "search.all":        "Todos",
+    "signin.failed":      "O login na Steam falhou: tente novamente",
 
     "theme.seasonal":     "Tema sazonal",
     "theme.seasonal.on":  "Mudar para o tema sazonal",
