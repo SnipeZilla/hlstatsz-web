@@ -21,6 +21,9 @@ Modern yet familiar: a clean, responsive, AJAX-first layout that keeps the origi
 - Signed-in players see their own status, with *Report a player* and *Appeal a ban* links to your forum or Discord
 - Admins kick, ban and unban from the servers list, over RCON
 - No SourceBans or AMXBans website needed: bans, admins and servers are managed from HLstatsZ, which also creates their databases
+<p align="center">
+<img height="420" alt="image" src="https://github.com/user-attachments/assets/0b4504c0-b0d2-4dc5-94c5-6c4afa161f9a" />
+</p>
 
 **Community**
 - Sign in with Steam: no account or password to create
@@ -32,6 +35,9 @@ Modern yet familiar: a clean, responsive, AJAX-first layout that keeps the origi
 - A simplified theme for the in-game MOTD
 - Multi languages, included: English (US), French, German, Spanish (Mexico), Portuguese (Brazil), Russian, Albanian
 - Plain CSS, JS and PHP, easy to customize
+<p align="center">
+<img align="center" height="420" alt="image" src="https://github.com/user-attachments/assets/d3b2f2e3-4823-4382-8f96-39d856b6c326" />
+</p>
 
 **Admin panel**
 - **Admins sign in with Steam**: no admin password on the site to guess, share or steal
