@@ -301,6 +301,9 @@ if ($g_options['slider'] == 1 && count($servers) > 1) {
             var sib = serverTable.nextElementSibling;
             if (sib && sib.classList.contains('livestats-table-players')) {
                 els.push(sib);
+                // and the chat under the players (livestats.php)
+                var chat = sib.nextElementSibling;
+                if (chat && chat.classList.contains('livestats-chat')) els.push(chat);
             }
         }
         return els;
@@ -314,8 +317,8 @@ if ($g_options['slider'] == 1 && count($servers) > 1) {
         getSliderEls(row).forEach(function(el) { el.classList.remove('hlstats-slider'); });
     }
 
-    // hide all player tables on load
-    document.querySelectorAll('.livestats-table-players').forEach(function(t) {
+    // hide all player tables (and their chat) on load
+    document.querySelectorAll('.livestats-table-players, .livestats-chat').forEach(function(t) {
         t.classList.add('hlstats-slider');
     });
 

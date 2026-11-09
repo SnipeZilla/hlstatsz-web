@@ -45,21 +45,24 @@ function liveVersion(): string
     static $version = null;
     if ($version !== null) return $version;
 
+    // the newest chat line too, when the chat is shown under the players (livestats.php)
+    $chat = ($g_options['nav_globalchat'] ?? 0) == 1 ? '(SELECT MAX(id) FROM hlstats_Events_Chat)' : "''";
     $result = $db->query("
         SELECT
             (SELECT CONCAT_WS(',', COUNT(*), MAX(last_event), SUM(act_players), SUM(max_players), SUM(kills), SUM(map_started))
              FROM hlstats_Servers),
             (SELECT CONCAT_WS(',', COUNT(*), SUM(kills), SUM(deaths), SUM(skill), SUM(ping), SUM(connected))
-             FROM hlstats_Livestats)
+             FROM hlstats_Livestats),
+            $chat
     ");
-    list($servers, $live) = $db->fetch_row($result);
+    list($servers, $live, $chat) = $db->fetch_row($result);
 
     $params = $_GET;
     unset($params['live']);
     ksort($params);
 
     return $version = substr(md5(implode('|', [
-        $servers, $live, intdiv(time(), 300),
+        $servers, $live, $chat, intdiv(time(), 300),
         http_build_query($params), liveLang(), $g_options['webversion'] ?? '',
     ])), 0, 16);
 }
@@ -142,7 +145,8 @@ function liveStart(?string $version = null): void
 // Cache cleaning
 
 // How often cache/, hlstatsimg/progress and hlstatsimg/avatars are emptied
-// hlstatsz_dns.json is kept.
+// hlstatsz_dns.json is kept, and so is the last answer of the voice / community servers (hlstatsz_sc_*.xml,
+// hlstatsz_dc_*.json): it is what the pages show when Steam or Discord does not answer.
 if (!defined('CACHE_CLEAN_INTERVAL')) define('CACHE_CLEAN_INTERVAL', 86400);
 define('CACHE_CLEAN_STAMP', './cache/hlstatsz_clean.stamp');   // holds the time of the last cleaning
 
@@ -180,7 +184,7 @@ function cacheClean(): void
 
     ignore_user_abort(true);
     @set_time_limit(300);
-    $keep   = ['hlstatsz_dns.json', basename(CACHE_CLEAN_STAMP), 'web.config'];
+    $keep   = ['hlstatsz_dns.json', basename(CACHE_CLEAN_STAMP), '.htaccess'];
     $recent = time() - 60;
 
     foreach (['./cache', IMAGE_PATH . '/progress', IMAGE_PATH . '/avatars'] as $dir) {
@@ -195,7 +199,7 @@ function cacheClean(): void
                     $path = $item->getPathname();
                     if ($item->isDir()) { @rmdir($path); continue; }   // a sub-folder, once emptied
                     $name = $item->getFilename();
-                    if (in_array($name, $keep, true) || $name[0] === '.' || stripos($name, 'index.') === 0
+                    if (in_array($name, $keep, true) || preg_match('/^hlstatsz_(sc|dc)_/', $name) || $name[0] === '.' || stripos($name, 'index.') === 0
                         || $item->getExtension() === '' || $item->getMTime() > $recent) continue;
                     @unlink($path);
                 } catch (Throwable $e) {

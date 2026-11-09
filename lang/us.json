@@ -424,6 +424,8 @@
     "sb.chart.since":             "since {date}",
     "sb.chart.tip":               "{period}: {n} bans",
     "sb.chart.reset":             "Reset",
+    "sb.chart.hint.year":         "Click a bar to drill down: Year → Month",
+    "sb.chart.hint.month":        "Click a bar to drill down: Month → Day",
     "sb.search.find":             "Search bans and comms",
     "sb.search.show":             "Show:",
     "sb.search.all":              "Bans and comms",

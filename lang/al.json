@@ -424,6 +424,8 @@
     "sb.chart.since":             "që nga {date}",
     "sb.chart.tip":               "{period}: {n} bane",
     "sb.chart.reset":             "Rivendos",
+    "sb.chart.hint.year":         "Kliko mbi një shtyllë për detaje: Vit → Muaj",
+    "sb.chart.hint.month":        "Kliko mbi një shtyllë për detaje: Muaj → Ditë",
     "sb.search.find":             "Kërko bane dhe komunikime",
     "sb.search.show":             "Shfaq:",
     "sb.search.all":              "Bane dhe komunikime",

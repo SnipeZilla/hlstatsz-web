@@ -424,6 +424,8 @@
     "sb.chart.since":             "seit {date}",
     "sb.chart.tip":               "{period}: {n} Bans",
     "sb.chart.reset":             "Zurücksetzen",
+    "sb.chart.hint.year":         "Klicke auf einen Balken für Details: Jahr → Monat",
+    "sb.chart.hint.month":        "Klicke auf einen Balken für Details: Monat → Tag",
     "sb.search.find":             "Bans und Comm-Sperren durchsuchen",
     "sb.search.show":             "Anzeigen:",
     "sb.search.all":              "Bans und Comm-Sperren",

@@ -1200,6 +1200,75 @@ input:focus::placeholder{
     opacity: 1;
 }
 
+/* The in-game chat under a server's players (livestats.php): the time, then who said what. Empty: hidden */
+.livestats-chat:empty{ display: none; }
+.livestats-chat{
+  border-top: var(--table-th-border-bottom);
+  background: var(--table-td-bg-odd);
+  padding: 8px 12px 10px;
+  font-size: 13px;
+  text-align: left;
+}
+.livestats-chat-head{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.livestats-chat-title{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: var(--table-th-color);
+}
+.livestats-chat-all{
+  margin-left: auto;
+  font-size: 12px;
+  opacity: .7;
+  color: var(--table-a-color);
+  text-decoration: none;
+}
+.livestats-chat-all:hover{ opacity: 1; color: var(--table-a-color-hover); text-decoration: underline; }
+/* 240px of lines at most, then a thin scrollbar (.hlstats-scrollbar); column-reverse opens it on the newest line,
+   at the bottom, after a live refresh too */
+.livestats-chat-scroll{
+  max-height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  padding-right: 4px;
+}
+.livestats-chat-lines{
+  display: grid;
+  grid-template-columns: auto 1fr;   /* the times line up, the messages too */
+  gap: 3px 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.livestats-chat-lines li{
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  color: var(--table-td-color);
+}
+.livestats-chat-lines time{
+  font-size: 12px;
+  line-height: 1.6;
+  opacity: .55;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.livestats-chat-line{ min-width: 0; overflow-wrap: anywhere; }
+.livestats-chat-name{
+  font-weight: 600;
+  color: var(--team, var(--table-a-color));
+  text-decoration: none;
+}
+.livestats-chat-name:hover{ text-decoration: underline; }
+.livestats-chat-said{ opacity: .6; }
+
 .hlstats-ranking{ width:64px; }
 .hlstats-numeric{ width:96px; }
 .hlstats-main-column{ width:25%; }
@@ -2760,6 +2829,7 @@ th:hover::after{
   font: inherit;
 }
 .sb-chart-col:hover{ background: var(--table-td-bg-hover); }
+button.sb-chart-col{ cursor: zoom-in; }   /* a column that opens its months or days */
 button.sb-chart-col:hover{ filter: none; }
 button.sb-chart-col:focus-visible{
   outline: 2px solid var(--input-border-color-focus);
@@ -2793,7 +2863,21 @@ button.sb-chart-col:focus-visible{
   white-space: nowrap;
   opacity: .7;
 }
-.sb-chart-reset{ margin-left: auto; }
+/* Right of the ban history head: what a click on a column does, then Reset once zoomed in;
+   under the title when they do not fit, Reset under the hint on the narrowest screens */
+.sb-chart-tools{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-left: auto;
+}
+.sb-chart-hint{
+  font-size: 12px;
+  opacity: .65;
+  text-wrap: balance;   /* two even lines on the narrowest screens */
+}
 
 /* Latest bans and comm blocks */
 .sb-list{

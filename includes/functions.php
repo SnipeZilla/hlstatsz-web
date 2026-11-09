@@ -1021,6 +1021,38 @@ function hlstatsSsl()
 }
 
 /**
+ * The member list of a Steam Community group (SimpleXMLElement holding groupDetails), or null when Steam never gave one.
+ * Asked every 5 minutes and kept in cache/hlstatsz_sc_<md5 of the slug>.xml. Only a real member list is kept: when Steam
+ * does not answer with one (time out, 429, an error page), what it said last time is used, and Steam is asked again
+ * 5 minutes later.
+ */
+function steamGroupData($slug)
+{
+    $file = './cache/hlstatsz_sc_' . md5($slug) . '.xml';
+    $read = function () use ($file) {
+        $xml = is_file($file) ? @simplexml_load_string((string) @file_get_contents($file)) : false;
+        return ($xml && isset($xml->groupDetails)) ? $xml : null;
+    };
+    if (is_file($file) && (time() - filemtime($file)) < 300 && ($xml = $read())) {
+        return $xml;
+    }
+    $url = 'https://steamcommunity.com/groups/' . urlencode($slug) . '/memberslistxml/?xml=1';
+    $ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'HLstatsZ/1.0'], 'ssl' => hlstatsSsl()]);
+    $raw = @file_get_contents($url, false, $ctx);
+    $xml = $raw ? @simplexml_load_string($raw) : false;
+    if ($xml && isset($xml->groupDetails)) {
+        if (!is_dir('./cache')) @mkdir('./cache', 0755, true);
+        @file_put_contents($file, $raw, LOCK_EX);
+        return $xml;
+    }
+    $xml = $read();
+    if ($xml) {
+        @touch($file);
+    }
+    return $xml;
+}
+
+/**
  * The address players connect a server by (steam://connect/...), from its public address.
  */
 function serverConnectAddress($publicaddress, $address, $port)

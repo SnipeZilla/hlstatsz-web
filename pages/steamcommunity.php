@@ -28,26 +28,8 @@ if (!$s) {
 $group_slug   = preg_replace('/[^a-zA-Z0-9_\-]/', '', $s['addr']);
 $sc_group_url = 'https://steamcommunity.com/groups/' . urlencode($group_slug);
 
-if (!is_dir('./cache')) mkdir('./cache', 0755, true);
-$sc_cache_ttl  = 300;
-$sc_cache_file = './cache/hlstatsz_sc_' . md5($group_slug) . '.xml';
-
-$sc_xml_raw = false;
-if (is_file($sc_cache_file) && (time() - filemtime($sc_cache_file)) < $sc_cache_ttl) {
-	$sc_xml_raw = file_get_contents($sc_cache_file);
-} else {
-	$url = 'https://steamcommunity.com/groups/' . urlencode($group_slug) . '/memberslistxml/?xml=1';
-	$ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'HLstatsZ/1.0'], 'ssl' => hlstatsSsl()]);
-	$sc_xml_raw = @file_get_contents($url, false, $ctx);
-	if ($sc_xml_raw !== false) {
-		@file_put_contents($sc_cache_file, $sc_xml_raw, LOCK_EX);
-	} elseif (is_file($sc_cache_file)) {
-		// Steam did not answer: what it said last time
-		$sc_xml_raw = file_get_contents($sc_cache_file);
-	}
-}
-
-$sc_data = $sc_xml_raw ? @simplexml_load_string($sc_xml_raw) : null;
+// Steam's member list, or what it said last time when it does not answer (steamGroupData())
+$sc_data = steamGroupData($group_slug);
 
 $sc_headline = htmlspecialchars($s['name']);
 $sc_avatar   = IMAGE_PATH . '/unknown.jpg';

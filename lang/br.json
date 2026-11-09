@@ -423,6 +423,8 @@
     "sb.chart.since":             "desde {date}",
     "sb.chart.tip":               "{period}: {n} banimentos",
     "sb.chart.reset":             "Redefinir",
+    "sb.chart.hint.year":         "Clique em uma barra para ver os detalhes: Ano → Mês",
+    "sb.chart.hint.month":        "Clique em uma barra para ver os detalhes: Mês → Dia",
     "sb.search.find":             "Buscar banimentos e comunicação",
     "sb.search.show":             "Mostrar:",
     "sb.search.all":              "Banimentos e comunicação",

@@ -424,6 +424,8 @@
     "sb.chart.since":             "с {date}",
     "sb.chart.tip":               "{period}: банов — {n}",
     "sb.chart.reset":             "Сбросить",
+    "sb.chart.hint.year":         "Нажмите на столбец для детализации: Год → Месяц",
+    "sb.chart.hint.month":        "Нажмите на столбец для детализации: Месяц → День",
     "sb.search.find":             "Поиск банов, мутов и гэгов",
     "sb.search.show":             "Показать:",
     "sb.search.all":              "Баны, муты и гэги",

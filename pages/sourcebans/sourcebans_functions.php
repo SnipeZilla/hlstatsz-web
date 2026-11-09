@@ -538,7 +538,8 @@ function sbBanHistory($scope)
 
 /**
  * Content of the ban history card (#sb-history) at $scope (sbBanHistory). A bar that has smaller periods
- * zooms into them, Reset goes back to the whole history. The bars scroll sideways under a fixed scale when
+ * zooms into them, as the hint on the right of the head says (Year → Month, Month → Day; none on days),
+ * Reset next to it goes back to the whole history. The bars scroll sideways under a fixed scale when
  * they do not fit; each one is labelled with its period and count for screen readers.
  */
 function sbHistoryCard($scope)
@@ -549,9 +550,14 @@ function sbHistoryCard($scope)
 		<div class="hlstats-card-title"><?= t('sb.chart.' . ($history['level'] ?? 'month')) ?></div>
 <?php if ($history): ?>
 		<span class="hlstats-card-note"><?= htmlspecialchars($history['note']) ?></span>
-<?php if ($history['scope'] !== ''): ?>
-		<button type="button" class="sba-btn is-small sb-chart-reset" data-sb-zoom=""><?= t('sb.chart.reset') ?></button>
+		<div class="sb-chart-tools">
+<?php if ($history['level'] !== 'day'): ?>
+			<span class="sb-chart-hint"><?= t('sb.chart.hint.' . $history['level']) ?></span>
 <?php endif; ?>
+<?php if ($history['scope'] !== ''): ?>
+			<button type="button" class="sba-btn is-small sb-chart-reset" data-sb-zoom=""><?= t('sb.chart.reset') ?></button>
+<?php endif; ?>
+		</div>
 <?php endif; ?>
 	</div>
 <?php
@@ -941,7 +947,7 @@ function sbRecordCard()
 	$me     = sbMyRecord();
 	$report = trim((string) ($g_options['report_url'] ?? ''));
 	$appeal = trim((string) ($g_options['appeal_url'] ?? ''));
-	$login  = preg_match('#<a href="(https://steamcommunity\.com/openid/login[^"]*)"#', (string) $signin, $m) ? $m[1] : '';
+	$login  = preg_match('#<a href="(https://steamcommunity\.com/openid/login[^"]*)"#', (string) $signin, $m) ? html_entity_decode($m[1], ENT_QUOTES, 'UTF-8') : '';
 	$bad    = $me['bans'] || $me['comms'];
 	if (!$me['signed'] && !$bad && $login === '' && $report === '' && $appeal === '') {
 		return;

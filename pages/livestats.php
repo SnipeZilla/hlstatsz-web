@@ -17,7 +17,10 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 require_once __DIR__ . '/../includes/team_colors.php';
 
-function printserverstats($server_id, $server)
+// Chat lines shown under a server's players, at most (can be set in config.php)
+if (!defined('LIVE_CHAT_LINES')) define('LIVE_CHAT_LINES', 15);
+
+function printserverstats($server_id, $server = [])
 {
     global $db, $g_options, $game;
 
@@ -482,9 +485,89 @@ function printserverstats($server_id, $server)
     ?>
 	</tbody>
 </table>
-
 <?php
+	// The in-game chat under the players, when the chat is shown (Show Chat nav-link), on the web only (in game, the
+	// players see it). The block is always there for the live refresh to fill it; empty, it is hidden.
+	if ($g_options['nav_globalchat'] == 1 && $mode !== 'statsme') {
+		echo '<div class="livestats-chat" data-live="chat-' . (int)$server_id . '">' . serverChat($server_id, $rowdata['act_map'], $rowdata['map_started']) . '</div>';
+	}
+}
 
+/**
+ * The chat of the game a server is playing: its last LIVE_CHAT_LINES lines said since the map started ($started, unix
+ * time), oldest first, back to the first one said on another map. A name has its team's color while the player is on
+ * the server. '' when there is none.
+ */
+function serverChat($server_id, $map, $started = 0)
+{
+	global $db, $g_options, $game;
+
+	$server_id = (int)$server_id;
+	$started   = (int)$started;
+	if ((string)$map === '') return '';
+	$lines = max(1, (int)LIVE_CHAT_LINES);
+
+	// the server's last lines (its index, newest first), those said since the map started, then who said them
+	$result = $db->query("
+		SELECT
+			c.eventTime,
+			c.playerId,
+			c.message_mode,
+			c.message,
+			c.map,
+			unhex(replace(hex(p.lastName), 'E280AE', '')) AS lastName,
+			p.flag,
+			p.country,
+			l.team
+		FROM
+			(SELECT id, eventTime, playerId, message_mode, message, map
+			 FROM hlstats_Events_Chat
+			 WHERE serverId = $server_id
+			 ORDER BY id DESC
+			 LIMIT $lines) AS c
+		INNER JOIN hlstats_Players AS p
+			ON p.playerId = c.playerId
+		LEFT JOIN hlstats_Livestats AS l
+			ON l.player_id = c.playerId
+			AND l.server_id = $server_id
+		WHERE
+			c.eventTime >= FROM_UNIXTIME($started)
+		ORDER BY
+			c.id DESC
+	");
+	$chat = [];
+	while ($row = $db->fetch_array($result)) {
+		$chat[] = $row;
+	}
+	foreach ($chat as $i => $row) {
+		if ($row['map'] !== $map) { $chat = array_slice($chat, 0, $i); break; }   // said on the map before
+	}
+	if (!$chat) return '';
+
+	$html = '<div class="livestats-chat-head">'
+	      . '<span class="livestats-chat-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' . t('chat') . '</span>'
+	      . '<a class="livestats-chat-all" href="' . $g_options['scripturl'] . '?mode=chat&amp;game=' . urlencode($game) . '&amp;server_id=' . $server_id . '">' . t('title.server.chat') . '</a>'
+	      . '</div><div class="livestats-chat-scroll hlstats-scrollbar"><ol class="livestats-chat-lines">';
+	foreach (array_reverse($chat) as $row) {
+		$time  = strtotime($row['eventTime'] ?? '') ?: 0;
+		$today = date('Ymd', $time) === date('Ymd');
+		$when  = $time ? formatDate($time, $today ? IntlDateFormatter::NONE : IntlDateFormatter::SHORT, IntlDateFormatter::SHORT, $today ? 'H:i' : 'j M H:i') : '';
+		$color = TeamColor($row['team'] ?? '');
+		$said  = $row['message_mode'] == 2 ? t('team') : ($row['message_mode'] == 3 ? 'Squad' : '');
+		$name  = htmlspecialchars(html_entity_decode($row['lastName'], ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_COMPAT);
+
+		$html .= '<li><time datetime="' . date('c', $time) . '">' . $when . '</time><span class="livestats-chat-line">';
+		if ($g_options['countrydata']) {
+			$country = htmlspecialchars($row['country'] ?? '', ENT_QUOTES);
+			$html .= '<span class="hlstats-flag"><img src="' . getFlag($row['flag']) . '" alt="' . $country . '" data-tooltip="' . $country . '" /></span>';
+		}
+		$html .= '<a class="livestats-chat-name" href="' . $g_options['scripturl'] . '?mode=playerinfo&amp;player=' . (int)$row['playerId'] . '"'
+		       . ($color === null ? '' : ' style="--team:' . $color . '"') . '>' . $name . '</a>: '
+		       . ($said === '' ? '' : '<span class="livestats-chat-said">(' . $said . ')</span> ')
+		       . htmlspecialchars(stripslashes($row['message']), ENT_QUOTES)
+		       . '</span></li>';
+	}
+	return $html . '</ol></div>';
 }
 
 ?>

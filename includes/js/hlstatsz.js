@@ -331,22 +331,28 @@ function iniMap() {
 }
 
 /*
- * The map follows what is going on by itself while the visitor leaves it alone
+ * The map follows what is going on by itself while the visitor leaves it alone: everybody playing in view; players
+ * who just came first, then everybody again with the next live refresh; nobody playing: the whole world
  */
 const MapView = {
     idle: 60000,    // ms after the visitor last touched the map before it moves by itself again
     zoom: 5,        // the closest it zooms by itself (one player, players in one place)
-    radius: 2000,   // km: players closer than this, one to the next, are in the same area
+    spot: 0,        // ms on players who just came before everybody is shown again; 0: one live refresh (Live.every)
+    radius: 2000,   // km: players coming together, closer than this one to the next, are shown together
     pad: 48,        // px kept free around the markers: a pin stands 43 px over its place
     touched: 0,     // when the visitor last touched the map
-    showing: '',    // what it last moved to by itself: 'world' or 'players'
+    seen: null,     // the players on the map at the last look, by key (null: none yet, the map was just drawn)
+    until: 0,       // when it goes back from the players who just came to everybody, at the latest
+    goal: null,     // the view it last moved to by itself; forgotten when the visitor touches the map
     timer: null,
 
     watch(map) {
         clearTimeout(this.timer);
         this.timer = null;
         this.touched = 0;
-        this.showing = '';
+        this.seen = null;
+        this.until = 0;
+        this.goal = null;
         const el = map.getContainer();
         // capture: seen before Leaflet handles it; the same function is added once to an element
         ['pointerdown', 'pointermove', 'wheel', 'keydown'].forEach(ev =>
@@ -355,23 +361,24 @@ const MapView = {
 
     touch() {
         MapView.touched = Date.now();
+        MapView.goal = null;
         if (!MapView.timer) MapView.timer = setTimeout(() => MapView.fit(), MapView.idle);
     },
 
-    // The players to show: the area holding more than half of them, else all of them (two far apart: both)
-    area(points) {
-        const left = points.slice(), areas = [];
+    // The biggest group among these points: each one closer than `radius` to another one in it
+    group(points) {
+        const left = points.slice();
+        let most = [];
         while (left.length) {
-            const area = [left.pop()];
-            for (let i = 0; i < area.length; i++) {                      // and whoever is close to one in it
+            const group = [left.pop()];
+            for (let i = 0; i < group.length; i++) {                      // and whoever is close to one in it
                 for (let j = left.length - 1; j >= 0; j--) {
-                    if (area[i].distanceTo(left[j]) <= this.radius * 1000) area.push(left.splice(j, 1)[0]);
+                    if (group[i].distanceTo(left[j]) <= this.radius * 1000) group.push(left.splice(j, 1)[0]);
                 }
             }
-            areas.push(area);
+            if (group.length > most.length) most = group;
         }
-        const most = areas.reduce((a, b) => (b.length > a.length ? b : a));
-        return most.length * 2 > points.length ? most : points;
+        return most;
     },
 
     // All the points inside the map, away from its edges
@@ -390,37 +397,60 @@ const MapView = {
         return OpenMap.unproject(L.point(h / 2, y), zoom);
     },
 
+    // The view showing these points, zoomed in up to `zoom` (as fitBounds does it)
+    view(points) {
+        const bounds = L.latLngBounds(points);
+        const zoom = Math.min(this.zoom, OpenMap.getBoundsZoom(bounds, false, L.point(this.pad * 2, this.pad * 2)));
+        const sw = OpenMap.project(bounds.getSouthWest(), zoom), ne = OpenMap.project(bounds.getNorthEast(), zoom);
+        return { center: OpenMap.unproject(sw.add(ne).divideBy(2), zoom), zoom: zoom };
+    },
+
+    // Moves to a view, unless it is the one it last moved to: it is there already, or on its way
+    go(view, animate) {
+        const goal = this.goal, px = ll => OpenMap.project(ll, view.zoom);
+        if (goal && goal.zoom === view.zoom && px(goal.center).distanceTo(px(view.center)) < 2) return;
+        this.goal = view;
+        if (animate) OpenMap.flyTo(view.center, view.zoom, { duration: 1.2 });
+        else OpenMap.setView(view.center, view.zoom, { animate: false });
+    },
+
     fit(animate = true) {
         clearTimeout(this.timer);
         this.timer = null;
         if (!window.OpenMap || typeof serverMarkers === 'undefined') return;
-        const wait = this.touched + this.idle - Date.now();
+
+        // who is on the map, and who came since the last look (nobody when it was just drawn)
+        const markers = playerMarkers.getLayers();
+        const came = this.seen ? markers.filter(m => !this.seen.has(m.options.key)) : [];
+        this.seen = new Set(markers.map(m => m.options.key));
+
+        const now = Date.now(), wait = this.touched + this.idle - now;
         if (wait > 0) {                                                   // in use: once it is left alone
             this.timer = setTimeout(() => this.fit(), wait);
             return;
         }
         if (OpenMap.getContainer().querySelector('.leaflet-popup')) return;   // closing it is a touch
 
-        const opts = { padding: [this.pad, this.pad], animate: animate, duration: 1.2 };
-        const players = playerMarkers.getLayers().map(m => m.getLatLng());
-        if (!players.length) {
-            if (this.showing === 'world') return;
-            this.showing = 'world';
-            if (animate) OpenMap.flyTo(this.world(), OpenMap.getMinZoom(), opts);
-            else OpenMap.setView(this.world(), OpenMap.getMinZoom(), opts);
+        if (!markers.length) {                                            // nobody playing: the whole world
+            this.until = 0;
+            this.go({ center: this.world(), zoom: OpenMap.getMinZoom() }, animate);
             return;
         }
-
-        const area = this.area(players);
-        if (this.showing === 'players') {
-            if (this.inView(area)) return;
-            opts.maxZoom = OpenMap.getZoom();                             // the zoom is kept, or zoomed out to fit
-        } else {
-            opts.maxZoom = this.zoom;
+        const spot = this.spot || Live.every || 20000;
+        if (came.length) {                                                // somebody came: to him (them) first
+            this.until = now + spot * 1.1;                                // back to everybody with the next live
+            this.timer = setTimeout(() => this.fit(), this.until - now);  // refresh, or this if it brings nothing
+            this.go(this.view(this.group(came.map(m => m.getLatLng()))), animate);
+            return;
         }
-        this.showing = 'players';
-        if (animate) OpenMap.flyToBounds(L.latLngBounds(area), opts);
-        else OpenMap.fitBounds(L.latLngBounds(area), opts);
+        if (now < this.until - spot * 0.2) {                              // still on who came
+            this.timer = setTimeout(() => this.fit(), this.until - now);
+            return;
+        }
+        // everybody; no small moves while they are all in view at that zoom already
+        const points = markers.map(m => m.getLatLng()), view = this.view(points);
+        if (this.goal && OpenMap.getZoom() === view.zoom && this.inView(points)) return;
+        this.go(view, animate);
     }
 };
 
@@ -591,7 +621,9 @@ function createPlayer(players) {
   players.forEach(player => {
     const s_icon = getTeamIcon(player.bg);//new LeafIcon({ iconUrl: imagePath + "/player-marker.png" });
 
-    const marker = L.marker([player.cli_lat, player.cli_lng], { icon: s_icon })
+    // key: who it is, so the map knows who just came (MapView)
+    const key = String(player.playerId ?? (player.cli_lat + ',' + player.cli_lng));
+    const marker = L.marker([player.cli_lat, player.cli_lng], { icon: s_icon, key: key })
       .bindPopup(playerCard(player), popupOpts());
 
     playerMarkers.addLayer(marker);

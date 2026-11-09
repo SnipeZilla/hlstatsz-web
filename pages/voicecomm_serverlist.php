@@ -209,23 +209,8 @@ For current support and updates:
 				foreach ($steam_servers as $sc_server) {
 					$sc_slug      = preg_replace('/[^a-zA-Z0-9_\-]/', '', $sc_server['addr']);
 					$sc_group_url = 'https://steamcommunity.com/groups/' . urlencode($sc_slug);
-					$sc_cache_file = './cache/hlstatsz_sc_' . md5($sc_slug) . '.xml';
 
-					$sc_xml_raw = false;
-					if (is_file($sc_cache_file) && (time() - filemtime($sc_cache_file)) < 300) {
-						$sc_xml_raw = file_get_contents($sc_cache_file);
-					} else {
-						$url = 'https://steamcommunity.com/groups/' . urlencode($sc_slug) . '/memberslistxml/?xml=1';
-						$ctx = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'HLstatsZ/1.0'], 'ssl' => hlstatsSsl()]);
-						$sc_xml_raw = @file_get_contents($url, false, $ctx);
-						if ($sc_xml_raw !== false) {
-							@file_put_contents($sc_cache_file, $sc_xml_raw, LOCK_EX);
-						} elseif (is_file($sc_cache_file)) {
-							$sc_xml_raw = file_get_contents($sc_cache_file);
-						}
-					}
-
-					$sc_data    = $sc_xml_raw ? @simplexml_load_string($sc_xml_raw) : null;
+					$sc_data    = steamGroupData($sc_slug);
 					$sc_online  = '&mdash;';
 					$sc_members = '&mdash;';
 					$sc_icon    = IMAGE_PATH . '/unknown.jpg';

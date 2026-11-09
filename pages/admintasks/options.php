@@ -266,7 +266,6 @@ message("warning","Options with an asterisk (*) beside them require a restart of
 	$optiongroups[35] = new OptionGroup('🌍 GeoIP data & OpenStreetMap settings');
 	$optiongroups[35]->options[] = new Option('show_google_map', '🗺️ Show World Map (OpenStreetMap)', 'select');
 	$optiongroups[35]->options[] = new Option('countrydata', '🚩 Show features (flag and country) requiring GeoIP data', 'select');
-	$optiongroups[35]->options[] = new Option('UseGeoIPBinary', '💻 <strong>*GeoCity2-Lite from binary file (newest)</strong> or GeoCity-Lite from mysql database(<strong>!!!deprecated!!!</strong>).<br>For binary, GeoLite2-City.dat goes in perl/GeoLiteCity and Geo::IP::PurePerl module is required', 'select', 0);
 	
 	$optiongroups[40] = new OptionGroup('⚡Daemon Settings');
 	$optiongroups[40]->options[] = new Option('Mode', '*Sets the player-tracking mode.<br><ul><LI><b>Steam ID</b>     - Recommended for public Internet server use. Players will be tracked by Steam ID.<LI><b>Player Name</b>  - Useful for shared-PC environments, such as Internet cafes, etc. Players will be tracked by nickname. <LI><b>IP Address</b>        - Useful for LAN servers where players do not have a real Steam ID. Players will be tracked by IP Address. </UL>', 'select', 1);
