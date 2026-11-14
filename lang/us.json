@@ -5,6 +5,13 @@
     "nav.forum":         "FORUM",
     "nav.help":          "HELP",
 
+    "link.donate":       "Donate",
+    "link.rules":        "Rules",
+    "link.store":        "Store",
+    "link.support":      "Support us",
+    "link.join":         "Join us",
+    "link.website":      "Website",
+
     "sub.nav.players":   "Players",
     "sub.nav.clans":     "Clans",
     "sub.nav.awards":    "Awards",

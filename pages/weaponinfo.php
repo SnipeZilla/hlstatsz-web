@@ -152,7 +152,7 @@ printSectionTitle(t('title.weapons.details'));
     kpiTiles($tiles);
 ?>
 
-<div id="weaponinfo">
+<div id="weaponinfo" tabindex="-1">
 <?php
 }
 if ($db->num_rows($result)) {

@@ -52,7 +52,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 			sortorder,
 			publicaddress,
 			game,
-			IF(rcon_password='','','(encrypted)') AS rcon_password
+			rcon_password
 		FROM
 			hlstats_Servers
 		WHERE

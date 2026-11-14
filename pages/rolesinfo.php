@@ -140,7 +140,7 @@ printSectionTitle(t('title.roles.details'));
     if ($db->num_rows($result)) {
        if (!is_ajax()) {
 ?>
-<div id="rolesinfo">
+<div id="rolesinfo" tabindex="-1">
 <?php
 }
 ?>

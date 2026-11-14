@@ -52,6 +52,16 @@ flush();
 
 echo "<h3>hlstats_Players Ranking Index Migration</h3>";
 
+// The indexes of these three tables are dropped, all but the primary key, and this update's own set is built: once.
+// A database that has been through it has idx_players_skill_kills_conn on hlstats_Players: a forced update leaves its
+// indexes as they are (later updates added theirs: 93, the rankings) and only adds one of the set that is missing.
+$db->query("SHOW INDEX FROM hlstats_Players WHERE Key_name = 'idx_players_skill_kills_conn'");
+$migrated88 = $db->num_rows() > 0;
+
+if ($migrated88) {
+    echo "The indexes of hlstats_Players, hlstats_Players_History and hlstats_PlayerUniqueIds are this update's already: none dropped<br />";
+} else {
+
 $result = $db->query("
 SELECT INDEX_NAME 
 FROM information_schema.STATISTICS
@@ -97,10 +107,11 @@ while (list($res) = $db->fetch_row($result))
 
 }
 
+}
+
 $tables = [
 
     'hlstats_Players' => [
-        ['idx_players_skill_kills', '(skill DESC, kills DESC)'],
         ['idx_players_skill_kills_conn', '(skill DESC, kills DESC, connection_time DESC)'],
         ['idx_clan_rank', '(game, hideranking, clan)'],
         ['idx_players_country', '(game, hideranking, flag)'],

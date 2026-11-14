@@ -96,7 +96,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
     if (!is_ajax()){
     printSectionTitle(t('title.country.rankings'));
 
-    echo '<div id="countries">';
+    echo '<div id="countries" tabindex="-1">';
         
     }   
 

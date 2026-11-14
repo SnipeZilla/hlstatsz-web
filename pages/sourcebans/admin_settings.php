@@ -193,7 +193,7 @@ if (!is_ajax()) {
 		<button type="button" class="sba-btn is-primary" data-sba-open="sba-admin-add">+ Add admin</button>
 <?php endif; ?>
 	</div>
-	<div id="sba-admins">
+	<div id="sba-admins" tabindex="-1">
 <?php } ?>
 	<div class="responsive-table">
 	<table class="sba-table" data-sba-count="<?= $count ?>">

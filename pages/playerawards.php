@@ -139,7 +139,7 @@ if (!is_ajax()) {
 
    if (!is_ajax()) {
 
-echo '<div id="playerawards">';
+echo '<div id="playerawards" tabindex="-1">';
 
 }
 ?>

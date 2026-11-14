@@ -1,5 +1,22 @@
 window.addEventListener("DOMContentLoaded", () => {
 
+// The night sky (noel.css): the stars that twinkle, then the trees, the moon and the glow of the star on the big tree
+// over them, under the logo and the menu
+(function(){
+
+    const top = document.querySelector(".hlstats-top");
+    if(!top) return;
+
+    const sky = document.createElement("div");
+    sky.className = "noel-sky";
+    sky.setAttribute("aria-hidden", "true");
+    for(let i = 0; i < 3; i++) sky.appendChild(document.createElement("i"));
+    sky.appendChild(document.createElement("span"));
+    sky.appendChild(document.createElement("b"));
+    top.insertBefore(sky, top.firstChild);
+    top.classList.add("noel-has-sky");
+}());
+
 // String lights under the snow of the header: one bulb per droop of the wire (56 px), each twinkling at its own pace
 (function(){
 
@@ -36,7 +53,7 @@ window.addEventListener("DOMContentLoaded", () => {
 // Snowfall: a little lighter than the defaults, and none for visitors who ask for less motion
 window["SnowflakeConfig"] = matchMedia("(prefers-reduced-motion: reduce)").matches
     ? { "start": false }
-    : { "density": 0.6, "speed": 0.8, "size": 0.9, "opacity": 0.85 };
+    : { "density": 0.6, "speed": 0.8, "size": 0.9, "opacity": 0.85, "fps": 30 };
 
 /**!
     Source: https://github.com/nextapps-de/snowflake
@@ -54,7 +71,7 @@ window["SnowflakeConfig"] = matchMedia("(prefers-reduced-motion: reduce)").match
     const base64 = window["dRg4!"] = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABABAMAAABYR2ztAAAAGFBMVEXk7PTk7PTk7PTk7PTk7PTk7PQAAADk7PQLtLMUAAAAB3RSTlO18FHbI4YAkU+M0QAAAVVJREFUeF7F1T1PwzAQgGGGouwg5B8QEWaioqyVSsNKoXL2KPYcE6L371PLcp1GjU7A0IztI53Pvo8bK3y/BnkpgGoQAFwXmPvCg/ZZL4A3hg94rPheBOFbBCaCiyHqo9gpAHc44m4Ots6L9h1uC/+/Ws/AE3qapuFrBpo5GCdgX14G+UMAHaxsRjEFLb3dQB0BB0U9BR1uRwS2Acdw/hYVCkYbQJcB4zlogL6OWbQV9OchMhiKlKYBxinYA9omsAW4SyAHWCfQKgagjGADVLgUogGdA6sAdh4bGCMw0PuwOO2BCQlmoBPQ8eAQUzIJdKo8JQunBHN3uodXa8NZAfCRbPg5glnN6eW+2BBy+RtIIQ4JSIcU0xQvSrxq6bHE5xYLRi45uWjlspcbR249uXnl9pcHiDyC0hD7hJc0xMQxKA9SeRTLw1xeB9ffWfJilVfz/7f/D7vzJWHzmXRTAAAAAElFTkSuQmCC";
 
     let width, height, count, raf = 0, last = 0;
-    let speed = 1, size = 3, density = 1, quality = 1.5, autostart = true;
+    let speed = 1, size = 3, density = 1, quality = 1.5, autostart = true, fps = 30;
 
     const snowflakes = [];
     const buffer = [];
@@ -138,8 +155,12 @@ window["SnowflakeConfig"] = matchMedia("(prefers-reduced-motion: reduce)").match
     function update(time){
 
         raf = window.requestAnimationFrame(update);
-        //setTimeout(update, 1000 / 30, Date.now())
         if(!image.loaded) return;
+
+        // At most `fps` frames a second: the snow covers the whole page, so each frame drawn has the whole page put
+        // together again; on every refresh of a 144 Hz screen, that keeps the graphics card busy for nothing
+        if(last && time - last < 1000 / fps - 4) return;
+
         ctx.clearRect(0, 0, width, height);
 
         let scale = last ? (time - last) / (1000 / 60) : 1;
@@ -253,6 +274,9 @@ window["SnowflakeConfig"] = matchMedia("(prefers-reduced-motion: reduce)").match
         "style": style,
         "speed": function(val){
             speed = val;
+        },
+        "fps": function(val){
+            fps = Math.max(val, 1);
         },
         "size": function(val){
             size = 3 * val;

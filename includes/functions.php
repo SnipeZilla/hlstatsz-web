@@ -69,13 +69,10 @@ function getOptions($exit = true)
 /**
  * Themes: styles/themes/<name>/<name>.css on top of hlstatsz.css, with <name>.php (the colors of the graphs) and an
  * optional <name>.js; 'default' is hlstatsz.css alone. Seasonal themes (Halloween, Noel...) are in
- * styles/themes/seasonal/<name>/: the admin switches one on for everybody (option style_seasonal), and each visitor
- * can switch it off from the footer (cookie seasonal_off). Option styles_hidden lists the themes the style selector
- * leaves out.
+ * styles/themes/seasonal/<name>/ and show for everybody on their days (option style_seasonal empty, the schedule:
+ * themeSeason()), or one the admin switches on whatever the date; each visitor can switch it off from the footer
+ * (cookie seasonal_off). Option styles_hidden lists the themes the style selector leaves out.
  */
-
-// A theme's name from an option, a cookie or the address ('dark', or 'dark.css' as old options have it); '' when it
-// cannot be one
 function themeName($value)
 {
 	$name = preg_replace('/\.css$/', '', (string) $value);
@@ -129,12 +126,144 @@ function themeAllowed()
 	return array_diff_key(themeList(), array_flip($hidden));
 }
 
-// The seasonal theme the admin switched on, '' for none
+// The seasonal theme on now, '' for none. Option style_seasonal: empty, the one whose days are today (the schedule);
+// 'off', none; a seasonal theme, that one whatever the date
 function themeSeasonal()
 {
 	global $g_options;
-	$name = themeName($g_options['style_seasonal'] ?? '');
-	return isset(themeList(true)[$name]) ? $name : '';
+	static $seasonal = null;
+	if ($seasonal === null) {
+		$value = (string) ($g_options['style_seasonal'] ?? '');
+		if ($value === '') {
+			$seasonal = themeSeasonOn(date('Y-m-d'));
+		} else {
+			$name = themeName($value);
+			$seasonal = isset(themeList(true)[$name]) ? $name : '';
+		}
+	}
+	return $seasonal;
+}
+
+// The days of a seasonal theme in the schedule: 'on' (in the schedule), 'from' and 'to' (its first and last day, as
+// seasonDay() reads them), 'own' (the days the theme comes with: 'season' in its <name>.php). The admin's are in
+// option season_<name>, 'on|first day|last day', or in $saved: a day left empty is the theme's own
+function themeSeason($name, $saved = null)
+{
+	global $g_options;
+	static $own = array();
+	if (!isset($own[$name])) {
+		$theme = array();
+		$file = "styles/themes/seasonal/$name/$name.php";
+		if (themeName($name) === $name && is_file($file)) {
+			include $file;
+		}
+		$own[$name] = array_pad(array_map('strval', array_slice((array) ($theme['season'] ?? array()), 0, 2)), 2, '');
+	}
+	$set = array_pad(explode('|', (string) ($saved ?? $g_options["season_$name"] ?? '')), 3, '');
+	return array(
+		'on'   => $set[0] !== '0',
+		'from' => trim($set[1]) !== '' ? trim($set[1]) : $own[$name][0],
+		'to'   => trim($set[2]) !== '' ? trim($set[2]) : $own[$name][1],
+		'own'  => $own[$name],
+	);
+}
+
+// The seasonal theme of a day ('Y-m-d'), '' for none: of the seasonal themes in the schedule, the one whose days have
+// it. When two have it, the one that began last, or the one that ends first when they began the same day: the other
+// one shows again after it. $seasons: name => its days as themeSeason() gives them, the saved schedule when null
+function themeSeasonOn($date, $seasons = null)
+{
+	if ($seasons === null) {
+		$seasons = array();
+		foreach (array_keys(themeList(true)) as $name) {
+			$seasons[$name] = themeSeason($name);
+		}
+	}
+	$year = (int) substr($date, 0, 4);
+	$on = $began = $ends = '';
+	foreach ($seasons as $name => $season) {
+		if (!$season['on']) {
+			continue;
+		}
+		foreach (array($year - 1, $year) as $y) {
+			list($first, $last) = seasonDays($season, $y);
+			if ($first !== false && $first <= $date && $date <= $last
+				&& ($first > $began || ($first === $began && $last < $ends))) {
+				$on = $name;
+				$began = $first;
+				$ends = $last;
+			}
+		}
+	}
+	return $on;
+}
+
+// The first and last day ('Y-m-d') of a theme's season that begins in a year, false, false when a day cannot be read.
+// A last day before the first is the next year's (december 1 to january 5)
+function seasonDays($season, $year)
+{
+	$first = seasonDay($season['from'], $year);
+	$last = seasonDay($season['to'], $year);
+	if ($first === false || $last === false) {
+		return array(false, false);
+	}
+	if ($last < $first) {
+		$last = seasonDay($season['to'], $year + 1);
+	}
+	return array($first, $last);
+}
+
+// A day of a year ('Y-m-d'), false when it is not one of these (HLstats Settings shows them): a date, its month in
+// letters ('december 1', 'dec 1st', '1 december'); a weekday of a month ('fourth thursday of november': first,
+// second, third, fourth or last); Easter ('easter'); and any of them with days or weeks before or after ('easter
+// -7 days', 'july 4 +1 week'). Nothing else: '12/01' is the 1st of December for some, the 12th of January for others
+function seasonDay($rule, $year)
+{
+	static $months = array('jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4, 'may' => 5, 'jun' => 6,
+		'jul' => 7, 'aug' => 8, 'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12);
+	$month = 'jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?';
+	$rule = preg_replace('/\s+/', ' ', strtolower(trim((string) $rule)));
+
+	// the days before or after, apart: strtotime() reads 'fourth thursday of november +3 days' but not -3 days
+	$move = '';
+	if (preg_match('/^(.+?) ?([+-]) ?(\d{1,3}) ?(days?|weeks?)$/', $rule, $m)) {
+		$rule = $m[1];
+		$move = $m[2] . $m[3] . ' ' . $m[4];
+	}
+
+	if ($rule === 'easter') {
+		$day = strtotime(easterDay($year) . ' 12:00');
+	} elseif (preg_match("/^(?:($month) (\\d{1,2})(?:st|nd|rd|th)?|(\\d{1,2})(?:st|nd|rd|th)? ($month))$/", $rule, $m)) {
+		$n = $months[substr($m[1] !== '' ? $m[1] : $m[4], 0, 3)];
+		$d = (int) ($m[2] !== '' ? $m[2] : $m[3]);
+		if (!checkdate($n, $d, $year)) {
+			return false;
+		}
+		$day = mktime(12, 0, 0, $n, $d, $year);
+	} elseif (preg_match("/^(first|second|third|fourth|last|1st|2nd|3rd|4th) ((?:mon|tues|wednes|thurs|fri|satur|sun)day) of ($month)$/", $rule, $m)) {
+		$nth = strtr($m[1], array('1st' => 'first', '2nd' => 'second', '3rd' => 'third', '4th' => 'fourth'));
+		$day = strtotime("$nth $m[2] of $m[3]", mktime(12, 0, 0, 1, 1, $year));
+	} else {
+		return false;
+	}
+	if ($day !== false && $move !== '') {
+		$day = strtotime($move, $day);
+	}
+	return $day === false ? false : date('Y-m-d', $day);
+}
+
+// Easter Sunday of a year ('Y-m-d'), Gregorian calendar (the anonymous algorithm: no calendar extension needed)
+function easterDay($year)
+{
+	$a = $year % 19;
+	$b = intdiv($year, 100);
+	$c = $year % 100;
+	$h = (19 * $a + $b - intdiv($b, 4) - intdiv($b - intdiv($b + 8, 25) + 1, 3) + 15) % 30;
+	$l = (32 + 2 * ($b % 4) + 2 * intdiv($c, 4) - $h - $c % 4) % 7;
+	$m = intdiv($a + 11 * $h + 22 * $l, 451);
+	$month = intdiv($h + $l - 7 * $m + 114, 31);
+	$day = ($h + $l - 7 * $m + 114) % 31 + 1;
+	return sprintf('%04d-%02d-%02d', $year, $month, $day);
 }
 
 // The theme of this visitor: the seasonal theme while one is on (unless they switched it off), else their pick in
@@ -261,7 +390,9 @@ function nf($value, int $decimals = 0, string $decPoint = '.', string $thousands
 
 /**
  * t()
- * Translate a key using the active language file from lang/<code>.json.
+ * Translate a key using the active language file from lang/<code>.json, over lang/us.json. A site's own strings (the
+ * labels of its links, or any string it says another way) go in lang/custom/<code>.json: HLstatsZ does not ship that
+ * folder, so an update leaves them, and a key only in lang/custom/us.json shows in every language.
  */
 function loadLangStrings(): array
 {
@@ -290,6 +421,15 @@ function loadLangStrings(): array
             $strings = array_merge($base, $overlay);
         } else {
             $strings = $base;
+        }
+        // The site's own strings (lang/custom/<code>.json): its English ones where the language says nothing else,
+        // then the language's own
+        foreach (array_unique(array('us', $lang)) as $code) {
+            $file = __DIR__ . '/../lang/custom/' . $code . '.json';
+            $own  = is_file($file) ? json_decode(file_get_contents($file), true) : null;
+            if (is_array($own)) {
+                $strings = array_merge($strings, $code === 'us' && $lang !== 'us' ? array_diff_key($own, $overlay) : $own);
+            }
         }
     }
     return $strings;
@@ -1050,6 +1190,12 @@ function steamGroupData($slug)
         @touch($file);
     }
     return $xml;
+}
+
+// The accent colors of the forum signature (sig.php), by their number: background=1..11
+function sigAccents(): array
+{
+    return array(1 => '4aa3df', '9cb36b', 'a4c639', 'e64e4e', '3f8fd8', 'f7a531', 'e0533d', 'ff7a2e', 'cbb89a', 'd9443c', '5fb3b3');
 }
 
 /**

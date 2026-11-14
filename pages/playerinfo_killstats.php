@@ -140,7 +140,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'playerkills') {
         if (empty($_GET['ajax'])) {
         printSectionTitle(t('title.player.kill.stats').$asterisk);
         ?>
-<div id="playerkills">
+<div id="playerkills" tabindex="-1">
 
 <?php
 }

@@ -95,7 +95,7 @@ if (!is_ajax()) {
 </section>
 </div>
 
-<div id="mapinfo">
+<div id="mapinfo" tabindex="-1">
 
 <?php
 }

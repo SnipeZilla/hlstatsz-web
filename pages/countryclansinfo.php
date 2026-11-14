@@ -198,7 +198,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 if ($db->num_rows($result)) {
     if (!is_ajax()){
 	printSectionTitle(t('title.members'));
-	echo '<div id="members">';
+	echo '<div id="members" tabindex="-1">';
     }
 
 echo '<div  class="responsive-table">

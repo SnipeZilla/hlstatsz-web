@@ -74,7 +74,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 		printSectionTitle(t('title.aliases'));
 ?>
-<div id="aliases">
+<div id="aliases" tabindex="-1">
 <?php
 }
 ?>

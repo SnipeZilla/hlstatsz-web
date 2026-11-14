@@ -90,7 +90,7 @@ if (!is_ajax()) {
 		<input type="search" class="sba-search" value="<?= htmlspecialchars($search) ?>" placeholder="Search by name, Steam ID or flags" aria-label="Search AMXBans admins" data-sba-search="sba-amx-admins" data-sba-page="page_amxadmins">
 		<span class="sba-count" data-sba-count-of="sba-amx-admins"><?= $count ?></span>
 	</div>
-	<div id="sba-amx-admins">
+	<div id="sba-amx-admins" tabindex="-1">
 <?php } ?>
 	<div class="responsive-table">
 	<table class="sba-table" data-sba-count="<?= $count ?>">

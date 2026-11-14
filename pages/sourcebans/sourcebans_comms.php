@@ -73,7 +73,7 @@ $result = $db->query("
 
 if (!is_ajax()) {
 	printSectionTitle(t('sb.title.comms'));
-	echo '<div id="comms">';
+	echo '<div id="comms" tabindex="-1">';
 }
 ?>
 <?php if (!$total): ?>

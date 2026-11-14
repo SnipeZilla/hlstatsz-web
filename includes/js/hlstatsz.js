@@ -64,7 +64,12 @@ const Fetch = {
             if (el) {
                 el.classList.remove("is-loading");
                 el.innerHTML = buffer;
-                if (his) el.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+                if (his) {
+                    el.focus({ preventScroll: true });
+                    el.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+                } else {
+                    clearStrayCaret();
+                }
                 el.querySelectorAll('[data-fetch-url]').forEach(function(sub) {
                     Fetch.run(sub.dataset.fetchUrl, sub, false);
                 });
@@ -311,23 +316,80 @@ function iniMap() {
     });
 
     function clusterGroup(kind) {
-      return L.markerClusterGroup({
-        spiderfyOnMaxZoom: true,
+      const spiderAt = (kind == 'servers' ? MapView.zoom + 1 : MapView.zoom);
+
+      const group = L.markerClusterGroup({
+        spiderfyOnMaxZoom: false,
         showCoverageOnHover: true,
-        zoomToBoundsOnClick: true,
+        zoomToBoundsOnClick: false,
         maxClusterRadius: 20,
+        // no disableClusteringAtZoom
         iconCreateFunction: c => L.divIcon({
           html: '<div><span>' + c.getChildCount() + '</span></div>',
           className: 'marker-cluster marker-cluster-' + kind,
           iconSize: L.point(40, 40)
         })
       });
+
+      group.spiderAt = spiderAt;   // from this zoom on, a cluster in view opens by itself (one per group at a time)
+      group.spiderKey = null;      // a marker of the cluster opened last: it is the one opened again (live redraw, pan)
+      group.on('spiderfied', e => { group.spiderKey = markerKey(e.markers[0]); });
+
+      // a click opens the cluster, zooming in first (but not past spiderAt) when the map is not that close yet
+      group.on('clusterclick', e => {
+        const cluster = e.layer;
+        const map = group._map;
+        const b = cluster.getBounds();
+
+        if (map.getZoom() >= spiderAt) {
+          cluster.spiderfy();
+        } else if (map.getBoundsZoom(b, false, L.point(40, 40)) < spiderAt) {
+          cluster.zoomToBounds({ padding: [20, 20] });          // still spread out: zoom in as usual
+        } else {
+          group.spiderKey = markerKey(cluster.getAllChildMarkers()[0]);
+          map.setView(b.getCenter(), spiderAt);                 // autoSpider opens it there
+        }
+      });
+
+      return group;
     }
+
     serverMarkers = clusterGroup('servers');
     playerMarkers = clusterGroup('players');
     OpenMap.addLayer(serverMarkers);
     OpenMap.addLayer(playerMarkers);
+    OpenMap.on('moveend', () => { autoSpider(serverMarkers); autoSpider(playerMarkers); });
     MapView.watch(OpenMap);
+}
+
+function markerKey(m) {
+    return m.options.key || m.getLatLng().toString();
+}
+
+// At spiderAt or closer, opens a cluster in view
+function autoSpider(group) {
+    clearTimeout(group.spiderTimer);
+    group.spiderTimer = setTimeout(() => openSpider(group), 25);
+}
+
+function openSpider(group) {
+    const map = group._map;
+    if (!map || map.getZoom() < group.spiderAt) return;
+    if (group._inZoomAnimation || map._animatingZoom) { autoSpider(group); return; }
+
+    const view = map.getBounds(), center = map.getCenter();
+    if (group._spiderfied && view.contains(group._spiderfied.getLatLng())) return;   // one is open already
+
+    let keep = null, best = null, bestD = Infinity;
+    group.eachLayer(m => {
+        const c = group.getVisibleParent(m);
+        if (!c || c === m || !view.contains(c.getLatLng())) return;
+        if (group.spiderKey && markerKey(m) === group.spiderKey) keep = c;
+        const d = map.distance(center, c.getLatLng());
+        if (d < bestD) { bestD = d; best = c; }
+    });
+    const c = keep || best;
+    if (c) c.spiderfy();
 }
 
 /*
@@ -335,7 +397,7 @@ function iniMap() {
  * who just came first, then everybody again with the next live refresh; nobody playing: the whole world
  */
 const MapView = {
-    idle: 60000,    // ms after the visitor last touched the map before it moves by itself again
+    idle: 15000,    // ms after the visitor last touched the map before it moves by itself again
     zoom: 5,        // the closest it zooms by itself (one player, players in one place)
     spot: 0,        // ms on players who just came before everybody is shown again; 0: one live refresh (Live.every)
     radius: 2000,   // km: players coming together, closer than this one to the next, are shown together
@@ -516,7 +578,7 @@ function serverCard(server) {
   return `
     <div class="hlstats-map-card">
       <div class="hlstats-map-top">
-        <div class="hlstats-map-title">${gameIcon(server.game_icon)}${name}</div>
+        <div class="hlstats-map-title" title="${name}">${gameIcon(server.game_icon)}${name}</div>
         <div class="hlstats-map-sub">${geocity}</div>
       </div>
 
@@ -530,7 +592,7 @@ function serverCard(server) {
       </div>
 
       <div class="hlstats-map-row">
-        <span class="hlstats-map-label">${t('th.map')}</span><span class="hlstats-map-value">${server.act_map}</span>
+        <span class="hlstats-map-label">${t('th.map')}</span><span class="hlstats-map-value" title="${escHtml(server.act_map)}">${server.act_map}</span>
       </div>
 
       <div class="hlstats-map-actions">
@@ -560,7 +622,8 @@ function playerCard(player) {
           </span><a href="hlstats.php?mode=playerinfo&player=${encodeURIComponent(player.playerId)}"><span class="hlstats-name">${name}</span></a>
         </div>
         <div class="hlstats-map-sub"><span class="hlstats-flag"><img src="${flag}" onerror="this.style.display='none'"></span><span class="hlstats-name">${geocity}</span></div>
-        <div class="hlstats-map-sub">${gameIcon(player.game_icon)}${server}</div>
+        <div class="hlstats-map-sub" title="${server}">${gameIcon(player.game_icon)}${server}</div>
+        <div class="hlstats-map-sub" title="${escHtml(player.act_map)}">${t('th.map')} &rarr; ${player.act_map}</div>
       </div>
 
       <div class="hlstats-map-row">
@@ -605,38 +668,64 @@ const svg = `
   return new LeafIcon({ iconUrl: url });
 }
 
+function syncMarkers(group, items) {
+  const old = new Map();
+  group.getLayers().forEach(m => old.set(m.options.key, m));
+
+  const used = new Set(), add = [];
+  items.forEach(item => {
+    let key = item.key;
+    for (let n = 2; used.has(key); n++) key = item.key + '#' + n;      // the same key twice: told apart
+    used.add(key);
+
+    const at = L.latLng(item.at), m = old.get(key);
+    if (m && m.options.at.equals(at)) {                                 // (getLatLng() moves in an open cluster)
+      old.delete(key);
+      if (m.options.bg !== item.bg) {
+        m.options.bg = item.bg;
+        m.setIcon(getTeamIcon(item.bg));
+      }
+      m.setPopupContent(item.card);
+    } else {
+      add.push(L.marker(at, { icon: getTeamIcon(item.bg), key: key, at: at, bg: item.bg })
+        .bindPopup(item.card, popupOpts()));
+    }
+  });
+
+  const gone = Array.from(old.values());
+  if (gone.length) group.removeLayers(gone);
+  if (add.length) group.addLayers(add);
+}
 
 function createServers(servers) {
-  servers.forEach(server => {
-    const s_icon = getTeamIcon(server.bg);//new LeafIcon({ iconUrl: imagePath + "/server-marker.png" });
-
-    const marker = L.marker([server.lat, server.lng], { icon: s_icon })
-      .bindPopup(serverCard(server), popupOpts());
-
-    serverMarkers.addLayer(marker);
-  });
+  syncMarkers(serverMarkers, servers.map(server => ({
+    key: 's' + String(server.serverId ?? (server.lat + ',' + server.lng)),
+    at: [server.lat, server.lng],
+    bg: server.bg,
+    card: serverCard(server)
+  })));
 }
 
 function createPlayer(players) {
-  players.forEach(player => {
-    const s_icon = getTeamIcon(player.bg);//new LeafIcon({ iconUrl: imagePath + "/player-marker.png" });
-
+  syncMarkers(playerMarkers, players.map(player => ({
     // key: who it is, so the map knows who just came (MapView)
-    const key = String(player.playerId ?? (player.cli_lat + ',' + player.cli_lng));
-    const marker = L.marker([player.cli_lat, player.cli_lng], { icon: s_icon, key: key })
-      .bindPopup(playerCard(player), popupOpts());
-
-    playerMarkers.addLayer(marker);
-  });
-
+    key: String(player.playerId ?? (player.cli_lat + ',' + player.cli_lng)),
+    at: [player.cli_lat, player.cli_lng],
+    bg: player.bg,
+    card: playerCard(player)
+  })));
 }
 
-document.addEventListener('mousedown', function(event) {
-    if ( event.target.tagName === 'BODY' ) {
-        event.preventDefault();
-        return false;
+function clearStrayCaret() {
+    const sel = window.getSelection();
+    // only a collapsed caret, so a real text selection the user made is kept
+    if (sel && sel.rangeCount && sel.isCollapsed) sel.removeAllRanges();
+
+    // focus was on a node that no longer exists or the BODY
+    if (!document.activeElement || document.activeElement === document.body) {
+        document.activeElement?.blur?.();
     }
-});
+}
 
 /* Tooltip
  * Replace title attribute.
@@ -864,15 +953,16 @@ const Live = {
 
         const redraw = () => {
             this.mapData = data;
-            serverMarkers.clearLayers();
-            playerMarkers.clearLayers();
-            createServers(JSON.parse(s.textContent || '[]'));
+            createServers(JSON.parse(s.textContent || '[]'));            // in place: an open cluster stays open
             createPlayer(JSON.parse(p.textContent || '[]'));
+            autoSpider(serverMarkers);                                   // one that had to close opens again
+            autoSpider(playerMarkers);
             MapView.fit();
         };
         // a popup is open: wait until it is closed, so it does not vanish under the mouse
+        if (this._pending) OpenMap.off('popupclose', this._pending);
+        this._pending = null;
         if (document.querySelector('#map .leaflet-popup')) {
-            OpenMap.off('popupclose', this._pending);
             this._pending = () => { this._pending = null; redraw(); };
             OpenMap.once('popupclose', this._pending);
         } else {

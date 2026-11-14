@@ -93,7 +93,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 if (!is_ajax()) {
 	printSectionTitle(t('title.session.history',['{name}'=> ucfirst($pl_name)]));
 
-echo '<div id="sessions">';
+echo '<div id="sessions" tabindex="-1">';
 
 }
 if ($numitems > 0) {

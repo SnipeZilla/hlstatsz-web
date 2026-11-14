@@ -32,8 +32,14 @@ if ($auth->userdata['acclevel'] < 100) {
       return;
     }
 
-    if (isset($_POST['force']) || !file_exists("./updater/" . ((int)$g_options['dbversion']) . ".php")) {
+    if (!file_exists("./updater/" . ((int)$g_options['dbversion']) . ".php")) {
+        // a version HLstatsZ has no update of (another HLstats): all of them
         $g_options['dbversion']=77;
+    } elseif (isset($_POST['force'])) {
+        // Forced: again from the update chosen (admin.php: the current one by default), all of them without one.
+        // Never from further than the one after the database's version: no update is skipped
+        $from = isset($_POST['from']) ? (int) $_POST['from'] : 78;
+        $g_options['dbversion'] = max(78, min($from, (int) $g_options['dbversion'] + 1)) - 1;
     }
     echo '<div class="panel">
 <div class="hlstats-admin-note">
@@ -77,6 +83,10 @@ if ($auth->userdata['acclevel'] < 100) {
         {
             message('success','Successfully updated to database version "'.($i-1).'!');
         }
+
+        // The versions as they are now, under the log
+        $g_options['dbversion'] = $i - 1;
+        checkVersion();
     }
 
 ?>

@@ -133,18 +133,79 @@
 .hlstats-top{
   position: relative;
   background:
-    url('noel-stars.svg') 0 0 / 520px 104px repeat-x,
+    url('noel-stars.svg?2') 0 0 / 520px 104px repeat-x,
     var(--header-top-bg);
 }
 @media (min-width: 1000px){
   .hlstats-top{
     background:
-      url('noel-trees.svg') right 18px bottom 0 / 342px 75px no-repeat,
+      url('noel-trees.svg?2') right 18px bottom 0 / 342px 75px no-repeat,
       url('noel-trees-left.svg') left calc(50% - 727px) bottom 0 / 194px 64px no-repeat,
       radial-gradient(circle at 63% 34%, #fff8e1 0 8px, rgba(255,248,225,.30) 9.5px, rgba(255,248,225,.07) 22px, rgba(255,248,225,0) 40px),
-      url('noel-stars.svg') 0 0 / 520px 104px repeat-x,
+      url('noel-stars.svg?2') 0 0 / 520px 104px repeat-x,
       var(--header-top-bg);
   }
+}
+
+/* With noel.js: the stars that twinkle (noel-twinkle.svg, one 520 x 104 row of them per pace, over the stars of
+   noel-stars.svg), then from 1000 px the trees, the moon and the glow of the star on the big tree over them, all under
+   the logo and the menu */
+.hlstats-top.noel-has-sky{
+  background:
+    url('noel-stars.svg?2') 0 0 / 520px 104px repeat-x,
+    var(--header-top-bg);
+}
+.noel-sky{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.noel-sky span{
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    url('noel-trees.svg?2') right 18px bottom 0 / 342px 75px no-repeat,
+    url('noel-trees-left.svg') left calc(50% - 727px) bottom 0 / 194px 64px no-repeat,
+    radial-gradient(circle at 63% 34%, #fff8e1 0 8px, rgba(255,248,225,.30) 9.5px, rgba(255,248,225,.07) 22px, rgba(255,248,225,0) 40px);
+}
+.noel-sky i{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('noel-twinkle.svg') 0 0 / 520px 312px repeat-x;
+  animation: noel-star 3.4s ease-in-out infinite alternate;
+}
+.noel-sky i + i{ background-position: 0 -104px; animation-delay: -1.6s; }
+.noel-sky i + i + i{ background-position: 0 -208px; animation-delay: -2.7s; }
+@keyframes noel-star{
+  from{ opacity: .12; }
+  to{ opacity: .95; }
+}
+
+/* The trees are 342 x 75 px, 18 px from the right; their star is at 148.3 x 10.8 px, its glow 12.5 px around it */
+.noel-sky b{
+  display: none;
+  position: absolute;
+  right: calc(18px + 342px - 148.3px - 12.5px);
+  bottom: calc(75px - 10.8px - 12.5px);
+  width: 25px;
+  height: 25px;
+  background: radial-gradient(closest-side, rgba(255,209,102,.75), rgba(255,209,102,0));
+  animation: noel-twinkle 2.4s ease-in-out infinite alternate;
+}
+@media (min-width: 1000px){
+  .noel-sky span,
+  .noel-sky b{ display: block; }
 }
 
 /* Snow along the bottom of the header; the lights hang under it (noel.js) */
@@ -175,7 +236,7 @@
   height: 10px;
   border-radius: 50% 50% 50% 50% / 42% 42% 58% 58%;
   background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.8) 0 1.2px, rgba(255,255,255,0) 2.6px), var(--c);
-  box-shadow: 0 0 7px 1px var(--c);
+  box-shadow: 0 0 9px 1px var(--c);
   animation: noel-twinkle 2s ease-in-out infinite alternate;
 }
 .noel-lights i::before{
@@ -193,9 +254,11 @@
 .noel-lights .c2{ --c: #4ade80; }
 .noel-lights .c3{ --c: #60c5ff; }
 
+/* Only the opacity moves (here and in .noel-sky): the browser fades these on the graphics card, without painting the
+   page again on every frame; a moving box-shadow, or an animation inside an SVG background, repaints all of it */
 @keyframes noel-twinkle{
-  from{ opacity: .45; box-shadow: 0 0 2px 0 var(--c); }
-  to{ opacity: 1; box-shadow: 0 0 10px 2px var(--c); }
+  from{ opacity: .45; }
+  to{ opacity: 1; }
 }
 
 /* Room for the lights above the game bar */
@@ -250,5 +313,7 @@
 .hlstats-footer .z{ color: #d93a3f; }
 
 @media (prefers-reduced-motion: reduce){
-  .noel-lights i{ animation: none; }
+  .noel-lights i,
+  .noel-sky i,
+  .noel-sky b{ animation: none; }
 }

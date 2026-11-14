@@ -35,7 +35,7 @@ if (!is_ajax()) { ?>
     echo t('help.hlstatsz');
 
     printSectionTitle(t('help.title.actions')); ?>
-    <div id="act_help">
+    <div id="act_help" tabindex="-1">
 <?php }
 
 if (!is_ajax() || ($_GET['ajax'] ?? '') === 'act_help') {
@@ -101,7 +101,7 @@ if (!is_ajax()) { ?>
     </div>
 
     <?php printSectionTitle(t('help.title.weapons')); ?>
-    <div id="weap_help">
+    <div id="weap_help" tabindex="-1">
 <?php }
 
 // ── Weapon Points Modifiers ───────────────────────────────────────────────

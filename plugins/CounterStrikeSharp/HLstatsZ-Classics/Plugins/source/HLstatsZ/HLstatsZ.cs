@@ -162,7 +162,7 @@ public class HLstatsZ : BasePlugin, IPluginConfig<HLstatsZMainConfig>
 
     private string? _lastPsayHash;
     public override string ModuleName => "HLstatsZ Classics";
-    public override string ModuleVersion => "2.4.1";
+    public override string ModuleVersion => "2.4.2";
     public override string ModuleAuthor => "SnipeZilla";
 
     public void OnConfigParsed(HLstatsZMainConfig config)
@@ -219,13 +219,13 @@ public class HLstatsZ : BasePlugin, IPluginConfig<HLstatsZMainConfig>
 
         if (string.IsNullOrWhiteSpace(Config.ServerAddr))
         {
-            var hostPort = ConVar.Find("hostport")?.GetPrimitiveValue<int>() ?? 27015;
-            var serverIP = ConVar.Find("ip")?.StringValue ?? GetLocalIPAddress();
+            var hostPort = int.TryParse(ConVar<int>.Find("hostport")?.ValueAsString, out var port) ? port : 27015;
+            var serverIP = ConVar<string>.Find("ip")?.ValueAsString ?? GetLocalIPAddress();
             Config.ServerAddr = $"{serverIP}:{hostPort}";
         }
         SourceBans.serverAddr = Config.ServerAddr;
 
-        SourceBans.hostName   = ConVar.Find("hostname")?.StringValue ?? "";
+        SourceBans.hostName   = ConVar<string>.Find("hostname")?.ValueAsString ?? "";
 
         SourceBans.Init(Config, Logger);
         _ = SourceBans.GetSid();
@@ -617,8 +617,8 @@ public class HLstatsZ : BasePlugin, IPluginConfig<HLstatsZMainConfig>
             if (ex is HttpRequestException hre2 && hre2.InnerException is IOException)
                 return true;
 
-            if (ex is TaskCanceledException) // timeout
-                return true;
+            // A timeout is not retried: the request was sent and the daemon queues the lines before it answers, so
+            // sending them again would count every kill of the batch twice
 
             return false;
         }

@@ -111,7 +111,7 @@ printSectionTitle(t('title.ribbons.details'));
 
 
 
-<div id="ribboninfo">
+<div id="ribboninfo" tabindex="-1">
 <?php
 }
 ?>

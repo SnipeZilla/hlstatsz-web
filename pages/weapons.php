@@ -100,7 +100,7 @@ printSectionTitle(t('title.weapons.stats'));
 </section>
 </div>
 
-<div id="weapons">
+<div id="weapons" tabindex="-1">
 <?php
 }
 if ($db->num_rows($result)) {

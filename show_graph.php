@@ -106,7 +106,7 @@ $height = $theme['height'];
 	switch ($server_load_type) {
 		case 1:
 			$avg_step = 1;
-			$update_interval = IMAGE_UPDATE_INTERVAL;
+			$update_interval = defined('IMAGE_UPDATE_INTERVAL') ? IMAGE_UPDATE_INTERVAL : 300;
 			break;
 		case 2:
 			$avg_step = 7;
@@ -122,7 +122,7 @@ $height = $theme['height'];
 			break;
 		default:
 			$avg_step = 1;
-			$update_interval = IMAGE_UPDATE_INTERVAL;
+			$update_interval = defined('IMAGE_UPDATE_INTERVAL') ? IMAGE_UPDATE_INTERVAL : 300;
 			break;
 	}
 

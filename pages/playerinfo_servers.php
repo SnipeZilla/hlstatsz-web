@@ -89,7 +89,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'server') {
 
 		printSectionTitle(t('title.server.activity').$asterisk);
 ?>
-<div id="server">
+<div id="server" tabindex="-1">
 <?php
 }
 ?>

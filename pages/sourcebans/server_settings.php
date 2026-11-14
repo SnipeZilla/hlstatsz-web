@@ -86,7 +86,7 @@ if (!is_ajax()) {
 		<button type="button" class="sba-btn is-primary" data-sba-open="sba-server" data-sba-title="Add server">+ Add server</button>
 <?php endif; ?>
 	</div>
-	<div id="sba-servers">
+	<div id="sba-servers" tabindex="-1">
 <?php } ?>
 	<div class="responsive-table">
 	<table class="sba-table" data-sba-count="<?= $count ?>">

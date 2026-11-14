@@ -79,7 +79,7 @@ $result = $db->query("
 
 if (!is_ajax()) {
 	printSectionTitle(t('sb.title.blocked'));
-	echo '<div id="blocked">';
+	echo '<div id="blocked" tabindex="-1">';
 }
 
 if (!$total) {

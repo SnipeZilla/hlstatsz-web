@@ -177,6 +177,7 @@ body{
   letter-spacing: 0.1px;
   white-space: normal;
   word-break: keep-all;
+  caret-color: transparent;
 }
 
 a{
@@ -194,6 +195,9 @@ h1, h2, h3{
   border: var(--table-border);
   margin: 15px 0;
 }
+
+input, textarea, select, [contenteditable="true"] { caret-color: auto; }
+[tabindex="-1"]:focus { outline: none; }
 
 .cnt { display:contents; }
 
@@ -627,6 +631,39 @@ a.hlstats-chip:is(.green, .orange, .red):hover{ background: color-mix(in srgb, c
   align-items: center;
   text-decoration: none;
   margin-right: 20px;
+}
+
+/* The mark that stands for the wide logo on a narrow screen (header.php), hidden until then */
+.hlstats-brand-mark{
+  display: none;
+  flex: none;
+  align-items: center;
+}
+.hlstats-brand-mark svg{
+  display: block;
+  width: 36px;
+  height: 36px;
+}
+
+/* The hamburger of the top menu, with the links that do not fit beside the first 3 on a narrow screen (header.php):
+   hidden until then, as its links are in the bar */
+.hlstats-topnav .hlstats-topnav-more{
+  display: none;
+}
+.hlstats-topnav-more .hlstats-dropbtn{
+  padding: 0 4px;
+  color: var(--header-top-nav-color);
+  font-size: 20px;
+  line-height: 1;
+}
+.hlstats-topnav-more.active .hlstats-dropbtn,
+.hlstats-topnav-more .hlstats-dropmenu a.active{
+  color: var(--header-top-nav-color-active);
+}
+.hlstats-topnav-more .hlstats-dropmenu{
+  left: auto;
+  right: 0;
+  text-align: right;
 }
 
 .hlstats-topnav{
@@ -1314,7 +1351,7 @@ div.hlstats-stats,
 }
 
 .hlstats-contents table th,
-.hlstats-contents table tr td{
+.hlstats-contents table tr td:not(.kd){
  /* white-space: nowrap;*/
   word-break: break-word;
   overflow-wrap: break-word;
@@ -2080,15 +2117,16 @@ th:hover::after{
     background: var(--header-dropmenu-bg);
     color: var(--header-dropmenu-color);
     box-shadow: var(--header-dropmenu-shadow);
+    box-shadow: var(--header-dropmenu-shadow);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .leaflet-control-container .leaflet-control-attribution{
   color: var(--a-color);
 }
 
-.hlstats-contents table .hlstats-map-card{
-  min-width: 240px;
-}
 .leaflet-container a.leaflet-popup-close-button,
 .hlstats-contents table .hlstats-map-card a{
   color: var(--a-color);
@@ -2116,13 +2154,26 @@ th:hover::after{
   opacity: 0.8;
 }
 
+.leaflet-popup-content button { height:24px }
+
+.leaflet-popup-content .hlstats-map-card{
+  min-width: 0;
+  max-width: 100%;
+}
+.leaflet-popup-content .hlstats-map-title,
+.leaflet-popup-content .hlstats-map-sub{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Rows */
 .hlstats-map-row{
   display: grid;
-  grid-template-columns: 90px 1fr; /* label | value */
+  grid-template-columns: 90px minmax(0, 1fr);
   gap: 8px;
   align-items: center;
-  padding: 6px 0;
+  padding: 2px 0;
   border-top: 1px solid rgba(0,0,0,.08);
 }
 .hlstats-map-label{
@@ -2625,7 +2676,12 @@ th:hover::after{
 
   #map { height: 280px; }
 
-  .leaflet-popup-content { margin: 4px; }
+  .leaflet-popup-content {
+      margin: 4px;
+      line-height:1;
+      font-size:0.8em;
+  }
+
 }
 
 @media (max-width: 810px){
@@ -2717,6 +2773,10 @@ th:hover::after{
 @media (max-width: 600px){
 
   .hlstats-brand{ display: none; }
+  .hlstats-brand-mark{ display: inline-flex; }
+  .hlstats-topnav{ flex-wrap: nowrap; gap: 12px; }
+  .hlstats-topnav .hlstats-navlink-more{ display: none; }
+  .hlstats-topnav .hlstats-topnav-more{ display: inline-flex; }
   .hlstats-game-dropdown .hlstats-game-link{ display: none; }
   .hlstats-game-dropdown .hlstats-dropbtn.hlstats-game-btn .hlstats-game-hamburger{ display: inline; }
   .hlstats-game-dropdown.has-games .hlstats-dropbtn.hlstats-game-btn .hlstats-server,

@@ -22,6 +22,7 @@ function TeamColor($name) {
         'green'  => '#35994d',
         'purple' => '#a35fd0',
         'orange' => '#d46f1a',
+        'teal'   => '#1fb0b8',   // spectators alone
     );
 
     // Team code (hlstats_Livestats.team) => palette color
@@ -126,7 +127,11 @@ function TeamColor($name) {
     );
 
     $name = (string) $name;
-    return isset($teams[$name]) ? $palette[$teams[$name]] : null;
+    if (isset($teams[$name])) {
+        return $palette[$teams[$name]];
+    }
+    // Spectators, however the game writes them (Spectator, SPECTATOR, Spectators, #FF_TEAM_SPECTATOR...)
+    return stripos($name, 'spectat') !== false ? $palette['teal'] : null;
 }
 
 // grey

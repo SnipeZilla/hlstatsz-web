@@ -80,7 +80,7 @@ printSectionTitle(t('title.action.stats')); ?>
   <div class="hlstats-card-foot"><?= t("total.actions.stats",["{actions}" => '<strong>'.nf($totalactions).'</strong>']) ?></div>
 </section>
 </div>
-<div id="actions">
+<div id="actions" tabindex="-1">
 <?php
 }
 if ($db->num_rows($result)) {

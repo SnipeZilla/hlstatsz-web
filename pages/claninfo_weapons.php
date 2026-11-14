@@ -96,7 +96,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'weapons') {
 	printSectionTitle(t('title.weapon.usage').$asterisk);
 
 ?>
-<div id="weapons">
+<div id="weapons" tabindex="-1">
 <?php
 }
 ?>
@@ -224,7 +224,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'statsme') {
         if (empty($_GET['ajax'])) {
             printSectionTitle(t('title.weapon.stats').$asterisk);
 ?>
-<div id="statsme">
+<div id="statsme" tabindex="-1">
 <?php
 }
 ?>
@@ -389,7 +389,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'statsme2') {
 <div class="hlstats-cards-grid">
 <section class="hlstats-section hlstats-card">
 
-<div id="statsme2">
+<div id="statsme2" tabindex="-1">
 <?php } ?>
   <div class="responsive-table">
   <table class="statsme2-table">

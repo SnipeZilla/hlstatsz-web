@@ -65,7 +65,7 @@ list($total) = $db->fetch_row();
 
 if (!is_ajax()) {
     printSectionTitle(t('sb.title.bans'));
-   echo '<div id="bans">';
+   echo '<div id="bans" tabindex="-1">';
  }
 ?>
 <?php if (!$total) { ?>

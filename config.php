@@ -73,19 +73,16 @@ define('SECRET_KEY', 'GdXtjLW6A8eIgoeYMbnRFhf366e111SAQMomkeYqDVGMOwjxY4WOd4y7t5
 
 // ── Cache ────────────────────────────────────────────────────────────────────────────────────────────
 
-// How long forum signatures, graphs and charts are kept before they are drawn again, in seconds.
-define('IMAGE_UPDATE_INTERVAL', 300);
-
-// The front page, game pages and server pages update by themselves every 20 seconds and shared by all visitors
-define('LIVE_INTERVAL', 20);
-
 // How long the IP of a host name is kept (publicAddress) before it is looked up again: a day 86400 or 10 years 315360000 ?
 define('DNS_CACHE_TTL', 86400); // keep for 1 day
 
-// ── Other ────────────────────────────────────────────────────────────────────────────────────────────
+
+// ── Analytics ────────────────────────────────────────────────────────────────────────────────────────────
 
 // Google Analytics measurement ID ('G-XXXXXXXXXX'); empty for none.
 define('GOOGLE_ANALYTICS_ID', '');
+
+// ── Other ────────────────────────────────────────────────────────────────────────────────────────────
 
 // true: PHP warnings and errors are written to _error.txt next to this file (web.config and .htaccess keep it
 // private), never shown on the pages. false: php.ini decides.

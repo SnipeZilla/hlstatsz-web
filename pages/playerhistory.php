@@ -333,7 +333,7 @@ if (!is_ajax()) {
 
 ?>
 
-<div id="events">
+<div id="events" tabindex="-1">
 <?php
 }
 ?>

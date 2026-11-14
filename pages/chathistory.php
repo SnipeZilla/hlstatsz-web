@@ -134,7 +134,7 @@ if (!is_ajax()) {
 if (!is_ajax()){
 		?>
 
-<div id="chats">
+<div id="chats" tabindex="-1">
 <?php
 }
 ?>

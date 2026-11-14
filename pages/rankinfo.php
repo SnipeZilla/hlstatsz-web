@@ -104,7 +104,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
 		printSectionTitle(t('title.rank.details'));
 ?>
-<div id="rankinfo">
+<div id="rankinfo" tabindex="-1">
 <?php
 }
 ?>

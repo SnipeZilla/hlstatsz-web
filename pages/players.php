@@ -85,7 +85,7 @@ if (!is_ajax()) {
     </form>
 </div>
 
-<div id="players">
+<div id="players" tabindex="-1">
 <?php
 }
 

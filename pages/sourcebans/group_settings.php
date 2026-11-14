@@ -63,7 +63,7 @@ if ($full || sbAjaxPart('sba-web-groups')):
 		<button type="button" class="sba-btn is-primary" data-sba-open="sba-group-web" data-sba-title="New web panel group">+ New group</button>
 <?php endif; ?>
 	</div>
-	<div id="sba-web-groups">
+	<div id="sba-web-groups" tabindex="-1">
 <?php endif; ?>
 	<div class="responsive-table">
 	<table class="sba-table">
@@ -111,7 +111,7 @@ if ($full || sbAjaxPart('sba-srv-groups')):
 		<button type="button" class="sba-btn is-primary" data-sba-open="sba-group-srv" data-sba-title="New in-game group">+ New group</button>
 <?php endif; ?>
 	</div>
-	<div id="sba-srv-groups">
+	<div id="sba-srv-groups" tabindex="-1">
 <?php endif; ?>
 	<div class="responsive-table">
 	<table class="sba-table">

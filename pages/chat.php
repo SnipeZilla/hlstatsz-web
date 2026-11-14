@@ -193,7 +193,7 @@ if (!is_ajax()){
 			}
 			$db->free_result();	
             if (!is_ajax()) {
-               echo '<div id="chats">';
+               echo '<div id="chats" tabindex="-1">';
             }
 if ($numitems) {
 ?>

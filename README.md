@@ -4,6 +4,12 @@ Player and clan rankings, awards, live servers and bans, read from the database 
 
 Modern yet familiar: a clean, responsive, AJAX-first layout that keeps the original HLstats feel.
 
+| | |
+| --- | --- |
+| **[Installation](#installation--setup)** | The website: files, `config.php`, Steam sign-in, database. Below on this page. |
+| **[Daemon installation](https://github.com/SnipeZilla/HLSTATS-2/blob/main/INSTALL.md)** | The HLstatsZ daemon on Windows or Linux, step by step, and the lines for your game servers. |
+| **[Guide](https://github.com/SnipeZilla/HLSTATS-2/blob/main/GUIDE.md)** | The settings worth knowing in the admin panel: add a server, bans, rankings, the profiler. |
+
 ---
 
 ## Features
@@ -50,7 +56,7 @@ Modern yet familiar: a clean, responsive, AJAX-first layout that keeps the origi
 
 ## Requirements
 
-- The [HLstatsZ daemon](https://github.com/SnipeZilla/HLSTATS-2): the frontend shows what it records
+- The [HLstatsZ daemon](https://github.com/SnipeZilla/HLSTATS-2): the frontend shows what it records ([how to install it](https://github.com/SnipeZilla/HLSTATS-2/blob/main/INSTALL.md))
 - PHP 8.3+ with the extensions mysqli, gd (with FreeType), curl, mbstring, intl, sockets, bcmath and xml
 - MySQL 8.0+ or MariaDB 10.2+
 - A web server: IIS, Apache or nginx
@@ -103,8 +109,14 @@ For a new one, open the site: the installer takes over. It creates the database 
 ### First visit
 Sign in with Steam at the top right of the site, then click **admin** (without Steam sign-in, open `hlstats.php?mode=admin`). The first page checks PHP, its extensions and the folders, and offers to update the database to the latest version.
 
+### Next: the daemon and your game servers
+The website is ready. Two steps are left, each with its own page:
+
+1. **[Install the daemon](https://github.com/SnipeZilla/HLSTATS-2/blob/main/INSTALL.md)**, with the database name, user and password of `config.php`, and add its lines to your game servers' `server.cfg`.
+2. **[Add your servers](https://github.com/SnipeZilla/HLSTATS-2/blob/main/GUIDE.md#add-a-server)** in the admin panel. The [guide](https://github.com/SnipeZilla/HLSTATS-2/blob/main/GUIDE.md) explains the settings worth knowing.
+
 ### Bans (optional)
-Set `DB_SBNAME` (SourceBans / SourceBans++) and/or `DB_AMXNAME` (AMXBans) in `config.php`, with their table prefix (`DB_SBPREFIX`, `DB_AMXPREFIX`). Their databases must be on the same MySQL server; HLstatsZ's own database will do. Then open *Admin › Bans › Bans Settings*: when a database or its tables don't exist yet, it creates them with that prefix, and makes you the SourceBans owner.
+Set `DB_SBNAME` (SourceBans / SourceBans++) and/or `DB_AMXNAME` (AMXBans) in `config.php`, with their table prefix (`DB_SBPREFIX`, `DB_AMXPREFIX`). Their databases must be on the same MySQL server; HLstatsZ's own database will do. Then open *Admin › Bans › Bans Settings*: when a database or its tables don't exist yet, it creates them with that prefix, and makes you the SourceBans owner. The plugin side on the game servers: [Bans](https://github.com/SnipeZilla/HLSTATS-2/blob/main/GUIDE.md#bans-sourcebans-and-amxbans) in the guide.
 
 ### Web server
 `web.config` (IIS) and `.htaccess` (Apache, with `AllowOverride All`) keep the private files out of reach. On nginx, add this before your PHP `location`:

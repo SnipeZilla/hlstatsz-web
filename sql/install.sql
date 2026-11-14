@@ -2,8 +2,8 @@
 
 -- This file is only needed for new installations.
 
-SET @DBVERSION="84";
-SET @VERSION="2.4.0";
+SET @DBVERSION="93";
+SET @VERSION="0.0.0";
 
 -- --------------------------------------------------------
 
@@ -1844,7 +1844,8 @@ INSERT INTO `hlstats_Awards` (`awardType`, `game`, `code`, `name`, `verb`) VALUE
 ('W', 'nd', 'suicide', 'Self-murderer', 'suicides'),
 ('W', 'nd', 'teamkills', 'Betrayer', 'team kills'),
 ('W', 'nd', 'u23 grenade', 'U23 POISON', 'kills with U23 POISON'),
-('W', 'nd', 'x01', 'X-01', 'kills with X-01');
+('W', 'nd', 'x01', 'X-01', 'kills with X-01'),
+('W', 'cs2', 'sg556', 'SG 556', 'kills with sg556');
 
 
 -- --------------------------------------------------------
@@ -2192,7 +2193,8 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_Admin` (
   `type` varchar(64) NOT NULL default 'Unknown',
   `message` varchar(255) NOT NULL default '',
   `playerName` varchar(64) NOT NULL default '',
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  KEY `eventTime` (`eventTime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2210,7 +2212,9 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_ChangeName` (
   `oldName` varchar(64) NOT NULL default '',
   `newName` varchar(64) NOT NULL default '',
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`)
+  KEY `playerId` (`playerId`),
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
@@ -2228,7 +2232,9 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_ChangeRole` (
   `playerId` int(10) unsigned NOT NULL default '0',
   `role` varchar(64) NOT NULL default '',
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`)
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`),
+  KEY `playerId` (`playerId`,`role`,`serverId`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2245,7 +2251,9 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_ChangeTeam` (
   `playerId` int(10) unsigned NOT NULL default '0',
   `team` varchar(64) NOT NULL default '',
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`)
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`),
+  KEY `playerId` (`playerId`,`team`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2265,6 +2273,8 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_Chat` (
   PRIMARY KEY  (`id`),
   KEY `playerId` (`playerId`),
   KEY `serverId` (`serverId`),
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`),
   FULLTEXT KEY `message` (`message`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -2285,7 +2295,9 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_Connects` (
   `hostgroup` varchar(255) NOT NULL default '',
   `eventTime_Disconnect` datetime default NULL,
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`)
+  KEY `playerId` (`playerId`),
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2300,7 +2312,9 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_Disconnects` (
   `serverId` int(10) unsigned NOT NULL default '0',
   `map` varchar(64) NOT NULL default '',
   `playerId` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2316,7 +2330,9 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_Entries` (
   `map` varchar(64) NOT NULL default '',
   `playerId` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`)
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`),
+  KEY `playerId` (`playerId`,`serverId`,`map`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2343,13 +2359,16 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_Frags` (
   `pos_victim_y` MEDIUMINT default NULL,
   `pos_victim_z` MEDIUMINT default NULL,
   PRIMARY KEY  (`id`),
-  KEY `killerId` (`killerId`),
-  KEY `victimId` (`victimId`),
   KEY `serverId` (`serverId`),
   KEY `headshot` (`headshot`),
   KEY `map` (`map`(5)),
   KEY `weapon16` (`weapon`(16)),
-  KEY `killerRole` (`killerRole`(8))
+  KEY `killerRole` (`killerRole`(8)),
+  KEY `killer_eventTime` (`killerId`,`eventTime`),
+  KEY `victim_eventTime` (`victimId`,`eventTime`),
+  KEY `eventTime` (`eventTime`),
+  KEY `killerId` (`killerId`,`weapon`,`map`,`killerRole`,`headshot`),
+  KEY `victimId` (`victimId`,`map`,`victimRole`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2366,7 +2385,9 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_Latency` (
   `playerId` int(10) unsigned NOT NULL default '0',
   `ping` int(32) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`)
+  KEY `playerId` (`playerId`),
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2387,8 +2408,10 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_PlayerActions` (
   `pos_y` MEDIUMINT default NULL,
   `pos_z` MEDIUMINT default NULL,
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`),
-  KEY `actionId` (`actionId`)
+  KEY `actionId` (`actionId`),
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`),
+  KEY `playerId` (`playerId`,`actionId`,`bonus`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2413,9 +2436,11 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_PlayerPlayerActions` (
   `pos_victim_y` MEDIUMINT default NULL,
   `pos_victim_z` MEDIUMINT default NULL,
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`),
   KEY `actionId` (`actionId`),
-	KEY `victimId` (`victimId`)
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`),
+  KEY `playerId` (`playerId`,`actionId`,`bonus`),
+  KEY `victimId` (`victimId`,`actionId`,`bonus`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2433,7 +2458,8 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_Rcon` (
   `remoteIp` varchar(32) NOT NULL default '',
   `password` varchar(128) NOT NULL default '',
   `command` varchar(255) NOT NULL default '',
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  KEY `eventTime` (`eventTime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2456,8 +2482,10 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_Statsme` (
   `kills` int(6) unsigned NOT NULL default '0',
   `deaths` int(6) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`),
-  KEY `weapon` (`weapon`)
+  KEY `weapon` (`weapon`),
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`),
+  KEY `playerId` (`playerId`,`weapon`,`kills`,`hits`,`shots`,`headshots`,`deaths`,`damage`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2481,8 +2509,10 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_Statsme2` (
   `leftleg` int(6) unsigned NOT NULL default '0',
   `rightleg` int(6) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`),
-  KEY `weapon` (`weapon`)
+  KEY `weapon` (`weapon`),
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`),
+  KEY `playerId` (`playerId`,`weapon`,`head`,`chest`,`stomach`,`leftarm`,`rightarm`,`leftleg`,`rightleg`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2499,7 +2529,9 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_StatsmeLatency` (
   `playerId` int(10) unsigned NOT NULL default '0',
   `ping` int(6) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`)
+  KEY `playerId` (`playerId`),
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2516,7 +2548,9 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_StatsmeTime` (
   `playerId` int(10) unsigned NOT NULL default '0',
   `time` time NOT NULL default '00:00:00',
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`)
+  KEY `playerId` (`playerId`),
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2536,7 +2570,9 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_Suicides` (
   `pos_y` MEDIUMINT default NULL,
   `pos_z` MEDIUMINT default NULL,
   PRIMARY KEY  (`id`),
-  KEY `playerId` (`playerId`)
+  KEY `playerId` (`playerId`),
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2555,7 +2591,9 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_TeamBonuses` (
   `bonus` int(11) NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `playerId` (`playerId`),
-  KEY `actionId` (`actionId`)
+  KEY `actionId` (`actionId`),
+  KEY `playerId_eventTime` (`playerId`,`eventTime`),
+  KEY `eventTime` (`eventTime`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -2579,7 +2617,10 @@ CREATE TABLE IF NOT EXISTS `hlstats_Events_Teamkills` (
   `pos_victim_y` MEDIUMINT default NULL,
   `pos_victim_z` MEDIUMINT default NULL,
   PRIMARY KEY  (`id`),
-  KEY `killerId` (`killerId`)
+  KEY `killerId` (`killerId`),
+  KEY `killer_eventTime` (`killerId`,`eventTime`),
+  KEY `victim_eventTime` (`victimId`,`eventTime`),
+  KEY `eventTime` (`eventTime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -3900,7 +3941,9 @@ CREATE TABLE `hlstats_Maps_Counts` (
   `kills` int(11) NOT NULL,
   `headshots` int(11) NOT NULL,
   PRIMARY KEY  (`game`,`map`),
-  INDEX ( `rowId` )
+  KEY `rowId` (`rowId`),
+  KEY `game_kills` (`game`,`kills`,`headshots`),
+  KEY `game_headshots` (`game`,`headshots`,`kills`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE IF NOT EXISTS `hlstats_Mods_Defaults` (
@@ -4054,7 +4097,25 @@ INSERT INTO `hlstats_Options` (`keyname`, `value`, `opttype`) VALUES
 ('sourcebans_address', '', 2),
 ('forum_address', '', 2),
 ('display_gamelist', '1', 2),
-('display_style_selector', '0', 2);
+('display_style_selector', '0', 2),
+('appeal_url', '', 2),
+('chart', '0', 2),
+('footer_link1_label', 'SnipeZilla', 2),
+('footer_link1_url', 'https://snipezilla.com', 2),
+('footer_link2_label', 'Steam', 2),
+('footer_link2_url', 'https://steamcommunity.com/groups/snipezilla', 2),
+('footer_link3_label', 'AlliedMods', 2),
+('footer_link3_url', 'https://forums.alliedmods.net/forumdisplay.php?f=156', 2),
+('topnav_link1_label', '', 2),
+('topnav_link1_url', '', 2),
+('topnav_link2_label', '', 2),
+('topnav_link2_url', '', 2),
+('Language', '', 2),
+('report_url', '', 2),
+('Sourcebans_Site', '0', 2),
+('styles_hidden', '', 2),
+('style_seasonal', '', 2),
+('webversion', '2.00.91', 2);
 
 
 CREATE TABLE IF NOT EXISTS `hlstats_Options_Choices` (
@@ -4083,8 +4144,11 @@ INSERT INTO `hlstats_Options_Choices` (`keyname`, `value`, `text`, `isDefault`) 
 ('show_weapon_target_flash', '0', 'HTML Table', 0),
 ('show_server_load_image', '1', 'Show', 0),
 ('show_server_load_image', '0', 'Hide', 1),
-('countrydata', '1', 'Show', 1),
-('countrydata', '0', 'Hide', 0),
+('countrydata', '0', 'Hide', 1),
+('countrydata', '1', 'Show City, Country', 0),
+('countrydata', '2', 'Show State, Country', 0),
+('countrydata', '3', 'Show City, State, Country', 0),
+('countrydata', '4', 'Show Country', 0),
 ('gamehome_show_awards', '1', 'Show', 0),
 ('gamehome_show_awards', '0', 'Hide', 1),
 ('show_google_map', '0', 'Hide', 0),
@@ -4165,7 +4229,11 @@ INSERT INTO `hlstats_Options_Choices` (`keyname`, `value`, `text`, `isDefault`) 
 ('display_gamelist', '1', 'Yes', 1),
 ('display_gamelist', '0', 'No', 0),
 ('display_style_selector', '1', 'Yes', 0),
-('display_style_selector', '0', 'No', 1);
+('display_style_selector', '0', 'No', 1),
+('chart', '0', 'pChart', 1),
+('chart', '1', 'Chart.js', 0),
+('Sourcebans_Site', '0', 'External', 1),
+('Sourcebans_Site', '1', 'Internal', 0);
 -- --------------------------------------------------------
 
 --
@@ -4198,6 +4266,7 @@ CREATE TABLE IF NOT EXISTS `hlstats_Players` (
   `connection_time` int(11) unsigned NOT NULL default '0',
   `lastName` varchar(64) NOT NULL default '',
   `lastAddress` varchar(32) NOT NULL default '',
+  `lastPing` int(10) unsigned default NULL,
   `city` varchar(64) NOT NULL default '',
   `state` varchar(64) NOT NULL default '',
   `country` varchar(64) NOT NULL default '',
@@ -4228,11 +4297,12 @@ CREATE TABLE IF NOT EXISTS `hlstats_Players` (
   `activity` int(11) NOT NULL default '100',
   `createdate` int(11) NOT NULL default'0',
   PRIMARY KEY  (`playerId`),
-  KEY `playerclan` (`clan`,`playerId`),
-  KEY `skill` (`skill`),
-  KEY `game` (`game`),
-  KEY `kills` (`kills`),
-  KEY `hideranking` (`hideranking`)
+  KEY `idx_players_skill_kills` (`skill` DESC,`kills` DESC),
+  KEY `idx_players_skill_kills_conn` (`skill` DESC,`kills` DESC,`connection_time` DESC),
+  KEY `idx_clan_rank` (`game`,`hideranking`,`clan`),
+  KEY `idx_players_country` (`game`,`hideranking`,`flag`),
+  KEY `ranking` (`game`,`hideranking`,`skill`,`kills`,`connection_time`,`playerId`,`lastAddress`),
+  KEY `ranking_kills` (`game`,`hideranking`,`kills`,`deaths` DESC,`connection_time`,`playerId`,`lastAddress`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -4247,7 +4317,8 @@ CREATE TABLE IF NOT EXISTS `hlstats_Players_Awards` (
   `playerId` int(11) unsigned NOT NULL default '0',
   `count` int(11) unsigned NOT NULL default '0',
   `game` varchar(32) NOT NULL,
-  PRIMARY KEY  (`awardTime`,`awardId`,`playerId`,`game`)
+  PRIMARY KEY  (`awardTime`,`awardId`,`playerId`,`game`),
+  KEY `player_award` (`playerId`,`awardId`,`game`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -4272,8 +4343,9 @@ CREATE TABLE IF NOT EXISTS `hlstats_Players_History` (
   `kill_streak` int(6) NOT NULL default '0',
   `death_streak` int(6) NOT NULL default '0',
   `skill_change` int(11) NOT NULL default '0',
-  UNIQUE KEY `eventTime` (`eventTime`,`playerId`,`game`),
-  KEY `playerId` (`playerId`)
+  KEY `idx_history_player_game` (`playerId`,`game`),
+  KEY `idx_history_eventTime` (`eventTime`),
+  KEY `idx_history_skill_kills_time` (`skill_change` DESC,`kills` DESC,`eventTime` DESC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -4285,7 +4357,8 @@ CREATE TABLE IF NOT EXISTS `hlstats_Players_History` (
 CREATE TABLE IF NOT EXISTS `hlstats_Players_Ribbons` (
   `playerId` int(11) unsigned NOT NULL default '0',
   `ribbonId` int(11) unsigned NOT NULL default '0',
-  `game` varchar(32) NOT NULL
+  `game` varchar(32) NOT NULL,
+  KEY `ribbonId_playerId` (`ribbonId`,`playerId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -4300,7 +4373,7 @@ CREATE TABLE IF NOT EXISTS `hlstats_PlayerUniqueIds` (
   `game` varchar(32) NOT NULL default '',
   `merge` int(10) unsigned default NULL,
   PRIMARY KEY  (`uniqueId`,`game`),
-  KEY `playerId` (`playerId`)
+  KEY `idx_uid_playerId` (`playerId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -6537,7 +6610,101 @@ INSERT INTO `hlstats_Ribbons` (`awardCode`, `awardCount`, `special`, `game`, `im
 ('suicide', 12, 0, 'cs2', '3_suicide.png', 'Silver Suicides'),
 ('suicide', 20, 0, 'cs2', '4_suicide.png', 'Gold Suicides'),
 ('suicide', 30, 0, 'cs2', '5_suicide.png', 'Platinum Suicides'),
-('suicide', 50, 0, 'cs2', '6_suicide.png', 'Supreme Suicides');
+('suicide', 50, 0, 'cs2', '6_suicide.png', 'Supreme Suicides'),
+('sg556', 1, 0, 'cs2', '1_sg553.png', 'Supreme SG 556'),
+('sg556', 5, 0, 'cs2', '2_sg553.png', 'Supreme SG 556'),
+('sg556', 12, 0, 'cs2', '3_sg553.png', 'Supreme SG 556'),
+('sg556', 20, 0, 'cs2', '4_sg553.png', 'Supreme SG 556'),
+('sg556', 30, 0, 'cs2', '5_sg553.png', 'Supreme SG 556'),
+('sg556', 50, 0, 'cs2', '6_sg553.png', 'Supreme SG 556'),
+('bilebomb_tank', 1, 0, 'l4d2', '1_boomer_claw.png', 'Bronze Green Can''t Be Healthy'),
+('headshot', 1, 0, 'l4d2', '1_headshot.png', 'Bronze Brain Salad'),
+('healed_teammate', 1, 0, 'l4d2', '1_healed_teammate.png', 'Bronze Field Medic'),
+('hunter_claw', 1, 0, 'l4d2', '1_hunter_claw.png', 'Bronze Grim Reaper'),
+('inferno', 1, 0, 'l4d2', '1_inferno.png', 'Bronze Cremator'),
+('killed_boomer', 1, 0, 'l4d2', '1_killed_exploding.png', 'Bronze Stomach Upset'),
+('killed_smoker', 1, 0, 'l4d2', '1_killed_gas.png', 'Bronze Tongue Twister'),
+('killed_hunter', 1, 0, 'l4d2', '1_killed_hunter.png', 'Bronze Hunter Punter'),
+('killed_survivor', 1, 0, 'l4d2', '1_killed_survivor.png', 'Bronze Dead Wreckening'),
+('killed_tank', 1, 0, 'l4d2', '1_killed_tank.png', 'Bronze Tankbuster'),
+('killed_witch', 1, 0, 'l4d2', '1_killed_witch.png', 'Bronze Inquisitor'),
+('latency', 1, 0, 'l4d2', '1_latency.png', 'Bronze Nothing Special'),
+('pipe_bomb', 1, 0, 'l4d2', '1_pipe_bomb.png', 'Bronze Pyrotechnician'),
+('pounce', 1, 0, 'l4d2', '1_pounce.png', 'Bronze Free 2 Fly'),
+('rescued_survivor', 1, 0, 'l4d2', '1_rescued_survivor.png', 'Bronze Ground Cover'),
+('revived_teammate', 1, 0, 'l4d2', '1_revived_teammate.png', 'Bronze Helping Hand'),
+('smoker_claw', 1, 0, 'l4d2', '1_smoker_claw.png', 'Bronze Chain Smoker'),
+('charger_pummel', 1, 0, 'l4d2', '1_tank_claw.png', 'Bronze Hulk Smash!'),
+('tongue_grab', 1, 0, 'l4d2', '1_tongue_grab.png', 'Bronze Drag &amp; Drop'),
+('vomit', 1, 0, 'l4d2', '1_vomit.png', 'Bronze Barf Bagged'),
+('bilebomb_tank', 3, 0, 'l4d2', '2_boomer_claw.png', 'Silver Green Can''t Be Healthy'),
+('headshot', 3, 0, 'l4d2', '2_headshot.png', 'Silver Brain Salad'),
+('healed_teammate', 3, 0, 'l4d2', '2_healed_teammate.png', 'Silver Field Medic'),
+('hunter_claw', 3, 0, 'l4d2', '2_hunter_claw.png', 'Silver Grim Reaper'),
+('inferno', 3, 0, 'l4d2', '2_inferno.png', 'Silver Cremator'),
+('killed_boomer', 3, 0, 'l4d2', '2_killed_exploding.png', 'Silver Stomach Upset'),
+('killed_smoker', 3, 0, 'l4d2', '2_killed_gas.png', 'Silver Tongue Twister'),
+('killed_hunter', 3, 0, 'l4d2', '2_killed_hunter.png', 'Silver Hunter Punter'),
+('killed_survivor', 3, 0, 'l4d2', '2_killed_survivor.png', 'Silver Dead Wreckening'),
+('killed_tank', 3, 0, 'l4d2', '2_killed_tank.png', 'Silver Tankbuster'),
+('killed_witch', 3, 0, 'l4d2', '2_killed_witch.png', 'Silver Inquisitor'),
+('latency', 3, 0, 'l4d2', '2_latency.png', 'Silver Nothing Special'),
+('pipe_bomb', 3, 0, 'l4d2', '2_pipe_bomb.png', 'Silver Pyrotechnician'),
+('pounce', 3, 0, 'l4d2', '2_pounce.png', 'Silver Free 2 Fly'),
+('rescued_survivor', 3, 0, 'l4d2', '2_rescued_survivor.png', 'Silver Ground Cover'),
+('revived_teammate', 3, 0, 'l4d2', '2_revived_teammate.png', 'Silver Helping Hand'),
+('smoker_claw', 3, 0, 'l4d2', '2_smoker_claw.png', 'Silver Chain Smoker'),
+('charger_pummel', 3, 0, 'l4d2', '2_tank_claw.png', 'Silver Hulk Smash!'),
+('tongue_grab', 3, 0, 'l4d2', '2_tongue_grab.png', 'Silver Drag &amp; Drop'),
+('vomit', 3, 0, 'l4d2', '2_vomit.png', 'Silver Barf Bagged'),
+('bilebomb_tank', 6, 0, 'l4d2', '3_boomer_claw.png', 'Golden Green Can''t Be Healthy'),
+('headshot', 6, 0, 'l4d2', '3_headshot.png', 'Golden Brain Salad'),
+('healed_teammate', 6, 0, 'l4d2', '3_healed_teammate.png', 'Golden Field Medic'),
+('hunter_claw', 6, 0, 'l4d2', '3_hunter_claw.png', 'Golden Grim Reaper'),
+('inferno', 6, 0, 'l4d2', '3_inferno.png', 'Golden Cremator'),
+('killed_boomer', 6, 0, 'l4d2', '3_killed_exploding.png', 'Golden Stomach Upset'),
+('killed_smoker', 6, 0, 'l4d2', '3_killed_gas.png', 'Golden Tongue Twister'),
+('killed_hunter', 6, 0, 'l4d2', '3_killed_hunter.png', 'Golden Hunter Punter'),
+('killed_survivor', 6, 0, 'l4d2', '3_killed_survivor.png', 'Golden Dead Wreckening'),
+('killed_tank', 6, 0, 'l4d2', '3_killed_tank.png', 'Golden Tankbuster'),
+('killed_witch', 6, 0, 'l4d2', '3_killed_witch.png', 'Golden Inquisitor'),
+('latency', 6, 0, 'l4d2', '3_latency.png', 'Golden Nothing Special'),
+('pipe_bomb', 6, 0, 'l4d2', '3_pipe_bomb.png', 'Golden Pyrotechnician'),
+('pounce', 6, 0, 'l4d2', '3_pounce.png', 'Golden Free 2 Fly'),
+('rescued_survivor', 6, 0, 'l4d2', '3_rescued_survivor.png', 'Golden Ground Cover'),
+('revived_teammate', 6, 0, 'l4d2', '3_revived_teammate.png', 'Golden Helping Hand'),
+('smoker_claw', 6, 0, 'l4d2', '3_smoker_claw.png', 'Golden Chain Smoker'),
+('charger_pummel', 6, 0, 'l4d2', '3_tank_claw.png', 'Golden Hulk Smash!'),
+('tongue_grab', 6, 0, 'l4d2', '3_tongue_grab.png', 'Golden Drag &amp; Drop'),
+('vomit', 6, 0, 'l4d2', '3_vomit.png', 'Golden Barf Bagged'),
+('bilebomb_tank', 10, 0, 'l4d2', '4_boomer_claw.png', 'Bloody Green Can''t Be Healthy'),
+('headshot', 10, 0, 'l4d2', '4_headshot.png', 'Bloody Brain Salad'),
+('healed_teammate', 10, 0, 'l4d2', '4_healed_teammate.png', 'Bloody Field Medic'),
+('hunter_claw', 10, 0, 'l4d2', '4_hunter_claw.png', 'Bloody Grim Reaper'),
+('inferno', 10, 0, 'l4d2', '4_inferno.png', 'Bloody Cremator'),
+('killed_boomer', 10, 0, 'l4d2', '4_killed_exploding.png', 'Bloody Stomach Upset'),
+('killed_smoker', 10, 0, 'l4d2', '4_killed_gas.png', 'Bloody Tongue Twister'),
+('killed_hunter', 10, 0, 'l4d2', '4_killed_hunter.png', 'Bloody Hunter Punter'),
+('killed_survivor', 10, 0, 'l4d2', '4_killed_survivor.png', 'Bloody Dead Wreckening'),
+('killed_tank', 10, 0, 'l4d2', '4_killed_tank.png', 'Bloody Tankbuster'),
+('killed_witch', 10, 0, 'l4d2', '4_killed_witch.png', 'Bloody Inquisitor'),
+('latency', 10, 0, 'l4d2', '4_latency.png', 'Bloody Nothing Special'),
+('pipe_bomb', 10, 0, 'l4d2', '4_pipe_bomb.png', 'Bloody Pyrotechnician'),
+('pounce', 10, 0, 'l4d2', '4_pounce.png', 'Bloody Free 2 Fly'),
+('rescued_survivor', 10, 0, 'l4d2', '4_rescued_survivor.png', 'Bloody Ground Cover'),
+('revived_teammate', 10, 0, 'l4d2', '4_revived_teammate.png', 'Bloody Helping Hand'),
+('smoker_claw', 10, 0, 'l4d2', '4_smoker_claw.png', 'Bloody Chain Smoker'),
+('charger_pummel', 10, 0, 'l4d2', '4_tank_claw.png', 'Bloody Hulk Smash!'),
+('tongue_grab', 10, 0, 'l4d2', '4_tongue_grab.png', 'Bloody Drag &amp; Drop'),
+('vomit', 10, 0, 'l4d2', '4_vomit.png', 'Bloody Barf Bagged'),
+('boomer_claw', 1, 0, 'l4d2', '1_boomer_claw.png', 'Bronze Boom!'),
+('boomer_claw', 3, 0, 'l4d2', '2_boomer_claw.png', 'Silver Boom!'),
+('boomer_claw', 6, 0, 'l4d2', '3_boomer_claw.png', 'Golden Boom!'),
+('boomer_claw', 10, 0, 'l4d2', '4_boomer_claw.png', 'Bloody Boom!'),
+('tank_claw', 1, 0, 'l4d2', '1_tank_claw.png', 'Bronze Lambs 2 Slaughter'),
+('tank_claw', 3, 0, 'l4d2', '2_tank_claw.png', 'Silver Lambs 2 Slaughter'),
+('tank_claw', 6, 0, 'l4d2', '3_tank_claw.png', 'Golden Lambs 2 Slaughter'),
+('tank_claw', 10, 0, 'l4d2', '4_tank_claw.png', 'Bloody Lambs 2 Slaughter');
 
 
 -- --------------------------------------------------------
@@ -8027,4 +8194,5 @@ INSERT INTO `hlstats_Weapons` (`game`, `code`, `name`, `modifier`) VALUES
 ('cs2', 'm249', 'M249 PARA Light Machine Gun', 1.00),
 ('cs2', 'inferno', 'Incendiary Grenade', 1.80),
 ('cs2', 'taser', 'Zeus x27', 1.00),
-('cs2', 'mp5sd', 'MP5-SD', 1.00);
+('cs2', 'mp5sd', 'MP5-SD', 1.00),
+('cs2', 'sg556', 'SG 556', 1.00);

@@ -91,7 +91,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'maps') {
         printSectionTitle(t('title.map.performance').$asterisk);
 
 ?>
-<div id="maps">
+<div id="maps" tabindex="-1">
 <?php
 }
 ?>

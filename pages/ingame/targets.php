@@ -473,6 +473,7 @@ printSectionTitle($pl_name.'\'s Targets');
         
 
 ?>
+<div id="statsme2">
 <div class="responsive-table">
   <table class="statsme2-table">
     <tr>
@@ -533,7 +534,7 @@ if (!$has) {
     echo '<p>No target statistics found for this player.</p>';
 }
   ?>
-
+</div>
 
 <div>
 <div style="float:left;">

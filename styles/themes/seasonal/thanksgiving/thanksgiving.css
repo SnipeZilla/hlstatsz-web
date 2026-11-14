@@ -1,0 +1,249 @@
+/* HLstatsZ theme: Thanksgiving (the fourth Thursday of November) */
+:root{
+  /* logo */
+  --logo-color: #fbf1e4;
+  --logo-color-z: #e5533a;
+
+  /* Base: dusk, a warm glow and a little plum at the top */
+  --body-bg:
+    radial-gradient(1000px 400px at 18% -8%, rgba(232,116,42,.13), rgba(232,116,42,0) 65%),
+    radial-gradient(900px 380px at 82% -6%, rgba(150,62,92,.12), rgba(150,62,92,0) 62%),
+    linear-gradient(to bottom, #1d1112 0%, #170d0e 50%, #110909 100%);
+  --main-color: #efe2d4;
+
+  /* Links (amber) */
+  --a-color: #f2a65a;
+  --a-color-hover: #ffd19a;
+
+  /* Section titles (pumpkin to cranberry) */
+  --h-tag-bg: linear-gradient(-60deg, rgba(232,116,42,.22) 5%, rgba(200,57,43,.18) 95%);
+
+  /* Inputs */
+  --input-border: 1px solid rgba(255,220,190,.16);
+  --input-bg: rgba(20,8,6,.5);
+  --input-border-color-focus: rgba(232,116,42,.85);
+  --select-option-bg: #24130f;
+  --input-placeholder-color: rgba(239,226,212,.5);
+
+  /* Buttons (rust) */
+  --button-bg: #c4561e;
+  --button-color: #ffffff;
+
+  /* Header: dusk over the farm */
+  --header-top-bg: linear-gradient(to bottom, #120c14 0%, #2a1520 50%, #5a2c1c 100%);
+  --header-border-bottom: none;
+  --header-top-nav-color: #ecdccd;
+  --header-top-nav-color-active: #f2a65a;
+
+  --header-sub-bar-bg: linear-gradient(to bottom, #2a140c 0%, #1f0f09 100%);
+  --header-dropmenu-bg: #24130f;
+  --header-dropmenu-bg-hover: rgba(232,116,42,.16);
+  --header-dropmenu-border: 1px solid rgba(255,220,190,.12);
+  --header-dropmenu-border-color: rgba(255,220,190,.12);
+  --header-dropmenu-color: #ead8c6;
+  --header-dropmenu-color-hover: #ffffff;
+  --header-dropmenu-shadow: 0 14px 34px rgba(0,0,0,.6);
+
+  /* Search panel */
+  --search-panel-bg: linear-gradient(#3a1d14, #22110b);
+  --search-panel-border: 1px solid rgba(0,0,0,.55);
+  --search-panel-shadow: 0 14px 34px rgba(0,0,0,.6);
+
+  /* Footer: the field */
+  --footer-color: #b79a83;
+  --footer-color-small: rgba(220,195,170,.6);
+  --footer-color-a: #f2a65a;
+  --footer-color-meta-a: #ead8c6;
+  --footer-color-a-hover: #ffffff;
+
+  /* Tabs */
+  --tabs-bg: linear-gradient(#3a1d14, #26130d);
+  --tab-border: 1px solid rgba(0,0,0,.4);
+  --tab-color: #ecdccd;
+  --tab-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 -1px 0 rgba(0,0,0,.35) inset;
+  --tab-color-hover: #ffffff;
+  --tab-bg-hover: linear-gradient(#4a2618, #311a10);
+  --tab-color-active: #ffffff;
+  --tab-bg-active: linear-gradient(#e0702a, #b44d17);
+
+  /* Tables */
+  --table-bg: rgba(20,9,6,.45);
+  --table-border: 1px solid rgba(255,220,190,.10);
+  --table-th-bg: linear-gradient(to bottom, rgba(74,36,22,.95) 65%, rgba(52,25,15,.95));
+  --table-th-color: #f6e8da;
+  --table-th-border-bottom: 1px solid rgba(255,220,190,.10);
+  --table-td-color: rgba(246,232,218,.86);
+  --table-td-border-bottom: 1px solid rgba(255,220,190,.06);
+  --table-td-bg-odd: rgba(0,0,0,.12);
+  --table-td-bg-even: rgba(255,255,255,.02);
+  --table-td-bg-hover: rgba(232,116,42,.10);
+  --table-a-color: #f6e8da;
+  --table-a-color-hover: #f2a65a;
+  --table-shadow: 0 10px 28px rgba(0,0,0,.35);
+
+  /* Cards */
+  --card-bg: linear-gradient(180deg, rgba(64,32,20,.70), rgba(36,18,11,.72));
+  --card-section-bg: rgba(0,0,0,.14);
+  --card-section-border: 1px solid rgba(255,220,190,.08);
+  --card-section-shadow: 0 10px 30px rgba(0,0,0,.4);
+  --card-border: 1px solid rgba(255,220,190,.12);
+  --card-border-color-hover: rgba(232,116,42,.50);
+  --card-title-color: #ecd5c0;
+
+  /* Awards: harvest gold counts */
+  --card-award-bg: radial-gradient(circle at 30% 25%, rgba(242,166,90,.14), rgba(0,0,0,.2));
+  --card-award-border: 1px solid rgba(255,220,190,.10);
+  --card-award-winner-color: rgba(239,226,212,.88);
+  --card-award-winner-count-bg: rgba(0,0,0,.3);
+  --card-award-winner-count-color: #f2b84b;
+  --card-award-winner-count-border: 1px solid rgba(242,184,75,.22);
+  --card-award-has-winner-border: rgba(232,116,42,.40);
+  --card-scrollbar-color: rgba(242,166,90,.45) transparent;
+  --card-award-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 12px 24px rgba(0,0,0,.15);
+  --card-award-has-winner-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 16px 32px rgba(0,0,0,.5);
+  --card-award-rank-has-winner-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 2px 4px rgba(0,0,0,.5);
+
+  /* Pagination */
+  --pagination-hover-bg: rgba(232,116,42,.25);
+  --pagination-hover-border: 1px solid rgba(255,220,190,.14);
+
+  /* Ajax loader */
+  --ajax-bg: #e8742a;
+
+  /* Hitbox */
+  --hitbox-model-bg:
+    radial-gradient(ellipse at 50% 35%, rgba(232,116,42,.10) 0%, rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(64,32,20,.40), rgba(0,0,0,.55));
+
+  /* Map */
+  --map-tile-filter: invert(1) hue-rotate(160deg) brightness(.72) contrast(.95) saturate(.65);
+  --map-bg: #1d1112;
+}
+
+.z{ color: #e5533a; }
+
+/* Dusk: a few stars, and from 1000 px a low harvest moon and the farm */
+.hlstats-top{
+  position: relative;
+  background:
+    url('thanksgiving-stars.svg') 0 0 / 520px 104px repeat-x,
+    var(--header-top-bg);
+}
+@media (min-width: 1000px){
+  .hlstats-top{
+    background:
+      url('thanksgiving-farm.svg') right 18px bottom 0 / 420px 80px no-repeat,
+      radial-gradient(circle at 66% 60%, #ffcf8a 0 13px, rgba(255,190,110,.32) 14.5px, rgba(255,170,90,.10) 30px, rgba(255,170,90,0) 52px),
+      url('thanksgiving-stars.svg') 0 0 / 520px 104px repeat-x,
+      var(--header-top-bg);
+  }
+}
+
+/* A garland of autumn leaves strung under the header */
+.hlstats-top::after{
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% - 3px);
+  height: 26px;
+  background: url('thanksgiving-garland.svg') 0 0 / 120px 26px repeat-x;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Room for the garland above the game bar */
+.hlstats-sub .hlstats-inner{ padding-top: 14px; }
+
+/* Pilgrim hat on the logo */
+.hlstats-top .hlstats-brand{ position: relative; }
+.hlstats-top .hlstats-brand::before{
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: -21px;
+  width: 40px;
+  height: 31px;
+  background: url('thanksgiving-hat.svg') center / contain no-repeat;
+  transform: rotate(-14deg);
+  pointer-events: none;
+}
+
+/* Three leaves at the end of the section titles */
+.hlstats-contents h1{ position: relative; }
+.hlstats-contents h1::after{
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 60px;
+  height: 24px;
+  margin-top: -12px;
+  background: url('thanksgiving-leaves.svg') center / contain no-repeat;
+  pointer-events: none;
+}
+
+/* The field at the bottom: fallen leaves and pumpkins */
+.hlstats-footer{
+  position: relative;
+  background: linear-gradient(to bottom, #24130c 0%, #160b07 100%);
+  border-top: 0;
+}
+.hlstats-footer::before{
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -12px;
+  height: 22px;
+  background: url('thanksgiving-footer.svg') 0 0 / 360px 22px repeat-x;
+  pointer-events: none;
+}
+
+/* Leaves falling through the header now and then (thanksgiving.js), under the logo and the menu: each drops at its
+   own pace and sways. Only transforms move, which the browser does on the graphics card */
+.thanksgiving-fall{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.thanksgiving-fall i{
+  position: absolute;
+  top: -24px;
+  width: 16px;
+  height: 16px;
+  animation: thanksgiving-fall 12s linear infinite;
+}
+.thanksgiving-fall b{
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: url('thanksgiving-leaf.svg') 0 0 / 48px 16px no-repeat;
+  animation: thanksgiving-sway 3s ease-in-out infinite alternate;
+}
+.thanksgiving-fall .l1 b{ background-position: -16px 0; }
+.thanksgiving-fall .l2 b{ background-position: -32px 0; }
+@keyframes thanksgiving-fall{
+  from{ transform: translateY(0); }
+  to{ transform: translateY(150px); }
+}
+@keyframes thanksgiving-sway{
+  from{ transform: translateX(-14px) rotate(-35deg); }
+  to{ transform: translateX(14px) rotate(35deg); }
+}
+
+/* The admin menu shows its current item in the text colour of the active tab, without the tab */
+.hlstats-sub-task li.active > a,
+.hlstats-admin-active{ color: var(--a-color) !important; }

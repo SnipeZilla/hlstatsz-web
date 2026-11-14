@@ -90,7 +90,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'playeractions') {
 
 		printSectionTitle(t('title.player.actions').$asterisk);
 ?>
-<div id="playeractions">
+<div id="playeractions" tabindex="-1">
 <?php
 }
 ?>
@@ -178,7 +178,7 @@ if (empty($_GET['ajax']) || $_GET['ajax'] == 'playerplayeractions') {
 
     printSectionTitle(t('title.victims.pp.actions').$asterisk);
 ?>
-<div id="playerplayeractions">
+<div id="playerplayeractions" tabindex="-1">
 <?php
 }
 ?>

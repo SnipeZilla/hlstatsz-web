@@ -244,7 +244,7 @@ printSectionTitle(t('title.members'));
 
 ?>
 
-    <div id="members">
+    <div id="members" tabindex="-1">
 <?php 
 
 }

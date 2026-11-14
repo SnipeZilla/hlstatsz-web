@@ -2,6 +2,9 @@
 
 $theme = [
 
+    /* SEASON: its first and last day in the seasonal schedule (December 1st to January 6th - king's day) */
+    'season' => ['december 1', 'january 6'],
+
     /* FONT */
     'font_size'        => 4,
     'font_color'       => [214, 230, 242],

@@ -240,6 +240,7 @@ function sigTriangle($im, int $x, int $y, bool $up, int $color): void
 		$show_flags = valid_request($_GET['show_flags'], 1);
 
 
+	if (!defined('IMAGE_UPDATE_INTERVAL')) define('IMAGE_UPDATE_INTERVAL', 300);   // seconds signature are kept before they are drawn again
 
 	if (file_exists(IMAGE_PATH.'/progress/sig_'.$player_id.'.png')) {
 		$file_timestamp = @filemtime(IMAGE_PATH.'/progress/sig_'.$player_id.'.png');
@@ -409,7 +410,7 @@ if ($player_id > 0) {
 		$background = valid_request($_GET['background'], 0);
 	if ($background == 'random')
 		$background = rand(1, 11);
-	$accents = array(1 => '4aa3df', '9cb36b', 'a4c639', 'e64e4e', '3f8fd8', 'f7a531', 'e0533d', 'ff7a2e', 'cbb89a', 'd9443c', '5fb3b3');
+	$accents = sigAccents();
 	$accent  = $accents[(int) $background] ?? $accents[1];
 
 	$W = 400;

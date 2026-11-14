@@ -219,7 +219,7 @@ public class SourceBans
             if (key.Equals("hostname", StringComparison.OrdinalIgnoreCase))
             {
                 return !string.IsNullOrEmpty(SourceBans.hostName)? SourceBans.hostName :
-                        ConVar.Find("hostname")?.StringValue ?? "Counter-Strike 2";
+                        ConVar<string>.Find("hostname")?.ValueAsString ?? "Counter-Strike 2";
             }
 
             // --- Map ---

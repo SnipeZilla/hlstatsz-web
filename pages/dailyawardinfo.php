@@ -117,7 +117,7 @@ if (!is_ajax()) {
 
 
 
-<div id="dailyawardinfo">
+<div id="dailyawardinfo" tabindex="-1">
 <?php
 }
 ?>

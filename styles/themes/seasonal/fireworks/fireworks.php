@@ -2,6 +2,9 @@
 
 $theme = [
 
+    /* SEASON: its first and last day in the seasonal schedule (the week of July 4th); */
+    'season' => ['july 1', 'july 7'],
+
     /* FONT */
     'font_size'        => 4,
     'font_color'       => [212, 220, 238],

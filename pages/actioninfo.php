@@ -190,7 +190,7 @@ if (!is_ajax() || $_GET['ajax'] == 'actioninfo') {
             array(t('players'), nf($rows ? $rows[0]['total_rows'] : 0), ''),
             array(t('th.reward'), ($reward > 0 ? '+' : '') . nf($reward), strtolower(t('th.points'))),
         ));
-        echo '<div id="actioninfo">';
+        echo '<div id="actioninfo" tabindex="-1">';
    }
 
 if ($rows) {
@@ -298,7 +298,7 @@ if ($rows) {
             array(t('players'), nf($rows[0]['total_rows']), ''),
             array(t('th.times.victimized'), nf($rows[0]['total_count']), ''),
         ));
-        echo '<div id="vpage">';
+        echo '<div id="vpage" tabindex="-1">';
     }
 
     echo '<div  class="responsive-table">

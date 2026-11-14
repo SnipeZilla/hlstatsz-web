@@ -89,7 +89,9 @@ $grid = $theme['grid_color'];
 			array_unshift($date, '');
 		}
 	}
-	
+
+	if (!defined('IMAGE_UPDATE_INTERVAL')) define('IMAGE_UPDATE_INTERVAL', 300);   // seconds charts are kept before they are drawn again
+
 	$cache_image = IMAGE_PATH . "/progress/trend_{$theme_name}_{$player}.png";
 	if (file_exists($cache_image))
 	{

@@ -181,7 +181,7 @@ if (!is_ajax()) {
 
         if (!is_ajax()) {
         ?>
-<div id="mapinfo">
+<div id="mapinfo" tabindex="-1">
 
 <?php
 }

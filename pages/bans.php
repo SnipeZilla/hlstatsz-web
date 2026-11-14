@@ -98,7 +98,7 @@ if (!is_ajax()) {
 <?php endif; ?>
 
 
-<div id="players">
+<div id="players" tabindex="-1">
 <?php
 }
 

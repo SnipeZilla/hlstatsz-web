@@ -127,7 +127,7 @@
   position: relative;
   background:
     radial-gradient(ellipse 280px 90px at 62% 100%, rgba(255,214,150,.50), rgba(255,214,150,0)),
-    url('easter-stars.svg') 0 0 / 520px 104px repeat-x,
+    url('easter-stars.svg?2') 0 0 / 520px 104px repeat-x,
     var(--header-top-bg);
 }
 @media (min-width: 1000px){
@@ -135,12 +135,57 @@
     background:
       url('easter-hills.svg') right 18px bottom 0 / 420px 80px no-repeat,
       radial-gradient(ellipse 280px 90px at 62% 100%, rgba(255,214,150,.50), rgba(255,214,150,0)),
-      url('easter-stars.svg') 0 0 / 520px 104px repeat-x,
+      url('easter-stars.svg?2') 0 0 / 520px 104px repeat-x,
       var(--header-top-bg);
   }
 }
 
 /* Grass along the bottom of the header */
+/* With easter.js: the stars that twinkle (easter-twinkle.svg, one 520 x 104 row of them per pace, over the stars of
+   easter-stars.svg), then the hills and the glow over them, all under the logo and the menu. Only the opacity moves:
+   the browser fades them on the graphics card, without painting the header again on every frame */
+.hlstats-top.easter-has-sky{
+  background:
+    url('easter-stars.svg?2') 0 0 / 520px 104px repeat-x,
+    var(--header-top-bg);
+}
+.easter-sky,
+.easter-sky i,
+.easter-sky span{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.easter-sky{
+  overflow: hidden;
+  pointer-events: none;
+}
+.easter-sky i{
+  background: url('easter-twinkle.svg') 0 0 / 520px 312px repeat-x;
+  animation: easter-star 3.8s ease-in-out -1.07s infinite alternate;
+}
+.easter-sky i:nth-child(2){ background-position: 0 -104px; animation-delay: -3s; }
+.easter-sky i:nth-child(3){ background-position: 0 -208px; animation-delay: -3.65s; }
+@keyframes easter-star{
+  from{ opacity: .1; }
+  to{ opacity: .9; }
+}
+.easter-sky span{
+  background: radial-gradient(ellipse 280px 90px at 62% 100%, rgba(255,214,150,.50), rgba(255,214,150,0));
+}
+@media (min-width: 1000px){
+  .easter-sky span{
+    background:
+      url('easter-hills.svg') right 18px bottom 0 / 420px 80px no-repeat,
+      radial-gradient(ellipse 280px 90px at 62% 100%, rgba(255,214,150,.50), rgba(255,214,150,0));
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .easter-sky i{ animation: none; }
+}
+
 .hlstats-top::after{
   content: '';
   position: absolute;

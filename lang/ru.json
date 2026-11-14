@@ -5,6 +5,13 @@
     "nav.forum":         "ФОРУМ",
     "nav.help":          "ПОМОЩЬ",
 
+    "link.donate":       "Пожертвовать",
+    "link.rules":        "Правила",
+    "link.store":        "Магазин",
+    "link.support":      "Поддержать нас",
+    "link.join":         "Присоединиться",
+    "link.website":      "Сайт",
+
     "sub.nav.players":   "Игроки",
     "sub.nav.clans":     "Кланы",
     "sub.nav.awards":    "Награды",

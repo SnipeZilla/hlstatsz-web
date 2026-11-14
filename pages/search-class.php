@@ -186,7 +186,7 @@ For current support and updates:
 				");
                 list($numitems) = $db->fetch_row($resultCount);
 if (!is_ajax() || (!empty($_GET['ajax']) && $_GET['ajax']=='search') || $from_admin) {
-  echo '<div id="searchname">';
+  echo '<div id="searchname" tabindex="-1">';
 }
 ?>
 <div class="responsive-table">

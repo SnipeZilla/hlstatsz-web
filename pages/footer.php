@@ -58,11 +58,12 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
         }
       } ?>
       <?php
+      // The site's own links (HLstats Settings > Footer Links); a label can be a translation key (link.donate...)
       for ($i = 1; $i <= 3; $i++) {
           $label = trim($g_options["footer_link{$i}_label"] ?? '');
           $url   = trim($g_options["footer_link{$i}_url"]   ?? '');
           if ($label !== '' && $url !== '') {
-              echo '<a href="' . htmlspecialchars($url, ENT_QUOTES) . '" target="_blank">' . htmlspecialchars($label, ENT_QUOTES) . '</a>';
+              echo '<a href="' . htmlspecialchars($url, ENT_QUOTES) . '" target="_blank">' . htmlspecialchars(t($label), ENT_QUOTES) . '</a>';
           }
       }
       // Help: the last link

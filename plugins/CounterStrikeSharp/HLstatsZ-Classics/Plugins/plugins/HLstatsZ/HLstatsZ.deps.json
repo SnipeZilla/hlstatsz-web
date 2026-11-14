@@ -8,14 +8,14 @@
     ".NETCoreApp,Version=v10.0": {
       "HLstatsZ/1.0.0": {
         "dependencies": {
-          "CounterStrikeSharp.API": "1.0.375",
+          "CounterStrikeSharp.API": "1.0.379",
           "MySqlConnector": "2.6.2"
         },
         "runtime": {
           "HLstatsZ.dll": {}
         }
       },
-      "CounterStrikeSharp.API/1.0.375": {
+      "CounterStrikeSharp.API/1.0.379": {
         "dependencies": {
           "FastGenericNew": "3.3.1",
           "McMaster.NETCore.Plugins": "1.4.0",
@@ -31,8 +31,8 @@
         },
         "runtime": {
           "lib/net10.0/CounterStrikeSharp.API.dll": {
-            "assemblyVersion": "1.0.375.0",
-            "fileVersion": "1.0.375.0"
+            "assemblyVersion": "1.0.379.0",
+            "fileVersion": "1.0.379.0"
           }
         }
       },
@@ -544,12 +544,12 @@
       "serviceable": false,
       "sha512": ""
     },
-    "CounterStrikeSharp.API/1.0.375": {
+    "CounterStrikeSharp.API/1.0.379": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ap0UNvxwQMWvY1NLBx5rA1cAF7rjwlJbLO/uB6uiIC/JRmE3gAJfv+uI6sGS2zPpW0d5O1IpWNzQCXNArtIXCA==",
-      "path": "counterstrikesharp.api/1.0.375",
-      "hashPath": "counterstrikesharp.api.1.0.375.nupkg.sha512"
+      "sha512": "sha512-2gKKt06j88nN2vk9dGa70kmrrcKeKh5EQL0Lll3gNzOJ+uiq1HQPWjK7M3GxWPKchGJsE8CZ2cYyHFOmcGvXlg==",
+      "path": "counterstrikesharp.api/1.0.379",
+      "hashPath": "counterstrikesharp.api.1.0.379.nupkg.sha512"
     },
     "FastGenericNew/3.3.1": {
       "type": "package",

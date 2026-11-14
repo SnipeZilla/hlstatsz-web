@@ -77,7 +77,18 @@ $tables = [
 
 ];
 
+// A database that update 88 has already been through has idx_players_skill_kills_conn on hlstats_Players: update 88
+// dropped every index of hlstats_Players, hlstats_Players_History and hlstats_PlayerUniqueIds and built its own set.
+// A forced update on such a database leaves these three tables alone: nothing to add here that 88 would not drop
+// again, on tables that can be big. An older database (no such index yet) goes through everything, as before.
+$db->query("SHOW INDEX FROM hlstats_Players WHERE Key_name = 'idx_players_skill_kills_conn'");
+$migrated88 = $db->num_rows() > 0;
+
 foreach ($tables as $table => $indexes) {
+    if ($migrated88) {
+        echo "<br /><b>$table</b>: its indexes are those of update 88 already: skipped<br />";
+        continue;
+    }
     echo "<br /><b>Processing $table</b><br />";
     foreach ($indexes as $idx) {
         list($name, $definition) = $idx;

@@ -224,7 +224,7 @@ if (!is_ajax()) {
         </select>
     </form>
 </div>
-<div id="clans">
+<div id="clans" tabindex="-1">
 <?php
 }
 $query  = qClansRank();

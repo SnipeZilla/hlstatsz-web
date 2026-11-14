@@ -716,6 +716,16 @@ class EditList
 
 					$input_value = $value;
 
+					// A password kept as typed (rcon_password): hidden, the lock beside it shows it. A hashed one
+					// cannot be shown: it stays '(encrypted)', as before
+					if ($col->type == 'password' && $value != '(encrypted)') {
+						echo '<span class="password-wrapper">'
+							. "<input $onClick type=\"password\" name=\"" . $keyval . "_$col->name\" size=$col->width value=\"" . htmlspecialchars((string) $value) . "\" class=\"textbox\" maxlength=\"$col->maxlength\" autocomplete=\"new-password\" spellcheck=\"false\" />"
+							. '<button type="button" class="toggle-eye" title="Show / hide" aria-label="Show or hide the password">🔒</button>'
+							. '</span>';
+						break;
+					}
+
 					echo "<input $onClick type=\"text\" name=\"" . $keyval . "_$col->name\" size=$col->width " . "value=\"" . $input_value . "\" class=\"textbox\"" . " maxlength=\"$col->maxlength\"$onclick />";
 			}
 
@@ -992,6 +1002,9 @@ function checkVersion() {
     }
     echo '</div>';
 
+    // For Update and Force Update alike (one of them shows)
+    echo '<div style="margin:15px 0;">⚠️ Stop the HLstatsZ daemon before you update, and start it again after: an update can change tables it writes to.</div>';
+
     if ($needsupdate) {
         echo '<form method="post" action="?mode=admin&task=updater" name="updater" class="hlstats-updater">
             <input type="hidden" name="run" value="1">
@@ -999,17 +1012,23 @@ function checkVersion() {
                 <button type="submit" class="submit">Update</button>
             </div>
         </form>';
-    }
-    
-    echo '<div class="hlstats-admin-note" style="margin-top:15px;">
-            <p class="center">You can force an update (Useful if you are  coming from a different HLstats version)</p>
+    } else {
+        // No update is due: a forced update runs the updates again from the one chosen, the current one by default
+        // (what a release put in it since), or further back, down to 78 for all of them (admintasks/updater.php).
+        // Not shown beside Update: one button then, the one to click
+        $last = $updates ? max($updates) : (int) $g_options['dbversion'];
+        $from = max(78, min((int) $g_options['dbversion'], $last));
+        echo '<div class="hlstats-admin-note" style="margin-top:15px;">
+            <p class="center">You can force an update: the updates run again from the one you choose (78 runs them all).<br />Useful if you are coming from a different HLstats version. Otherwise it is mostly for developers and testers trying a change in an update.</p>
             <form method="post" action="?mode=admin&task=updater" name="updater" class="hlstats-updater">
                 <input type="hidden" name="force" value="1">
                 <div class="hlstats-admin-apply">
+                    <label>From update <input type="number" name="from" min="78" max="'.$last.'" value="'.$from.'" class="textbox" style="width:5em;"></label>
                     <button type="submit" class="submit hlstats-btn">Force Update</button>
                 </div>
             </form>
         </div>';
+    }
     echo '</div>';
 }
 
@@ -1056,7 +1075,8 @@ function message($icon, $msg)
 {
 ?>
 <div class="hlstats-admin-msg <?php echo ($icon === 'success') ? 'success' : 'warning'; ?>">
-	<?php echo ($icon === 'success') ? '✅ ' : '⚠️ '; echo $msg; ?>
+	<span><?php echo ($icon === 'success') ? '✅' : '⚠️'; ?></span>
+	<div><?php echo $msg; ?></div>
 </div>
 <?php
 }
@@ -1095,6 +1115,7 @@ $adminTaskTitles = array(
 	'ranks' => 'Ranks',
 	'ribbons' => 'Ribbons',
 	'tools_updater' => 'DB Updater',
+	'updater' => 'DB Updater',
 	'tools_perlcontrol' => 'Daemon Control',
 	'tools_rcon' => 'RCON console',
 	'tools_amxadmins' => 'AMXBans',
@@ -1268,6 +1289,27 @@ checkVersion();
     let   activeLink = null;
     let   skipPush   = false;
 
+    // A save in these tasks reloads the whole page, as what it changes shows outside the panel too (the games in the
+    // menu, the theme and the header for HLstats Settings, the database version and the Update button of the admin's
+    // first page for the Updater); the answer to the save is shown again after the reload, with its messages
+    // (sessionStorage, this tab only, for a minute)
+    const reloadTasks = ['games', 'options', 'updater'];
+    const SAVED       = 'hlz-admin-saved';
+
+    function keepSaved(task, html) {
+        try { sessionStorage.setItem(SAVED, JSON.stringify({ task, html, at: Date.now() })); } catch (err) {}
+    }
+
+    function takeSaved(task) {
+        try {
+            const saved = JSON.parse(sessionStorage.getItem(SAVED) || 'null');
+            sessionStorage.removeItem(SAVED);
+            return saved && saved.task === task && Date.now() - saved.at < 60000 ? saved.html : null;
+        } catch (err) {
+            return null;
+        }
+    }
+
 
     function clearPanel() {
         [...panel.children]
@@ -1366,6 +1408,14 @@ checkVersion();
             history.pushState({ params, title }, '', buildBrowserUrl(params));
         }
 
+        // Just reloaded after a save (bindForms): its answer, as it came
+        const saved = takeSaved(task);
+        if (saved !== null) {
+            setPanelHtml(saved);
+            bindPanel(task, game);
+            return;
+        }
+
         panel.classList.add('is-loading');
         try {
             const res = await fetch(buildFetchUrl(params), {
@@ -1456,8 +1506,9 @@ checkVersion();
                         }
                     }
                     panel.classList.remove('is-loading');
-                    if (taskUrl === 'games') {
-                        window.location.href = buildBrowserUrl({ task: 'games' });
+                    if (reloadTasks.includes(taskUrl) && (method === 'POST' || taskUrl === 'games')) {
+                        keepSaved(taskUrl, html);
+                        window.location.href = buildBrowserUrl({ task: taskUrl });
                         return;
                     }
                     setPanelHtml(html);
@@ -1597,8 +1648,9 @@ checkVersion();
                     if (now - lastUpdate > 50) { streamEl.innerHTML = html; lastUpdate = now; }
                 }
                 panel.classList.remove('is-loading');
-                setPanelHtml(html);
-                bindPanel('updater', baseGame);
+                // the page again, with the log: this first page still says the version of before (reloadTasks)
+                keepSaved('updater', html);
+                window.location.href = buildBrowserUrl({ task: 'updater' });
             } catch (err) {
                 panel.classList.remove('is-loading');
                 setPanelHtml('<p class="hlstats-admin-error">Update failed. Please try again.</p>');

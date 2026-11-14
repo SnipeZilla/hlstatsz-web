@@ -80,6 +80,69 @@ foreach ($events as $table => $list) {
     flush();
 }
 
+echo "<h3>Indexes covered by another index</h3>";
+
+// table => array(index to drop => the index that covers it)
+$covered = array(
+    'hlstats_Players'               => array('idx_players_skill_kills' => 'idx_players_skill_kills_conn'),
+    'hlstats_Events_ChangeName'     => array('playerId' => 'playerId_eventTime'),
+    'hlstats_Events_Chat'           => array('playerId' => 'playerId_eventTime'),
+    'hlstats_Events_Connects'       => array('playerId' => 'playerId_eventTime'),
+    'hlstats_Events_Latency'        => array('playerId' => 'playerId_eventTime'),
+    'hlstats_Events_StatsmeLatency' => array('playerId' => 'playerId_eventTime'),
+    'hlstats_Events_StatsmeTime'    => array('playerId' => 'playerId_eventTime'),
+    'hlstats_Events_Suicides'       => array('playerId' => 'playerId_eventTime'),
+    'hlstats_Events_TeamBonuses'    => array('playerId' => 'playerId_eventTime'),
+    'hlstats_Events_Teamkills'      => array('killerId' => 'killer_eventTime'),
+);
+
+// The columns of an index, in order, each with its prefix length and direction: array(unique, list), or null when
+// the table has no such index
+$indexParts = function ($table, $name) use ($db) {
+    $result = $db->query("SHOW INDEX FROM `$table` WHERE Key_name = '$name'", false);
+    if (!$result) {
+        return null;
+    }
+    $parts  = array();
+    $unique = false;
+    while ($row = $db->fetch_array($result)) {
+        $parts[(int) $row['Seq_in_index']] = $row['Column_name'] . '/' . $row['Sub_part'] . '/' . $row['Collation'];
+        $unique = $unique || !$row['Non_unique'] || strtoupper((string) $row['Index_type']) !== 'BTREE';
+    }
+    ksort($parts);
+    return $parts ? array($unique, array_values($parts)) : null;
+};
+
+@set_time_limit(0);
+foreach ($covered as $table => $list) {
+    foreach ($list as $name => $by) {
+        $index = $indexParts($table, $name);
+        if (!$index) {
+            echo "&rarr; <b>$table.$name</b> is not there: skipped<br />";
+            continue;
+        }
+        $cover = $indexParts($table, $by);
+        if ($index[0] || !$cover || array_slice($cover[1], 0, count($index[1])) !== $index[1]) {
+            echo "&rarr; <b>$table.$name</b> is not covered by $by here: kept<br />";
+            continue;
+        }
+        $db->query("ALTER TABLE `$table` DROP INDEX `$name`");
+        echo "&rarr; <b>$table.$name</b> dropped: $by covers it<br />";
+    }
+    ob_flush();
+    flush();
+}
+
+// ---------------------------------------------
+// Top menu: two links of the site's own, such as Donate (HLstats Settings > Top Menu Links)
+// ---------------------------------------------
+echo "<h3>Top menu links</h3>";
+
+foreach (array('topnav_link1_label', 'topnav_link1_url', 'topnav_link2_label', 'topnav_link2_url') as $key) {
+    $db->query("INSERT IGNORE INTO hlstats_Options (keyname, value, opttype) VALUES ('$key', '', 2)");
+    echo "&rarr; <b>$key</b> added (skipped if already exists)<br />";
+}
+
 $dbversion = 93;
 echo "Updating database schema version.<br />";
 $db->query("UPDATE hlstats_Options SET `value` = '$dbversion' WHERE `keyname` = 'dbversion'");

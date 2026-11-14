@@ -122,22 +122,91 @@
 
 .z{ color: #ff4d5a; }
 
-/* Night sky: stars, and from 1000 px the skyline and the fireworks. The contents are a centred column,
-   so the fireworks are placed from the centre line (50% centres the image; half its width, 280 px, moves its left edge) */
+/* Night sky: stars, and from 1000 px the skyline; the fireworks over it come with fireworks.js (.fireworks-sky) */
 .hlstats-top{
   position: relative;
   background:
-    url('fireworks-stars.svg') 0 0 / 520px 104px repeat-x,
+    url('fireworks-stars.svg?2') 0 0 / 520px 104px repeat-x,
     var(--header-top-bg);
 }
 @media (min-width: 1000px){
   .hlstats-top{
     background:
       url('fireworks-skyline.svg') right 18px bottom 0 / 420px 64px no-repeat,
-      url('fireworks-bursts.svg') left calc(50% + 300px) top 0 / 520px 104px no-repeat,
-      url('fireworks-stars.svg') 0 0 / 520px 104px repeat-x,
+      url('fireworks-stars.svg?2') 0 0 / 520px 104px repeat-x,
       var(--header-top-bg);
   }
+}
+
+/* With fireworks.js: the stars that twinkle (fireworks-twinkle.svg, one 520 x 104 row of them per pace, over the stars
+   of fireworks-stars.svg), from 1000 px the fireworks and the skyline over them, all under the logo and the menu. Only
+   the opacity and the size move: the browser does it on the graphics card, without painting the header again on every
+   frame */
+.hlstats-top.fireworks-has-sky{
+  background:
+    url('fireworks-stars.svg?2') 0 0 / 520px 104px repeat-x,
+    var(--header-top-bg);
+}
+.fireworks-sky,
+.fireworks-sky i,
+.fireworks-sky span{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.fireworks-sky{
+  overflow: hidden;
+  pointer-events: none;
+}
+.fireworks-sky i{
+  background: url('fireworks-twinkle.svg') 0 0 / 520px 416px repeat-x;
+  animation: fireworks-star 3.8s ease-in-out -1.44s infinite alternate;
+}
+.fireworks-sky i:nth-child(2){ background-position: 0 -104px; animation-delay: -2.29s; }
+.fireworks-sky i:nth-child(3){ background-position: 0 -208px; animation-delay: -3.27s; }
+.fireworks-sky i:nth-child(4){ background-position: 0 -312px; animation-delay: -3.52s; }
+@keyframes fireworks-star{
+  from{ opacity: .1; }
+  to{ opacity: .9; }
+}
+
+/* The bursts, each opening and fading at its own pace: fireworks-bursts.svg has one per 84 x 84 cell, drawn at 78 px
+   (520 / 560, as the art of the header). --x, --y: where it opens in the 560 x 112 art, whose left edge is on the
+   centre line + 40 px (the contents are a centred column) */
+.fireworks-sky b{
+  display: none;
+  position: absolute;
+  left: calc(50% + 40px + var(--x) * 0.928571px - 39px);
+  top: calc(var(--y) * 0.928571px - 39px);
+  width: 78px;
+  height: 78px;
+  background: url('fireworks-bursts.svg?2') 0 0 / 390px 78px no-repeat;
+  animation: fireworks-burst 5s ease-out infinite;
+}
+.fireworks-sky b:nth-of-type(1){ --x: 70;  --y: 44; animation-duration: 4.6s; animation-delay: -.4s; }
+.fireworks-sky b:nth-of-type(2){ --x: 182; --y: 30; background-position: -78px 0; animation-duration: 5.4s; animation-delay: -2.6s; }
+.fireworks-sky b:nth-of-type(3){ --x: 300; --y: 50; background-position: -156px 0; animation-duration: 5s; animation-delay: -1.5s; }
+.fireworks-sky b:nth-of-type(4){ --x: 418; --y: 28; background-position: -234px 0; animation-duration: 6.1s; animation-delay: -3.9s; }
+.fireworks-sky b:nth-of-type(5){ --x: 498; --y: 52; background-position: -312px 0; animation-duration: 5.6s; animation-delay: -.9s; }
+@keyframes fireworks-burst{
+  0%{ transform: scale(.08); opacity: 0; }
+  6%{ opacity: 1; }
+  42%{ transform: scale(1); opacity: 1; }
+  70%, to{ transform: scale(1.07); opacity: 0; }
+}
+.fireworks-sky span{
+  display: none;
+  background: url('fireworks-skyline.svg') right 18px bottom 0 / 420px 64px no-repeat;
+}
+@media (min-width: 1000px){
+  .fireworks-sky b,
+  .fireworks-sky span{ display: block; }
+}
+@media (prefers-reduced-motion: reduce){
+  .fireworks-sky i,
+  .fireworks-sky b{ animation: none; }
 }
 
 /* Bunting strung under the header */

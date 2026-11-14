@@ -132,27 +132,116 @@
 .hlstats-top{
   position: relative;
   background:
-    url('halloween-stars.svg') 0 0 / 460px 104px repeat-x,
+    url('halloween-stars.svg?2') 0 0 / 460px 104px repeat-x,
     var(--header-top-bg);
 }
 @media (min-width: 1000px){
   .hlstats-top{
     background:
-      url('halloween-graveyard.svg') right 18px bottom 0 / 360px 88px no-repeat,
+      url('halloween-graveyard.svg?2') right 18px bottom 0 / 360px 88px no-repeat,
       url('halloween-moon.svg') left 63% top 4px / 96px 96px no-repeat,
-      url('halloween-stars.svg') 0 0 / 460px 104px repeat-x,
+      url('halloween-stars.svg?2') 0 0 / 460px 104px repeat-x,
       var(--header-top-bg);
   }
 }
 @media (min-width: 1600px){
   .hlstats-top{
     background:
-      url('halloween-graveyard.svg') right 18px bottom 0 / 360px 88px no-repeat,
-      url('halloween-house.svg') left calc(50% - 730px) bottom 0 / 230px 92px no-repeat,
+      url('halloween-graveyard.svg?2') right 18px bottom 0 / 360px 88px no-repeat,
+      url('halloween-house.svg?2') left calc(50% - 730px) bottom 0 / 230px 92px no-repeat,
       url('halloween-moon.svg') left 63% top 4px / 96px 96px no-repeat,
-      url('halloween-stars.svg') 0 0 / 460px 104px repeat-x,
+      url('halloween-stars.svg?2') 0 0 / 460px 104px repeat-x,
       var(--header-top-bg);
   }
+}
+
+/* With halloween.js: the stars that twinkle (halloween-twinkle.svg, one 460 x 104 row of them per pace), then the
+   moon, the house and the graveyard over them, under the fog, the logo and the menu. The art is in layers, in the
+   order it is drawn (halloween-*-layers.svg, one row each; --row in halloween.js): only the lights of the pumpkins
+   and the windows flicker, and only their opacity moves, which the browser does on the graphics card */
+.hlstats-top.halloween-has-sky{
+  background:
+    url('halloween-stars.svg?2') 0 0 / 460px 104px repeat-x,
+    var(--header-top-bg);
+}
+.halloween-sky,
+.halloween-sky i,
+.halloween-sky b{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.halloween-sky{
+  overflow: hidden;
+  pointer-events: none;
+}
+.halloween-sky i{
+  background: url('halloween-twinkle.svg') 0 0 / 460px 208px repeat-x;
+  animation: halloween-star 3.8s ease-in-out -.08s infinite alternate;
+}
+.halloween-sky i + i{ background-position: 0 -104px; animation-delay: -2.44s; }
+@keyframes halloween-star{
+  from{ opacity: .1; }
+  to{ opacity: .9; }
+}
+.halloween-sky b{
+  display: none;
+  background: url('halloween-moon.svg') left 63% top 4px / 96px 96px no-repeat;
+}
+/* placed as the art was: a background's left 50% is half of the room left beside it */
+.halloween-house,
+.halloween-graveyard,
+.halloween-graves{
+  position: absolute;
+  pointer-events: none;
+}
+.halloween-house{
+  display: none;
+  left: calc((100% - 230px) / 2 - 730px);
+  bottom: 0;
+  width: 230px;
+  height: 92px;
+}
+.halloween-graveyard{
+  display: none;
+  right: 18px;
+  bottom: 0;
+  width: 360px;
+  height: 88px;
+}
+.halloween-house span,
+.halloween-graveyard span,
+.halloween-graves span{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-repeat: no-repeat;
+}
+.halloween-house span{ background-image: url('halloween-house-layers.svg'); background-size: 230px 1196px; background-position: 0 calc(var(--row) * -92px); }
+.halloween-graveyard span{ background-image: url('halloween-graveyard-layers.svg'); background-size: 360px 704px; background-position: 0 calc(var(--row) * -88px); }
+/* in small steps between its levels (3 each), not on every frame: with the header and the footer in view, each frame
+   that changes has all of the screen between them drawn again */
+.halloween-flicker{ animation: halloween-flicker 3.1s steps(3, end) infinite; }
+@keyframes halloween-flicker{
+  0%, 100%{ opacity: 1; }
+  7%{ opacity: .72; }
+  12%{ opacity: .95; }
+  33%{ opacity: .8; }
+  41%{ opacity: 1; }
+  63%{ opacity: .68; }
+  70%{ opacity: .92; }
+  88%{ opacity: .78; }
+}
+@media (min-width: 1000px){
+  .halloween-sky b,
+  .halloween-graveyard{ display: block; }
+}
+@media (min-width: 1600px){
+  .halloween-house{ display: block; }
 }
 
 /* Grass along the bottom of the header, the same colour as the ground below */
@@ -235,9 +324,18 @@
   right: 0;
   top: -40px;
   height: 46px;
-  background: url('halloween-graves.svg') 0 0 / 520px 46px repeat-x;
+  background: url('halloween-graves.svg?2') 0 0 / 520px 46px repeat-x;
   pointer-events: none;
 }
+/* With halloween.js the graves are in layers (.halloween-graves), their pumpkin flickering */
+.hlstats-footer.halloween-has-graves::before{ background: none; }
+.halloween-graves{
+  left: 0;
+  right: 0;
+  top: -40px;
+  height: 46px;
+}
+.halloween-graves span{ background-image: url('halloween-graves-layers.svg'); background-size: 520px 230px; background-position: 0 calc(var(--row) * -46px); background-repeat: repeat-x; }
 
 /* The admin menu shows its current item in the text colour of the active tab, without the tab: the tabs' dark text
    would vanish there, so the pumpkin accent instead */
@@ -310,5 +408,7 @@
 }
 
 @media (prefers-reduced-motion: reduce){
-  .halloween-fog i{ animation: none; }
+  .halloween-fog i,
+  .halloween-sky i,
+  .halloween-flicker{ animation: none; }
 }

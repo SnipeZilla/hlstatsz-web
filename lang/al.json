@@ -5,6 +5,13 @@
     "nav.forum":         "FORUM",
     "nav.help":          "NDIHMË",
 
+    "link.donate":       "Dhuro",
+    "link.rules":        "Rregullat",
+    "link.store":        "Dyqani",
+    "link.support":      "Na mbështet",
+    "link.join":         "Bashkohu",
+    "link.website":      "Faqja e internetit",
+
     "sub.nav.players":   "Lojtarë",
     "sub.nav.clans":     "Klane",
     "sub.nav.awards":    "Çmime",

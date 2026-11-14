@@ -97,7 +97,7 @@ $asterisk = $g_options['DeleteDays'] ? ' *' : '';
     $total = $first['total_rows'];
     if (empty($_GET['ajax'])) {
         printSectionTitle(t('title.player.actions').$asterisk);
-        echo '<div id="obj">';
+        echo '<div id="obj" tabindex="-1">';
     }
     echo '<div class="responsive-table"><table class="maps-table">
         <tr>
