@@ -223,6 +223,7 @@ if ( $type ==  "clan" && !empty($clan) ) {
                    city,
                    state,
                    country,
+                   flag,
                    last_event
                FROM
                   hlstats_Players
@@ -240,6 +241,7 @@ if ( $type ==  "clan" && !empty($clan) ) {
                            'cli_city'    => $row['city'],
                            'cli_state'   => $row['state'],
                            'cli_country' => $row['country'],
+                           'cli_flag'    => $row['flag'],
                            'playerId'    => $row['playerId'],
                            'name'        => $row['lastName'],
                            'kills'       => $row['kills'],
@@ -247,6 +249,7 @@ if ( $type ==  "clan" && !empty($clan) ) {
                            'connected'   => $time_str,
                            'team'        => '',
                            'team_name'   => '',
+                           'act_map'     => '',
                            'bg'          => BgColor("clan"));
     }
 }

@@ -614,7 +614,7 @@ function playerCard(player) {
   const team = escHtml(player.team_name);
   const geocity = Location(country, state, city);
   const flag = imagePath+'/flags/'+escHtml(player.cli_flag)+'.png';
- 
+
   return `
     <div class="hlstats-map-card">
       <div class="hlstats-map-top">
@@ -623,7 +623,8 @@ function playerCard(player) {
         </div>
         <div class="hlstats-map-sub"><span class="hlstats-flag"><img src="${flag}" onerror="this.style.display='none'"></span><span class="hlstats-name">${geocity}</span></div>
         <div class="hlstats-map-sub" title="${server}">${gameIcon(player.game_icon)}${server}</div>
-        <div class="hlstats-map-sub" title="${escHtml(player.act_map)}">${t('th.map')} &rarr; ${player.act_map}</div>
+        ${Tabs.baseParams.mode != 'claninfo' ? `
+        <div class="hlstats-map-sub" title="${escHtml(player.act_map)}">${t('th.map')} &rarr; ${player.act_map}</div>` : ``}
       </div>
 
       <div class="hlstats-map-row">
