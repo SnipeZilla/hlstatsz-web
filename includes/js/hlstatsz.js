@@ -625,16 +625,18 @@ function playerCard(player) {
         <div class="hlstats-map-sub"><span class="hlstats-flag"><img src="${flag}" onerror="this.style.display='none'"></span><span class="hlstats-name">${geocity}</span></div>
         <div class="hlstats-map-sub"><a href="steam://connect/${encodeURI(addrRaw)}" data-tooltip="${t('map.join')}">${gameIcon(player.game_icon)}${server}</a></div>
         ${Tabs.baseParams.mode != 'claninfo' ? `
-        <div class="hlstats-map-sub" data-tooltip="${escHtml(player.act_map)}">${t('th.map')} &rarr; ${player.act_map}</div>` : ``}
+        <div class="hlstats-map-sub" data-tooltip="${escHtml(player.act_map)}">${t('th.map')} &rarr; ${player.act_map}</div>` : 
+        `<span class="hlstats-map-value" data-tooltip="${connected}">${connected}</span>`}
       </div>
 
-      <div class="hlstats-map-row">
+      ${Tabs.baseParams.mode != 'claninfo' ? 
+      `<div class="hlstats-map-row">
         <span class="hlstats-map-label">${t('map.connected')}</span> <span class="hlstats-map-value">${connected}</span>
       </div>
 
       <div class="hlstats-map-row">
         <span class="hlstats-map-label">${t('team')}</span> <span class="hlstats-map-value">${team}</span>
-      </div>
+      </div>` : ``}
 
       <div class="hlstats-map-row">
         <span class="hlstats-map-label">${t('th.kd')}</span> <span class="hlstats-map-value">${player.kills}:${player.deaths}</span>
