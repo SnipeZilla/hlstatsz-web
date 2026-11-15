@@ -195,6 +195,7 @@ if ( $type ==  "main" ) {
                            'cli_country' => $row['cli_country'],
                            'cli_flag'    => $row['cli_flag'],
                            'server_name' => $row['server_name'],
+                           'server_addr' => $row['server_addr'],
                            'act_map'     => $row['act_map'],
                            'game_icon'   => $gameIcons[$row['game']] ?? '',
                            'playerId'    => $row['player_id'],

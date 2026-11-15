@@ -397,7 +397,7 @@ function openSpider(group) {
  * who just came first, then everybody again with the next live refresh; nobody playing: the whole world
  */
 const MapView = {
-    idle: 15000,    // ms after the visitor last touched the map before it moves by itself again
+    idle: 10000,    // ms after the visitor last touched the map before it moves by itself again
     zoom: 5,        // the closest it zooms by itself (one player, players in one place)
     spot: 0,        // ms on players who just came before everybody is shown again; 0: one live refresh (Live.every)
     radius: 2000,   // km: players coming together, closer than this one to the next, are shown together
@@ -578,13 +578,13 @@ function serverCard(server) {
   return `
     <div class="hlstats-map-card">
       <div class="hlstats-map-top">
-        <div class="hlstats-map-title" title="${name}">${gameIcon(server.game_icon)}${name}</div>
+        <div class="hlstats-map-title" data-tooltip="${t('title.server.live')}"><a href="hlstats.php?mode=servers&server_id=${encodeURIComponent(server.serverId)}">${gameIcon(server.game_icon)}${name}</a></div>
         <div class="hlstats-map-sub">${geocity}</div>
       </div>
 
       <div class="hlstats-map-row">
         <span class="hlstats-map-label">${t('th.server')}</span>
-        <a class="hlstats-map-value" href="steam://connect/${encodeURI(addrRaw)}">${addrText}</a>
+        <a class="hlstats-map-value" href="steam://connect/${encodeURI(addrRaw)}" data-tooltip="${t('map.join')}">${addrText}</a>
       </div>
 
       <div class="hlstats-map-row">
@@ -592,7 +592,7 @@ function serverCard(server) {
       </div>
 
       <div class="hlstats-map-row">
-        <span class="hlstats-map-label">${t('th.map')}</span><span class="hlstats-map-value" title="${escHtml(server.act_map)}">${server.act_map}</span>
+        <span class="hlstats-map-label">${t('th.map')}</span><span class="hlstats-map-value" data-tooltip="${escHtml(server.act_map)}">${server.act_map}</span>
       </div>
 
       <div class="hlstats-map-actions">
@@ -607,11 +607,12 @@ function serverCard(server) {
 function playerCard(player) {
   const server = decodeAndEsc(player.server_name);
   const name = escHtml(stripBackslashes(player.name));
+  const addrRaw = stripBackslashes(player.server_addr);
   const city = escHtml(player.cli_city);
   const state = escHtml(player.cli_state);
   const country = escHtml(player.cli_country);
   const connected = escHtml(player.connected);
-  const team = escHtml(player.team_name);
+  const team = player.team_name ? escHtml(player.team_name) : (player.team ? escHtml(player.team) : 'Unassigned');
   const geocity = Location(country, state, city);
   const flag = imagePath+'/flags/'+escHtml(player.cli_flag)+'.png';
 
@@ -622,9 +623,9 @@ function playerCard(player) {
           </span><a href="hlstats.php?mode=playerinfo&player=${encodeURIComponent(player.playerId)}"><span class="hlstats-name">${name}</span></a>
         </div>
         <div class="hlstats-map-sub"><span class="hlstats-flag"><img src="${flag}" onerror="this.style.display='none'"></span><span class="hlstats-name">${geocity}</span></div>
-        <div class="hlstats-map-sub" title="${server}">${gameIcon(player.game_icon)}${server}</div>
+        <div class="hlstats-map-sub"><a href="steam://connect/${encodeURI(addrRaw)}" data-tooltip="${t('map.join')}">${gameIcon(player.game_icon)}${server}</a></div>
         ${Tabs.baseParams.mode != 'claninfo' ? `
-        <div class="hlstats-map-sub" title="${escHtml(player.act_map)}">${t('th.map')} &rarr; ${player.act_map}</div>` : ``}
+        <div class="hlstats-map-sub" data-tooltip="${escHtml(player.act_map)}">${t('th.map')} &rarr; ${player.act_map}</div>` : ``}
       </div>
 
       <div class="hlstats-map-row">

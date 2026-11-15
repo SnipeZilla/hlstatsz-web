@@ -2774,14 +2774,14 @@ th:hover::after{
 
   .hlstats-brand{ display: none; }
   .hlstats-brand-mark{ display: inline-flex; }
-  .hlstats-topnav{ flex-wrap: nowrap; gap: 12px; }
+  .hlstats-topnav{ flex-wrap: nowrap; gap: 8px; }
   .hlstats-topnav .hlstats-navlink-more{ display: none; }
   .hlstats-topnav .hlstats-topnav-more{ display: inline-flex; }
   .hlstats-game-dropdown .hlstats-game-link{ display: none; }
   .hlstats-game-dropdown .hlstats-dropbtn.hlstats-game-btn .hlstats-game-hamburger{ display: inline; }
   .hlstats-game-dropdown.has-games .hlstats-dropbtn.hlstats-game-btn .hlstats-server,
   .hlstats-game-dropdown.has-games .hlstats-dropbtn.hlstats-game-btn .caret{ display: none; }
-  .hlstats-topnav a{font-size: 13px;}
+  .hlstats-topnav a{font-size: 14px;}
 
   #map { height: 240px; }
   .hlstats-map-row{ padding: 2px 0; }
