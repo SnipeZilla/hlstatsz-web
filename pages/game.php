@@ -41,7 +41,7 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	list($total_players_24h) = $db->fetch_row($result);
 	$players_last_day = 0;
 	if ($total_players_24h > 0) {
-		$players_last_day = $all_players - $total_players_24h;
+		$players_last_day = $total_players - $total_players_24h;
 	}
 
 	$query = "

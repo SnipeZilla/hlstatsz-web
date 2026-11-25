@@ -37,10 +37,15 @@ if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 	
 	if ($_POST)
 	{
-		if ($edlist->update())
+		if ($edlist->update()) {
 			message("success", "Operation successful.");
-		else
+			// clear live cache
+			foreach (glob('./cache/hlstatsz_live_*.html') ?: [] as $old) {
+				@unlink($old);
+			}
+		} else {
 			message("warning", $edlist->error());
+		}
 	}
 
 	$result = $db->query("

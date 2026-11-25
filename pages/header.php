@@ -15,7 +15,7 @@ For current support and updates:
 */
 if ( !defined('IN_HLSTATS') ) { die('Do not access this file directly'); }
 
-	global $signin,$game,$mode,$selectedStyle,$theme,$realname;
+	global $signin,$game,$mode,$selectedStyle,$theme,$realname,$num_games;
 
 	// The theme (themeCurrent()): a pick in the style selector (?stylesheet=) and the footer's Seasonal theme switch
 	// (?seasonal=1|0) are kept in cookies
@@ -268,7 +268,7 @@ $currentMode = $mode ?? $game ?? '';
 
       </nav>
 <?php
-    } else if (!empty($_GET) && !empty($game) && $mode != 'admin' && $mode != 'help') { 
+    } else if ((!empty($_GET) || $num_games == 1) && !empty($game) && $mode != 'admin' && $mode != 'help') { 
 
       $gameName=!empty($_SESSION['realname']) ? htmlspecialchars($_SESSION['realname']) : 'Servers';
 ?>

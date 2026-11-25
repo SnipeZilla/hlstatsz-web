@@ -4057,11 +4057,11 @@ INSERT INTO `hlstats_Options` (`keyname`, `value`, `opttype`) VALUES
 ('SkillRatioCap', '0',0),
 ('UseGeoIPBinary', '1',0),
 ('contact', 'your@email.address',2),
-('sitename', 'HLstatsX Community Edition',2),
-('siteurl', 'http://www.yoursite.com/stats/',2),
-('style', 'sourcebans.css',2),
+('sitename', 'HLstatsZ Real-Time Statistics',2),
+('siteurl', 'https://hlstats.yoursite.com',2),
+('style', 'default',2),
 ('imgpath', 'hlstatsimg',2),
-('map_dlurl', 'http://www.yoursite.com/fastdownload/%GAME%/%MAP%.bsp.bz2',2),
+('map_dlurl', 'https://yoursite.com/fastdl/%GAME%/maps/',2),
 ('awards_d_date', '2008-08-30',2),
 ('awards_numdays', '1',2),
 ('graphbg_trend', '282828',2),
@@ -4097,9 +4097,9 @@ INSERT INTO `hlstats_Options` (`keyname`, `value`, `opttype`) VALUES
 ('sourcebans_address', '', 2),
 ('forum_address', '', 2),
 ('display_gamelist', '1', 2),
-('display_style_selector', '0', 2),
+('display_style_selector', '1', 2),
 ('appeal_url', '', 2),
-('chart', '0', 2),
+('chart', '1', 2),
 ('footer_link1_label', 'SnipeZilla', 2),
 ('footer_link1_url', 'https://snipezilla.com', 2),
 ('footer_link2_label', 'Steam', 2),
@@ -4112,10 +4112,10 @@ INSERT INTO `hlstats_Options` (`keyname`, `value`, `opttype`) VALUES
 ('topnav_link2_url', '', 2),
 ('Language', '', 2),
 ('report_url', '', 2),
-('Sourcebans_Site', '0', 2),
+('Sourcebans_Site', '1', 2),
 ('styles_hidden', '', 2),
 ('style_seasonal', '', 2),
-('webversion', '2.00.91', 2);
+('webversion', '2.0.0', 2);
 
 
 CREATE TABLE IF NOT EXISTS `hlstats_Options_Choices` (
@@ -4222,18 +4222,18 @@ INSERT INTO `hlstats_Options_Choices` (`keyname`, `value`, `text`, `isDefault`) 
 ('GlobalChat', '2', 'Broadcast to admins', 0),
 ('SkillRatioCap', '0', 'No', 1),
 ('SkillRatioCap', '1', 'Yes', 0),
-('UseGeoIPBinary', '0', 'GeoIP lookup via database', 1),
-('UseGeoIPBinary', '1', 'GeoIP lookup via binary file', 0),
+('UseGeoIPBinary', '0', 'GeoIP lookup via database', 0),
+('UseGeoIPBinary', '1', 'GeoIP lookup via binary file', 1),
 ('showqueries', '0', 'No', 1),
 ('showqueries', '1', 'Yes', 0),
 ('display_gamelist', '1', 'Yes', 1),
 ('display_gamelist', '0', 'No', 0),
-('display_style_selector', '1', 'Yes', 0),
-('display_style_selector', '0', 'No', 1),
-('chart', '0', 'pChart', 1),
-('chart', '1', 'Chart.js', 0),
-('Sourcebans_Site', '0', 'External', 1),
-('Sourcebans_Site', '1', 'Internal', 0);
+('display_style_selector', '1', 'Yes', 1),
+('display_style_selector', '0', 'No', 0),
+('chart', '0', 'pChart', 0),
+('chart', '1', 'Chart.js', 1),
+('Sourcebans_Site', '0', 'External', 0),
+('Sourcebans_Site', '1', 'Internal', 1);
 -- --------------------------------------------------------
 
 --
